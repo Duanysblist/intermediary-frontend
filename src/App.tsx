@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router'
 import AppShell from './components/layout/AppShell'
 import DashboardPage from './pages/DashboardPage'
-import ApplicationsPage from './pages/ApplicationsPage'
+import ApplicationsPage from './features/applications/ApplicationsPage'
 import PlanPage from './pages/PlanPage'
 import PromptPage from './pages/PromptPage'
 

@@ -27,7 +27,7 @@ export default function AppShell() {
                     </NavLink>
                 ))}
             </nav>
-            <main className="p-6">
+            <main className="mx-auto max-w-5xl p-6">
                 <Outlet />
             </main>
         </div>
