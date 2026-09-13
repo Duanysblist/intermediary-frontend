@@ -33,6 +33,21 @@ Both are the same build. The demo is the app mounted under `/demo` with an in-me
 | **Documents** | Register resumes, plans, and guides so plan items can reference them. |
 | **Prompt** | Builds a Markdown + JSON context block from the slices you pick, then: **Ask Claude** (server-side call, returns structured changes), **Open in Claude** (prefills claude.ai), **Copy**, and **Import changes** (paste the JSON any assistant returns). Every suggestion is shown as before → after and applied only when you accept it. |
 
+## How to use it
+
+1. **Set up the reference data once.** Add the certifications you're studying for, the
+   applications you have open, and any documents you maintain. Plan items can point at these.
+2. **Plan on the board.** Create plan items with an intent (study, exercise, apply, read, write)
+   and a target date. Drag between columns as work starts and finishes; switch to the Week view
+   and drag cards onto days to schedule them.
+3. **Log reality as it happens.** Under Sessions, log study time (against a certification) and
+   workouts. The Dashboard compares this with what you planned for the week.
+4. **Ask for help without re-explaining.** On the Prompt page pick what to include and either
+   press Ask Claude, or Open in Claude / Copy and paste into any assistant. Ask it what to
+   change; it answers with a JSON change set.
+5. **Import and review.** Press Import changes, paste the JSON, tick what you accept, Apply.
+   Every accepted change goes through the same API as a manual edit, so the history stays honest.
+
 ### The Claude round-trip
 
 1. The Prompt page renders your data plus a "How to answer" section that asks for changes in a fixed
