@@ -163,8 +163,8 @@ export const DOCUMENT_TYPES: DocumentType[] = ['RESUME', 'PLAN', 'GUIDE', 'SPEC'
 export const WORKOUT_TYPES: WorkoutType[] = ['WORKOUT_A', 'WORKOUT_B', 'WALK', 'OTHER']
 export const PLAN_INTENTS: PlanIntent[] = ['STUDY', 'EXERCISE', 'APPLY', 'READ', 'WRITE', 'OTHER']
 export const PLAN_STATUSES: PlanItemStatus[] = ['PLANNED', 'IN_PROGRESS', 'DONE', 'DEFERRED', 'CANCELED']
-export const REFERENCE_TYPES: ReferenceEntityType[] =
-    ['CERTIFICATION', 'APPLICATION', 'DOCUMENT', 'STUDY_SESSION', 'FITNESS_SESSION', 'PLAN_ITEM']
+/** What a new plan item or routine can point at. Sessions link back to intentions themselves, so they are not offered here. */
+export const REFERENCE_PICKER_TYPES: ReferenceEntityType[] = ['CERTIFICATION', 'APPLICATION', 'DOCUMENT', 'PLAN_ITEM']
 
 /** Human label for any enum value: IN_PROGRESS -> "In progress", with a few explicit overrides. */
 const LABEL_OVERRIDES: Record<string, string> = {

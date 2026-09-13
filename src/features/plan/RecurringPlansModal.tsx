@@ -9,7 +9,7 @@ import Pill from '../../components/ui/Pill'
 import { ApiError } from '../../api/client'
 import { EmptyState } from '../../components/ui/Page'
 import {
-    DAYS_OF_WEEK, PLAN_INTENTS, REFERENCE_TYPES, label,
+    DAYS_OF_WEEK, PLAN_INTENTS, REFERENCE_PICKER_TYPES, label,
     type DayOfWeek, type PlanIntent, type RecurringPlan, type RecurringPlanInput, type ReferenceEntityType,
 } from '../../types'
 
@@ -68,6 +68,8 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
     }
 
     const refType = form.referenceEntityType
+    // An item saved with a link type no longer offered (a session) still shows it, so nothing is silently dropped.
+    const pickerTypes = refType && !REFERENCE_PICKER_TYPES.includes(refType) ? [...REFERENCE_PICKER_TYPES, refType] : REFERENCE_PICKER_TYPES
     const refOptions = refType ? optionsFor(refType) : []
 
     return (
@@ -110,7 +112,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                         <Field label="Relates to">
                             <select className={inputClass} value={refType ?? ''} onChange={(e) => { update('referenceEntityType', (e.target.value || null) as ReferenceEntityType | null); update('referenceEntityId', null) }}>
                                 <option value="">— Nothing —</option>
-                                {REFERENCE_TYPES.map((t) => <option key={t} value={t}>{label(t)}</option>)}
+                                {pickerTypes.map((t) => <option key={t} value={t}>{label(t)}</option>)}
                             </select>
                         </Field>
                         {refType && (

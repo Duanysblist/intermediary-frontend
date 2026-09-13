@@ -4,7 +4,7 @@ import Button from '../../components/ui/Button'
 import { ApiError } from '../../api/client'
 import { useReferenceOptions } from './references'
 import {
-    PLAN_INTENTS, PLAN_STATUSES, REFERENCE_TYPES, label,
+    PLAN_INTENTS, PLAN_STATUSES, REFERENCE_PICKER_TYPES, label,
     type PlanIntent, type PlanItem, type PlanItemInput, type PlanItemStatus, type ReferenceEntityType,
 } from '../../types'
 
@@ -62,6 +62,8 @@ export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, is
     }
 
     const refType = form.referenceEntityType
+    // An item saved with a link type no longer offered (a session) still shows it, so nothing is silently dropped.
+    const pickerTypes = refType && !REFERENCE_PICKER_TYPES.includes(refType) ? [...REFERENCE_PICKER_TYPES, refType] : REFERENCE_PICKER_TYPES
     const refOptions = refType ? optionsFor(refType, initial?.id) : []
 
     return (
@@ -89,7 +91,7 @@ export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, is
                     <select className={inputClass} value={refType ?? ''}
                             onChange={(e) => { update('referenceEntityType', (e.target.value || null) as ReferenceEntityType | null); update('referenceEntityId', null) }}>
                         <option value="">— Nothing —</option>
-                        {REFERENCE_TYPES.map((t) => <option key={t} value={t}>{label(t)}</option>)}
+                        {pickerTypes.map((t) => <option key={t} value={t}>{label(t)}</option>)}
                     </select>
                 </Field>
                 {refType && (
