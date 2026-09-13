@@ -1,8 +1,9 @@
-import { addDays, todayISO } from '../../lib/format'
+import { addDays, daysBetween, startOfWeek, todayISO } from '../../lib/format'
 import { CHANGE_SET_FORMAT } from './changeSet'
 import type { Application, Certification, Document, FitnessSession, PlanEvent, PlanItem, StudySession } from '../../types'
 
 export type ContextOptions = {
+    summary: boolean
     plan: boolean
     includeClosedPlan: boolean
     applications: boolean
@@ -19,6 +20,7 @@ export type ContextOptions = {
 }
 
 export const DEFAULT_OPTIONS: ContextOptions = {
+    summary: true,
     plan: true,
     includeClosedPlan: false,
     applications: true,
@@ -68,6 +70,7 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
 
     parts.push(`# Planning context — ${today}`)
     if (opts.instructions.trim()) parts.push(opts.instructions.trim())
+    if (opts.summary) parts.push(`## This week at a glance\n${weekSummary(data, today)}`)
     parts.push(
         'Model: **plan items** are intentions (status PLANNED / IN_PROGRESS / DONE / DEFERRED / CANCELED, optional targetDate). ' +
         '**Study and fitness sessions** are reality: what actually happened. **Plan events** are the append-only history of status changes. ' +
@@ -107,7 +110,7 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
             '```json\n' + CHANGE_SET_FORMAT + '\n```\n' +
             'Rules: only plan items; "update" needs an existing id from the data, "create" has id null and needs title + intent; ' +
             'intent is one of STUDY, EXERCISE, APPLY, READ, WRITE, OTHER; status is one of PLANNED, IN_PROGRESS, DONE, DEFERRED, CANCELED; ' +
-            'targetDate is YYYY-MM-DD and never in the past; dates can be moved but not cleared.',
+            'targetDate is YYYY-MM-DD and never in the past, or the string CLEAR to take an item off the calendar.',
         )
     }
     if (opts.endpoints) {
@@ -120,4 +123,36 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
         )
     }
     return parts.join('\n\n') + '\n'
+}
+
+/**
+ * A deterministic paragraph describing the current week, computed locally. Assistants answer
+ * better from a short narrative plus the raw rows than from rows alone, and it costs no tokens to make.
+ */
+export function weekSummary(data: ContextData, today: string): string {
+    const monday = startOfWeek(today)
+    const sunday = addDays(monday, 6)
+    const nextMonday = addDays(monday, 7)
+    const inWeek = (iso: string | null | undefined) => iso != null && iso >= monday && iso < nextMonday
+    const open = data.planItems.filter((p) => p.status === 'PLANNED' || p.status === 'IN_PROGRESS')
+    const overdue = open.filter((p) => p.targetDate != null && p.targetDate < today)
+    const dueThisWeek = open.filter((p) => inWeek(p.targetDate))
+    const unscheduled = open.filter((p) => p.targetDate == null)
+    const doneThisWeek = data.planEvents.filter((e) => e.toStatus === 'DONE' && inWeek(e.eventTime)).length
+    const studyMin = data.studySessions.filter((s) => inWeek(s.sessionDate)).reduce((n, s) => n + s.durationMinutes, 0)
+    const fitnessMin = data.fitnessSessions.filter((s) => inWeek(s.sessionDate)).reduce((n, s) => n + s.durationMinutes, 0)
+    const plannedStudy = data.planItems.filter((p) => p.intent === 'STUDY' && inWeek(p.targetDate)).length
+    const plannedExercise = data.planItems.filter((p) => p.intent === 'EXERCISE' && inWeek(p.targetDate)).length
+    const exams = data.certifications.filter((c) => c.examDate && c.examDate >= today && c.status !== 'PASSED')
+        .sort((a, b) => a.examDate!.localeCompare(b.examDate!))
+    const interviews = data.applications.filter((a) => a.status === 'INTERVIEWING' || a.status === 'OFFER')
+
+    const s: string[] = []
+    s.push(`Today is ${today} (week ${monday} to ${sunday}).`)
+    s.push(`${open.length} open plan item${open.length === 1 ? '' : 's'}: ${dueThisWeek.length} due this week, ${overdue.length} overdue, ${unscheduled.length} without a date; ${doneThisWeek} completed so far this week.`)
+    if (overdue.length) s.push(`Overdue: ${overdue.slice(0, 5).map((p) => `"${p.title}" (${p.targetDate})`).join(', ')}${overdue.length > 5 ? ', …' : ''}.`)
+    s.push(`Logged this week: ${studyMin} min of study across ${data.studySessions.filter((x) => inWeek(x.sessionDate)).length} session(s) against ${plannedStudy} planned study item(s); ${fitnessMin} min of exercise against ${plannedExercise} planned workout(s).`)
+    if (exams.length) s.push(`Next exam: ${exams[0].name} on ${exams[0].examDate} (${daysBetween(today, exams[0].examDate!)} days away).`)
+    if (interviews.length) s.push(`Active interviews or offers: ${interviews.map((a) => `${a.company} (${a.role})`).join(', ')}.`)
+    return s.join(' ')
 }

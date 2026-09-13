@@ -9,6 +9,7 @@ const tabs = [
     { to: '/applications', label: 'Applications' },
     { to: '/certifications', label: 'Certifications' },
     { to: '/documents', label: 'Documents' },
+    { to: '/review', label: 'Review' },
     { to: '/prompt', label: 'Prompt' },
 ]
 

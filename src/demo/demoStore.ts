@@ -1,16 +1,17 @@
-import type { Resource } from '../api/resources'
+import type { CalendarApi, ProposalsApi, RecurringPlansApi, Resource } from '../api/resources'
 import { ApiError } from '../api/client'
 import { buildDemoData } from './demoData'
-import { addDays, todayISO } from '../lib/format'
-import type { ChangeSet } from '../features/prompt/changeSet'
+import { addDays, parseLocal, todayISO } from '../lib/format'
+import type { Change, ChangeSet } from '../features/prompt/changeSet'
 import type {
     Application, ApplicationInput, Certification, CertificationInput, Document, DocumentInput,
-    FitnessSession, FitnessSessionInput, PlanItem, PlanItemInput, StudySession, StudySessionInput,
+    FitnessSession, FitnessSessionInput, PlanItem, PlanItemInput, Proposal, RecurringPlan, RecurringPlanInput,
+    StudySession, StudySessionInput, DayOfWeek,
 } from '../types'
 
 /**
  * In-memory stand-in for the API used by the public demo. Mirrors the server's behaviour that
- * matters to the UI: ids, timestamps, merge-on-update semantics, and the plan-event audit log
+ * matters to the UI: ids, timestamps, full-replacement updates, and the plan-event audit log
  * written on status changes. Network latency is simulated so loading states stay honest.
  */
 const data = buildDemoData()
@@ -42,10 +43,8 @@ function makeResource<T extends { id: number; createdAt: string; updatedAt: stri
         update: (id, body) => {
             const row = find(id)
             const before = clone(row)
-            // Same merge rule as the server: null fields leave the existing value alone.
-            for (const [k, v] of Object.entries(body)) {
-                if (v != null) (row as Record<string, unknown>)[k] = v
-            }
+            // Same rule as the server: PUT replaces the record (a null field clears it).
+            Object.assign(row, body)
             row.updatedAt = now()
             afterUpdate?.(before, row)
             return delay(clone(row))
@@ -78,6 +77,58 @@ export const demoPlanItems = makeResource<PlanItem, PlanItemInput>('plan-items',
 export const demoPlanEvents = {
     list: (planItemId?: number) =>
         delay(clone(planItemId == null ? data.planEvents : data.planEvents.filter((e) => e.planItemId === planItemId))),
+}
+
+const DAY_INDEX: Record<DayOfWeek, number> = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 }
+
+const recurringBase = makeResource<RecurringPlan, RecurringPlanInput>('recurring-plans', data.recurringPlans)
+export const demoRecurringPlans: RecurringPlansApi = {
+    ...recurringBase,
+    generate: async (days) => {
+        const created: PlanItem[] = []
+        const today = todayISO()
+        for (const plan of data.recurringPlans.filter((p) => p.active)) {
+            for (let i = 0; i <= Math.min(days, 60); i++) {
+                const date = addDays(today, i)
+                const dow = parseLocal(date).getDay()
+                if (!plan.days.some((d) => DAY_INDEX[d] === dow)) continue
+                if (data.planItems.some((p) => p.recurringPlanId === plan.id && p.targetDate === date)) continue
+                const item = await demoPlanItems.create({
+                    title: plan.title, intent: plan.intent, targetDate: date, status: 'PLANNED',
+                    referenceEntityType: plan.referenceEntityType, referenceEntityId: plan.referenceEntityId,
+                    recurringPlanId: plan.id, notes: plan.notes,
+                })
+                created.push(item)
+            }
+        }
+        return delay(created)
+    },
+}
+
+let nextProposalId = Math.max(0, ...data.proposals.map((p) => p.id)) + 1
+export const demoProposals: ProposalsApi = {
+    list: (status) => delay(clone(status ? data.proposals.filter((p) => p.status === status) : data.proposals)),
+    create: (source, summary, changes: Change[]) => {
+        const p: Proposal = { id: nextProposalId++, source, summary, changes, status: 'PENDING', createdAt: now(), updatedAt: now() }
+        data.proposals.unshift(p)
+        return delay(clone(p))
+    },
+    setStatus: (id, status) => {
+        const p = data.proposals.find((x) => x.id === id)
+        if (!p) throw new ApiError(404, 'Proposal not found.')
+        p.status = status
+        p.updatedAt = now()
+        return delay(clone(p))
+    },
+    remove: (id) => {
+        const idx = data.proposals.findIndex((x) => x.id === id)
+        if (idx >= 0) data.proposals.splice(idx, 1)
+        return delay(undefined)
+    },
+}
+
+export const demoCalendar: CalendarApi = {
+    link: () => delay({ url: 'https://intermediary-loxn.onrender.com/calendar.ics?token=demo-feed-token' }),
 }
 
 /** The demo's stand-in for Claude: a plausible, data-aware suggestion built locally. */

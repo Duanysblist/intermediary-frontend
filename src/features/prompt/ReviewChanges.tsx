@@ -8,17 +8,21 @@ import Button from '../../components/ui/Button'
 import { formatDate } from '../../lib/format'
 import { label, type PlanItem } from '../../types'
 import type { Change, ChangeSet, PlanItemFields } from './changeSet'
+import { recordBatch, type AppliedEntry } from './appliedBatches'
 
 type Props = {
     source: string
     changeSet: ChangeSet
     onClose: () => void
+    /** Called once after Apply finishes, e.g. to mark a server-side proposal as applied. */
+    onApplied?: (applied: number, failed: number) => void
 }
 
 type Outcome = { ok: true } | { ok: false; error: string }
 
 function describeField(key: keyof PlanItemFields, value: string | null | undefined): string {
-    if (value == null) return '—'
+    if (value === null) return key === 'targetDate' ? 'no date' : 'cleared'
+    if (value === undefined) return '—'
     if (key === 'targetDate') return formatDate(value)
     if (key === 'status' || key === 'intent') return label(value)
     return value
@@ -28,9 +32,10 @@ const FIELD_LABEL: Record<keyof PlanItemFields, string> = { title: 'Title', inte
 
 /**
  * Shows each proposed change with its before/after, lets the user tick the ones to accept, then
- * applies them through the normal plan-item API so audit events are written as usual.
+ * applies them through the normal plan-item API so audit events are written as usual. What was
+ * applied is remembered so the batch can be reverted from the Prompt page.
  */
-export default function ReviewChanges({ source, changeSet, onClose }: Props) {
+export default function ReviewChanges({ source, changeSet, onClose, onApplied }: Props) {
     const qc = useQueryClient()
     const items = planItems.useList()
     const byId = useMemo(() => new Map((items.data ?? []).map((p) => [p.id, p])), [items.data])
@@ -43,30 +48,35 @@ export default function ReviewChanges({ source, changeSet, onClose }: Props) {
     async function apply() {
         setApplying(true)
         const results: (Outcome | null)[] = [...outcomes]
+        const entries: AppliedEntry[] = []
         for (let i = 0; i < changeSet.changes.length; i++) {
             if (!selected[i] || results[i]?.ok) continue
             const ch = changeSet.changes[i]
             try {
                 if (ch.op === 'create') {
-                    await planItemsApi.create({
+                    const created = await planItemsApi.create({
                         title: ch.fields.title ?? 'Untitled',
                         intent: ch.fields.intent ?? 'OTHER',
                         status: ch.fields.status ?? 'PLANNED',
                         targetDate: ch.fields.targetDate ?? null,
                         referenceEntityType: null,
                         referenceEntityId: null,
+                        recurringPlanId: null,
                         notes: ch.fields.notes ?? null,
                     })
+                    entries.push({ op: 'create', id: created.id, title: created.title })
                 } else {
                     const current = byId.get(ch.id!)
                     if (!current) throw new Error(`Plan item #${ch.id} no longer exists.`)
-                    const next = { ...toInput(current) }
+                    const before = toInput(current)
+                    const next = { ...before }
                     if (ch.fields.title) next.title = ch.fields.title
                     if (ch.fields.intent) next.intent = ch.fields.intent
                     if (ch.fields.status) next.status = ch.fields.status
-                    if (ch.fields.targetDate) next.targetDate = ch.fields.targetDate
-                    if (ch.fields.notes != null) next.notes = ch.fields.notes
+                    if (ch.fields.targetDate !== undefined) next.targetDate = ch.fields.targetDate
+                    if (ch.fields.notes !== undefined) next.notes = ch.fields.notes
                     await planItemsApi.update(ch.id!, next)
+                    entries.push({ op: 'update', id: ch.id!, title: current.title, before })
                 }
                 results[i] = { ok: true }
             } catch (err) {
@@ -75,8 +85,10 @@ export default function ReviewChanges({ source, changeSet, onClose }: Props) {
             setOutcomes([...results])
         }
         setApplying(false)
+        if (entries.length > 0) recordBatch({ source, summary: changeSet.summary, entries })
         qc.invalidateQueries({ queryKey: planItems.queryKey })
         qc.invalidateQueries({ queryKey: [PLAN_EVENTS_KEY] })
+        onApplied?.(results.filter((r) => r?.ok).length, results.filter((r) => r && !r.ok).length)
     }
 
     const acceptedCount = selected.filter((s, i) => s && !outcomes[i]?.ok).length
@@ -87,7 +99,7 @@ export default function ReviewChanges({ source, changeSet, onClose }: Props) {
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <h2 className="text-lg font-semibold text-gray-900">Review suggested changes</h2>
-                    <p className="mt-0.5 text-xs text-gray-500">From {source}. Nothing is applied until you click Apply.</p>
+                    <p className="mt-0.5 text-xs text-gray-500">From {source}. Nothing is applied until you click Apply; applied batches can be reverted from the Prompt page.</p>
                 </div>
                 <button type="button" onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" aria-label="Close">✕</button>
             </div>
@@ -130,7 +142,7 @@ export default function ReviewChanges({ source, changeSet, onClose }: Props) {
 function ChangeRow({ change, current, checked, outcome, disabled, onToggle }: {
     change: Change; current?: PlanItem; checked: boolean; outcome: Outcome | null; disabled: boolean; onToggle: (v: boolean) => void
 }) {
-    const fields = (Object.keys(change.fields) as (keyof PlanItemFields)[]).filter((k) => change.fields[k] != null)
+    const fields = (Object.keys(change.fields) as (keyof PlanItemFields)[]).filter((k) => change.fields[k] !== undefined)
     const missing = change.op === 'update' && !current
     return (
         <li className={`rounded-lg border p-3 ${outcome?.ok ? 'border-green-200 bg-green-50/40' : outcome && !outcome.ok ? 'border-red-200 bg-red-50/40' : 'border-gray-200 bg-white'}`}>

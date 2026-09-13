@@ -26,12 +26,13 @@ Both are the same build. The demo is the app mounted under `/demo` with an in-me
 | Screen | What it does |
 |---|---|
 | **Dashboard** | Week-at-a-glance: open and overdue intentions, what got done (from the audit log), study and fitness minutes versus what was planned, application pipeline, next exam. |
-| **Plan** | Kanban board by status and a calendar week view. Drag a card to a column to change its status (the server appends a `PlanEvent`), or onto a day to set its target date. Click a card for details and its full status history. |
+| **Plan** | Kanban board by status and a calendar week view. Drag a card to a column to change its status (the server appends a `PlanEvent`), onto a day to set its target date, or onto the Unscheduled tray to clear it. Click a card for details, its history, and **Log session** to record the study time or workout that fulfilled it. **Routines** generate recurring items; **Calendar feed** gives a subscribable iCalendar URL. |
 | **Sessions** | Log study sessions (optionally against a certification) and workouts. Weekly totals up top. |
 | **Applications** | Job application tracker with status filter. |
 | **Certifications** | Cards with exam countdown, manual hours, and minutes actually logged in sessions. |
 | **Documents** | Register resumes, plans, and guides so plan items can reference them. |
-| **Prompt** | Builds a Markdown + JSON context block from the slices you pick, then: **Ask Claude** (server-side call, returns structured changes), **Open in Claude** (prefills claude.ai), **Copy**, and **Import changes** (paste the JSON any assistant returns). Every suggestion is shown as before → after and applied only when you accept it. |
+| **Review** | Weekly review: completion rate, planned versus done by intent, study minutes per certification, what slipped, and which intentions get deferred most. |
+| **Prompt** | Builds a Markdown + JSON context block (with a computed week summary) from the slices you pick, then: **Ask Claude** (server-side call, returns structured changes), **Open in Claude** (prefills claude.ai), **Copy**, and **Import changes** (paste the JSON any assistant returns). Proposals from the MCP server appear in an inbox here. Every suggestion is shown as before → after, applied only when you accept it, and applied batches can be reverted for a week. |
 
 ## How to use it
 
@@ -100,6 +101,5 @@ routing, which is also what makes `/demo/...` work. In the Vercel project set
 
 ## Known limits
 
-- The API's `PUT` merges non-null fields, so a target date can be moved but not cleared once set.
-  The week view's "Unscheduled" tray is therefore a drag source only.
+- Undo history for imported change sets lives in the browser, not the server.
 - Single user. The API has one account; there is no sign-up.

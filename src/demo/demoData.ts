@@ -1,5 +1,5 @@
 import { addDays, todayISO } from '../lib/format'
-import type { Application, Certification, Document, FitnessSession, PlanEvent, PlanItem, StudySession } from '../types'
+import type { Application, Certification, Document, FitnessSession, PlanEvent, PlanItem, Proposal, RecurringPlan, StudySession } from '../types'
 
 /** Sample dataset for the public demo, generated relative to today so it always looks current. */
 export function buildDemoData() {
@@ -30,18 +30,18 @@ export function buildDemoData() {
     ]
 
     const planItems: PlanItem[] = [
-        { id: 1, title: 'AWS practice exam #3', intent: 'STUDY', targetDate: d(-2), status: 'IN_PROGRESS', referenceEntityType: 'CERTIFICATION', referenceEntityId: 1, notes: 'Aim for 80%+.', createdAt: stamp(-8), updatedAt: stamp(-2) },
-        { id: 2, title: 'Review VPC peering and Transit Gateway', intent: 'STUDY', targetDate: d(1), status: 'PLANNED', referenceEntityType: 'CERTIFICATION', referenceEntityId: 1, notes: null, createdAt: stamp(-6), updatedAt: stamp(-6) },
-        { id: 3, title: 'Prep system design round for Northwind', intent: 'APPLY', targetDate: d(2), status: 'PLANNED', referenceEntityType: 'APPLICATION', referenceEntityId: 1, notes: 'Use the guide; practice a URL shortener and a rate limiter.', createdAt: stamp(-3), updatedAt: stamp(-3) },
-        { id: 4, title: 'Reply to Globex recruiter with availability', intent: 'APPLY', targetDate: d(-1), status: 'PLANNED', referenceEntityType: 'APPLICATION', referenceEntityId: 2, notes: null, createdAt: stamp(-2), updatedAt: stamp(-2) },
-        { id: 5, title: 'Workout B', intent: 'EXERCISE', targetDate: d(0), status: 'PLANNED', referenceEntityType: null, referenceEntityId: null, notes: null, createdAt: stamp(-1), updatedAt: stamp(-1) },
-        { id: 6, title: 'Long walk', intent: 'EXERCISE', targetDate: d(3), status: 'PLANNED', referenceEntityType: null, referenceEntityId: null, notes: null, createdAt: stamp(-1), updatedAt: stamp(-1) },
-        { id: 7, title: 'Update defense resume with current project', intent: 'WRITE', targetDate: d(-5), status: 'DONE', referenceEntityType: 'DOCUMENT', referenceEntityId: 1, notes: null, createdAt: stamp(-12), updatedAt: stamp(-5) },
-        { id: 8, title: 'Read "Designing Data-Intensive Applications" ch. 5', intent: 'READ', targetDate: null, status: 'PLANNED', referenceEntityType: null, referenceEntityId: null, notes: 'Replication.', createdAt: stamp(-14), updatedAt: stamp(-14) },
-        { id: 9, title: 'Security+ domain 1 flashcards', intent: 'STUDY', targetDate: d(5), status: 'PLANNED', referenceEntityType: 'CERTIFICATION', referenceEntityId: 2, notes: null, createdAt: stamp(-4), updatedAt: stamp(-4) },
-        { id: 10, title: 'Apply to Initech referral', intent: 'APPLY', targetDate: d(-20), status: 'DONE', referenceEntityType: 'APPLICATION', referenceEntityId: 3, notes: null, createdAt: stamp(-22), updatedAt: stamp(-16) },
-        { id: 11, title: 'CKA labs: pods and deployments', intent: 'STUDY', targetDate: d(-9), status: 'DEFERRED', referenceEntityType: 'CERTIFICATION', referenceEntityId: 3, notes: 'After AWS.', createdAt: stamp(-15), updatedAt: stamp(-9) },
-        { id: 12, title: 'Write cover letter for CACI', intent: 'WRITE', targetDate: d(-3), status: 'DONE', referenceEntityType: 'APPLICATION', referenceEntityId: 5, notes: null, createdAt: stamp(-4), updatedAt: stamp(-2) },
+        { id: 1, title: 'AWS practice exam #3', intent: 'STUDY', targetDate: d(-2), status: 'IN_PROGRESS', referenceEntityType: 'CERTIFICATION', referenceEntityId: 1, recurringPlanId: null, notes: 'Aim for 80%+.', createdAt: stamp(-8), updatedAt: stamp(-2) },
+        { id: 2, title: 'Review VPC peering and Transit Gateway', intent: 'STUDY', targetDate: d(1), status: 'PLANNED', referenceEntityType: 'CERTIFICATION', referenceEntityId: 1, recurringPlanId: null, notes: null, createdAt: stamp(-6), updatedAt: stamp(-6) },
+        { id: 3, title: 'Prep system design round for Northwind', intent: 'APPLY', targetDate: d(2), status: 'PLANNED', referenceEntityType: 'APPLICATION', referenceEntityId: 1, recurringPlanId: null, notes: 'Use the guide; practice a URL shortener and a rate limiter.', createdAt: stamp(-3), updatedAt: stamp(-3) },
+        { id: 4, title: 'Reply to Globex recruiter with availability', intent: 'APPLY', targetDate: d(-1), status: 'PLANNED', referenceEntityType: 'APPLICATION', referenceEntityId: 2, recurringPlanId: null, notes: null, createdAt: stamp(-2), updatedAt: stamp(-2) },
+        { id: 5, title: 'Workout B', intent: 'EXERCISE', targetDate: d(0), status: 'PLANNED', referenceEntityType: null, referenceEntityId: null, recurringPlanId: null, notes: null, createdAt: stamp(-1), updatedAt: stamp(-1) },
+        { id: 6, title: 'Long walk', intent: 'EXERCISE', targetDate: d(3), status: 'PLANNED', referenceEntityType: null, referenceEntityId: null, recurringPlanId: null, notes: null, createdAt: stamp(-1), updatedAt: stamp(-1) },
+        { id: 7, title: 'Update defense resume with current project', intent: 'WRITE', targetDate: d(-5), status: 'DONE', referenceEntityType: 'DOCUMENT', referenceEntityId: 1, recurringPlanId: null, notes: null, createdAt: stamp(-12), updatedAt: stamp(-5) },
+        { id: 8, title: 'Read "Designing Data-Intensive Applications" ch. 5', intent: 'READ', targetDate: null, status: 'PLANNED', referenceEntityType: null, referenceEntityId: null, recurringPlanId: null, notes: 'Replication.', createdAt: stamp(-14), updatedAt: stamp(-14) },
+        { id: 9, title: 'Security+ domain 1 flashcards', intent: 'STUDY', targetDate: d(5), status: 'PLANNED', referenceEntityType: 'CERTIFICATION', referenceEntityId: 2, recurringPlanId: null, notes: null, createdAt: stamp(-4), updatedAt: stamp(-4) },
+        { id: 10, title: 'Apply to Initech referral', intent: 'APPLY', targetDate: d(-20), status: 'DONE', referenceEntityType: 'APPLICATION', referenceEntityId: 3, recurringPlanId: null, notes: null, createdAt: stamp(-22), updatedAt: stamp(-16) },
+        { id: 11, title: 'CKA labs: pods and deployments', intent: 'STUDY', targetDate: d(-9), status: 'DEFERRED', referenceEntityType: 'CERTIFICATION', referenceEntityId: 3, recurringPlanId: null, notes: 'After AWS.', createdAt: stamp(-15), updatedAt: stamp(-9) },
+        { id: 12, title: 'Write cover letter for CACI', intent: 'WRITE', targetDate: d(-3), status: 'DONE', referenceEntityType: 'APPLICATION', referenceEntityId: 5, recurringPlanId: null, notes: null, createdAt: stamp(-4), updatedAt: stamp(-2) },
     ]
 
     const planEvents: PlanEvent[] = [
@@ -54,22 +54,39 @@ export function buildDemoData() {
     ]
 
     const studySessions: StudySession[] = [
-        { id: 1, sessionDate: dt(-6, '19:00'), durationMinutes: 75, certificationId: 1, notes: 'IAM, Organizations, SCPs', createdAt: dt(-6, '20:15'), updatedAt: dt(-6, '20:15') },
-        { id: 2, sessionDate: dt(-5, '07:00'), durationMinutes: 45, certificationId: 1, notes: 'S3 storage classes', createdAt: dt(-5, '07:45'), updatedAt: dt(-5, '07:45') },
-        { id: 3, sessionDate: dt(-3, '19:30'), durationMinutes: 90, certificationId: 1, notes: 'Practice exam #2: 74%', createdAt: dt(-3, '21:00'), updatedAt: dt(-3, '21:00') },
-        { id: 4, sessionDate: dt(-2, '19:00'), durationMinutes: 60, certificationId: 1, notes: 'Started practice exam #3', createdAt: dt(-2, '20:00'), updatedAt: dt(-2, '20:00') },
-        { id: 5, sessionDate: dt(-1, '08:00'), durationMinutes: 30, certificationId: 2, notes: 'Threat types', createdAt: dt(-1, '08:30'), updatedAt: dt(-1, '08:30') },
-        { id: 6, sessionDate: dt(-13, '19:00'), durationMinutes: 60, certificationId: 1, notes: null, createdAt: dt(-13, '20:00'), updatedAt: dt(-13, '20:00') },
-        { id: 7, sessionDate: dt(-11, '19:00'), durationMinutes: 50, certificationId: 1, notes: null, createdAt: dt(-11, '19:50'), updatedAt: dt(-11, '19:50') },
+        { id: 1, sessionDate: dt(-6, '19:00'), durationMinutes: 75, certificationId: 1, planItemId: null, notes: 'IAM, Organizations, SCPs', createdAt: dt(-6, '20:15'), updatedAt: dt(-6, '20:15') },
+        { id: 2, sessionDate: dt(-5, '07:00'), durationMinutes: 45, certificationId: 1, planItemId: null, notes: 'S3 storage classes', createdAt: dt(-5, '07:45'), updatedAt: dt(-5, '07:45') },
+        { id: 3, sessionDate: dt(-3, '19:30'), durationMinutes: 90, certificationId: 1, planItemId: null, notes: 'Practice exam #2: 74%', createdAt: dt(-3, '21:00'), updatedAt: dt(-3, '21:00') },
+        { id: 4, sessionDate: dt(-2, '19:00'), durationMinutes: 60, certificationId: 1, planItemId: null, notes: 'Started practice exam #3', createdAt: dt(-2, '20:00'), updatedAt: dt(-2, '20:00') },
+        { id: 5, sessionDate: dt(-1, '08:00'), durationMinutes: 30, certificationId: 2, planItemId: null, notes: 'Threat types', createdAt: dt(-1, '08:30'), updatedAt: dt(-1, '08:30') },
+        { id: 6, sessionDate: dt(-13, '19:00'), durationMinutes: 60, certificationId: 1, planItemId: null, notes: null, createdAt: dt(-13, '20:00'), updatedAt: dt(-13, '20:00') },
+        { id: 7, sessionDate: dt(-11, '19:00'), durationMinutes: 50, certificationId: 1, planItemId: null, notes: null, createdAt: dt(-11, '19:50'), updatedAt: dt(-11, '19:50') },
     ]
 
     const fitnessSessions: FitnessSession[] = [
-        { id: 1, sessionDate: dt(-6, '06:30'), durationMinutes: 45, workoutType: 'WORKOUT_A', notes: null, createdAt: dt(-6, '07:15'), updatedAt: dt(-6, '07:15') },
-        { id: 2, sessionDate: dt(-4, '06:30'), durationMinutes: 40, workoutType: 'WORKOUT_B', notes: 'Felt strong.', createdAt: dt(-4, '07:10'), updatedAt: dt(-4, '07:10') },
-        { id: 3, sessionDate: dt(-2, '17:00'), durationMinutes: 35, workoutType: 'WALK', notes: null, createdAt: dt(-2, '17:35'), updatedAt: dt(-2, '17:35') },
-        { id: 4, sessionDate: dt(-12, '06:30'), durationMinutes: 45, workoutType: 'WORKOUT_A', notes: null, createdAt: dt(-12, '07:15'), updatedAt: dt(-12, '07:15') },
-        { id: 5, sessionDate: dt(-9, '06:30'), durationMinutes: 40, workoutType: 'WORKOUT_B', notes: null, createdAt: dt(-9, '07:10'), updatedAt: dt(-9, '07:10') },
+        { id: 1, sessionDate: dt(-6, '06:30'), durationMinutes: 45, workoutType: 'WORKOUT_A', planItemId: null, notes: null, createdAt: dt(-6, '07:15'), updatedAt: dt(-6, '07:15') },
+        { id: 2, sessionDate: dt(-4, '06:30'), durationMinutes: 40, workoutType: 'WORKOUT_B', planItemId: null, notes: 'Felt strong.', createdAt: dt(-4, '07:10'), updatedAt: dt(-4, '07:10') },
+        { id: 3, sessionDate: dt(-2, '17:00'), durationMinutes: 35, workoutType: 'WALK', planItemId: null, notes: null, createdAt: dt(-2, '17:35'), updatedAt: dt(-2, '17:35') },
+        { id: 4, sessionDate: dt(-12, '06:30'), durationMinutes: 45, workoutType: 'WORKOUT_A', planItemId: null, notes: null, createdAt: dt(-12, '07:15'), updatedAt: dt(-12, '07:15') },
+        { id: 5, sessionDate: dt(-9, '06:30'), durationMinutes: 40, workoutType: 'WORKOUT_B', planItemId: null, notes: null, createdAt: dt(-9, '07:10'), updatedAt: dt(-9, '07:10') },
     ]
 
-    return { certifications, applications, documents, planItems, planEvents, studySessions, fitnessSessions }
+    const recurringPlans: RecurringPlan[] = [
+        { id: 1, title: 'Workout A', intent: 'EXERCISE', days: ['MONDAY', 'THURSDAY'], referenceEntityType: null, referenceEntityId: null, notes: null, active: true, createdAt: stamp(-30), updatedAt: stamp(-30) },
+        { id: 2, title: 'Workout B', intent: 'EXERCISE', days: ['TUESDAY', 'FRIDAY'], referenceEntityType: null, referenceEntityId: null, notes: null, active: true, createdAt: stamp(-30), updatedAt: stamp(-30) },
+        { id: 3, title: 'Evening AWS study block', intent: 'STUDY', days: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY'], referenceEntityType: 'CERTIFICATION', referenceEntityId: 1, notes: '45 minutes minimum.', active: true, createdAt: stamp(-20), updatedAt: stamp(-20) },
+    ]
+
+    const proposals: Proposal[] = [
+        {
+            id: 1, source: 'mcp:claude-desktop', status: 'PENDING', createdAt: dt(-1, '21:05'), updatedAt: dt(-1, '21:05'),
+            summary: 'You asked Claude Desktop to look at next week: it suggests moving the Security+ flashcards after the AWS exam and adding an interview debrief.',
+            changes: [
+                { op: 'update', id: 9, fields: { targetDate: d(14) }, reason: 'Security+ can wait until after the AWS exam on ' + d(12) + '.' },
+                { op: 'create', id: null, fields: { title: 'Write up Northwind interview debrief', intent: 'WRITE', targetDate: d(3) }, reason: 'Capture what was asked while it is fresh.' },
+            ],
+        },
+    ]
+
+    return { certifications, applications, documents, planItems, planEvents, studySessions, fitnessSessions, recurringPlans, proposals }
 }

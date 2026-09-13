@@ -1,18 +1,23 @@
 import { useMemo, useState } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { API_BASE_URL } from '../../api/client'
-import { aiApi } from '../../api/resources'
-import { applications, certifications, documents, fitnessSessions, planItems, studySessions, usePlanEvents } from '../../hooks/resources'
+import { aiApi, planItemsApi, proposalsApi } from '../../api/resources'
+import { PLAN_EVENTS_KEY, applications, certifications, documents, fitnessSessions, planItems, studySessions, usePlanEvents } from '../../hooks/resources'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
+import Pill from '../../components/ui/Pill'
 import { inputClass } from '../../components/ui/Field'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
+import { formatDateTime } from '../../lib/format'
 import { DEFAULT_OPTIONS, buildContext, type ContextOptions } from './buildContext'
-import { parseChangeSet, type ChangeSet } from './changeSet'
+import { normalizeChangeSet, parseChangeSet, type ChangeSet } from './changeSet'
 import ReviewChanges from './ReviewChanges'
+import { loadBatches, markReverted, type AppliedBatch } from './appliedBatches'
+import type { Proposal } from '../../types'
 
 // claude.ai accepts a prefilled prompt via ?q=; browsers cap URLs, so fall back to copy above this.
 const OPEN_IN_CLAUDE_LIMIT = 7000
+const PROPOSALS_KEY = ['proposals', 'PENDING'] as const
 
 function Toggle({ label, checked, onChange, hint }: { label: string; checked: boolean; onChange: (v: boolean) => void; hint?: string }) {
     return (
@@ -26,13 +31,15 @@ function Toggle({ label, checked, onChange, hint }: { label: string; checked: bo
     )
 }
 
-type Review = { source: string; changeSet: ChangeSet } | null
+type Review = { source: string; changeSet: ChangeSet; proposalId?: number } | null
 
 /**
  * The point of the whole app: turn the structured data into context an AI can use without you
- * re-explaining anything, then bring its suggestions back in as reviewable changes.
+ * re-explaining anything, then bring its suggestions back in as reviewable changes. Proposals
+ * posted by agents (the MCP server) land in the inbox here; applied batches can be reverted.
  */
 export default function PromptPage() {
+    const qc = useQueryClient()
     const plan = planItems.useList()
     const apps = applications.useList()
     const certs = certifications.useList()
@@ -41,6 +48,7 @@ export default function PromptPage() {
     const events = usePlanEvents()
     const docs = documents.useList()
     const aiStatus = useQuery({ queryKey: ['ai-status'], queryFn: aiApi.status, staleTime: Infinity, retry: false })
+    const inbox = useQuery({ queryKey: PROPOSALS_KEY, queryFn: () => proposalsApi.list('PENDING'), refetchInterval: 60_000 })
 
     const [opts, setOpts] = useState<ContextOptions>(() => {
         try {
@@ -54,6 +62,9 @@ export default function PromptPage() {
     const [importText, setImportText] = useState('')
     const [importError, setImportError] = useState<string | null>(null)
     const [review, setReview] = useState<Review>(null)
+    const [batches, setBatches] = useState<AppliedBatch[]>(loadBatches)
+    const [reverting, setReverting] = useState<string | null>(null)
+    const [revertError, setRevertError] = useState<string | null>(null)
 
     function set<K extends keyof ContextOptions>(key: K, value: ContextOptions[K]) {
         setOpts((o) => {
@@ -75,7 +86,11 @@ export default function PromptPage() {
 
     const suggest = useMutation({
         mutationFn: () => aiApi.suggest(text, ask.trim() || undefined),
-        onSuccess: (cs) => setReview({ source: `Claude (${aiStatus.data?.model ?? 'server'})`, changeSet: cs }),
+        onSuccess: (cs) => setReview({ source: `Claude (${aiStatus.data?.model ?? 'server'})`, changeSet: normalizeChangeSet(cs) }),
+    })
+    const resolveProposal = useMutation({
+        mutationFn: (v: { id: number; status: 'APPLIED' | 'DISMISSED' }) => proposalsApi.setStatus(v.id, v.status),
+        onSuccess: () => qc.invalidateQueries({ queryKey: PROPOSALS_KEY }),
     })
 
     const failed = [plan, apps, certs, study, fitness, events, docs].find((q) => q.isError)
@@ -108,9 +123,38 @@ export default function PromptPage() {
         }
     }
 
+    function reviewProposal(p: Proposal) {
+        try {
+            setReview({ source: p.source, changeSet: normalizeChangeSet({ summary: p.summary, changes: p.changes }), proposalId: p.id })
+        } catch (err) {
+            setRevertError(err instanceof Error ? err.message : 'Could not read that proposal.')
+        }
+    }
+
+    async function revert(batch: AppliedBatch) {
+        setReverting(batch.id)
+        setRevertError(null)
+        const failures: string[] = []
+        for (const entry of [...batch.entries].reverse()) {
+            try {
+                if (entry.op === 'create') await planItemsApi.remove(entry.id)
+                else await planItemsApi.update(entry.id, entry.before)
+            } catch (err) {
+                failures.push(`${entry.title}: ${err instanceof Error ? err.message : 'failed'}`)
+            }
+        }
+        markReverted(batch.id)
+        setBatches(loadBatches())
+        setReverting(null)
+        if (failures.length) setRevertError(`Some changes could not be reverted. ${failures.join(' · ')}`)
+        qc.invalidateQueries({ queryKey: planItems.queryKey })
+        qc.invalidateQueries({ queryKey: [PLAN_EVENTS_KEY] })
+    }
+
     const approxTokens = Math.ceil(text.length / 4)
     const aiEnabled = aiStatus.data?.enabled === true
     const canOpenInClaude = text.length <= OPEN_IN_CLAUDE_LIMIT
+    const pending = inbox.data ?? []
 
     return (
         <div>
@@ -138,6 +182,30 @@ export default function PromptPage() {
             {suggest.isError && (
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{suggest.error.message}</p>
             )}
+            {revertError && (
+                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{revertError}</p>
+            )}
+
+            {pending.length > 0 && (
+                <section className="mb-6">
+                    <SectionTitle>Inbox · {pending.length} proposal{pending.length === 1 ? '' : 's'} waiting for review</SectionTitle>
+                    <ul className="divide-y divide-gray-100 rounded-xl border border-blue-200 bg-white shadow-xs">
+                        {pending.map((p) => (
+                            <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <Pill value="PROPOSAL" tone="blue" />
+                                        <span className="text-xs text-gray-500">{p.source} · {formatDateTime(p.createdAt)} · {p.changes.length} change{p.changes.length === 1 ? '' : 's'}</span>
+                                    </div>
+                                    <p className="mt-1 truncate text-gray-800" title={p.summary}>{p.summary || 'No summary'}</p>
+                                </div>
+                                <Button size="sm" onClick={() => reviewProposal(p)}>Review</Button>
+                                <Button size="sm" variant="ghost" onClick={() => resolveProposal.mutate({ id: p.id, status: 'DISMISSED' })} disabled={resolveProposal.isPending}>Dismiss</Button>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
 
             <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
                 <aside className="space-y-5">
@@ -161,6 +229,7 @@ export default function PromptPage() {
                     <Card>
                         <SectionTitle>Include</SectionTitle>
                         <div className="space-y-3">
+                            <Toggle label="Week summary" hint="A computed paragraph: counts, overdue, exams" checked={opts.summary} onChange={(v) => set('summary', v)} />
                             <Toggle label="Plan items" checked={opts.plan} onChange={(v) => set('plan', v)} />
                             {opts.plan && <div className="pl-6"><Toggle label="Also closed items" checked={opts.includeClosedPlan} onChange={(v) => set('includeClosedPlan', v)} /></div>}
                             <Toggle label="Sessions" hint="Study and fitness, recent window" checked={opts.sessions} onChange={(v) => set('sessions', v)} />
@@ -192,6 +261,31 @@ export default function PromptPage() {
                             Reset to default
                         </button>
                     </Card>
+                    {batches.length > 0 && (
+                        <Card>
+                            <SectionTitle>Recent imports</SectionTitle>
+                            <ul className="space-y-3">
+                                {batches.map((b) => (
+                                    <li key={b.id} className="text-sm">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <p className="truncate text-gray-800" title={b.summary}>{b.summary || `${b.entries.length} change${b.entries.length === 1 ? '' : 's'}`}</p>
+                                                <p className="text-xs text-gray-500">{b.source} · {new Date(b.appliedAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {b.entries.length} applied</p>
+                                            </div>
+                                            {b.reverted ? (
+                                                <span className="shrink-0 text-xs text-gray-400">reverted</span>
+                                            ) : (
+                                                <Button size="sm" variant="secondary" onClick={() => revert(b)} disabled={reverting === b.id}>
+                                                    {reverting === b.id ? 'Reverting…' : 'Revert'}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <p className="mt-3 text-xs text-gray-500">Kept in this browser for a week. Reverting restores each item to how it was and deletes items the batch created.</p>
+                        </Card>
+                    )}
                 </aside>
 
                 <section className="min-w-0">
@@ -230,7 +324,17 @@ export default function PromptPage() {
             </Modal>
 
             <Modal open={review !== null} onClose={() => setReview(null)} wide>
-                {review && <ReviewChanges source={review.source} changeSet={review.changeSet} onClose={() => setReview(null)} />}
+                {review && (
+                    <ReviewChanges
+                        source={review.source}
+                        changeSet={review.changeSet}
+                        onClose={() => setReview(null)}
+                        onApplied={(applied) => {
+                            setBatches(loadBatches())
+                            if (review.proposalId != null && applied > 0) resolveProposal.mutate({ id: review.proposalId, status: 'APPLIED' })
+                        }}
+                    />
+                )}
             </Modal>
         </div>
     )

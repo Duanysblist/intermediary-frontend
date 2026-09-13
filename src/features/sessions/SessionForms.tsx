@@ -39,6 +39,7 @@ export function StudySessionForm({ initial, onSubmit, onCancel, isSaving, error 
         sessionDate: initial?.sessionDate.slice(0, 16) ?? defaultSessionDate(),
         durationMinutes: initial?.durationMinutes ?? 60,
         certificationId: initial?.certificationId ?? null,
+        planItemId: initial?.planItemId ?? null,
         notes: initial?.notes ?? '',
     })
     const fieldErrors = error instanceof ApiError ? error.fieldErrors ?? {} : {}
@@ -59,7 +60,7 @@ export function StudySessionForm({ initial, onSubmit, onCancel, isSaving, error 
                     <input type="datetime-local" className={inputClass} value={form.sessionDate} onChange={(e) => update('sessionDate', e.target.value)} required autoFocus />
                 </Field>
                 <Field label="Duration (minutes)" required error={fieldErrors.durationMinutes}>
-                    <input type="number" min={1} step={5} className={inputClass} value={form.durationMinutes}
+                    <input type="number" min={1} className={inputClass} value={form.durationMinutes}
                            onChange={(e) => update('durationMinutes', Number(e.target.value))} required />
                 </Field>
                 <Field label="Certification" className="sm:col-span-2" hint="Optional. Links this session to what you were studying for.">
@@ -84,6 +85,7 @@ export function FitnessSessionForm({ initial, onSubmit, onCancel, isSaving, erro
         sessionDate: initial?.sessionDate.slice(0, 16) ?? defaultSessionDate(),
         durationMinutes: initial?.durationMinutes ?? 45,
         workoutType: initial?.workoutType ?? 'WORKOUT_A',
+        planItemId: initial?.planItemId ?? null,
         notes: initial?.notes ?? '',
     })
     const fieldErrors = error instanceof ApiError ? error.fieldErrors ?? {} : {}
@@ -104,7 +106,7 @@ export function FitnessSessionForm({ initial, onSubmit, onCancel, isSaving, erro
                     <input type="datetime-local" className={inputClass} value={form.sessionDate} onChange={(e) => update('sessionDate', e.target.value)} required autoFocus />
                 </Field>
                 <Field label="Duration (minutes)" required error={fieldErrors.durationMinutes}>
-                    <input type="number" min={1} step={5} className={inputClass} value={form.durationMinutes}
+                    <input type="number" min={1} className={inputClass} value={form.durationMinutes}
                            onChange={(e) => update('durationMinutes', Number(e.target.value))} required />
                 </Field>
                 <Field label="Workout type" required className="sm:col-span-2">

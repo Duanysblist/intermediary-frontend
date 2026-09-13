@@ -65,6 +65,8 @@ export interface StudySession {
     sessionDate: string
     durationMinutes: number
     certificationId: number | null
+    /** The intention this session fulfilled, if it was logged from a plan item. */
+    planItemId: number | null
     notes: string | null
     createdAt: string
     updatedAt: string
@@ -78,6 +80,7 @@ export interface FitnessSession {
     sessionDate: string
     durationMinutes: number
     workoutType: WorkoutType
+    planItemId: number | null
     notes: string | null
     createdAt: string
     updatedAt: string
@@ -100,11 +103,31 @@ export interface PlanItem {
     status: PlanItemStatus
     referenceEntityType: ReferenceEntityType | null
     referenceEntityId: number | null
+    /** Set when the item was generated from a recurring plan. */
+    recurringPlanId: number | null
     notes: string | null
     createdAt: string
     updatedAt: string
 }
 export type PlanItemInput = Omit<PlanItem, 'id' | 'createdAt' | 'updatedAt'>
+
+// ---------- Recurring plans (routines that generate plan items) ----------
+export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
+export const DAYS_OF_WEEK: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
+
+export interface RecurringPlan {
+    id: number
+    title: string
+    intent: PlanIntent
+    days: DayOfWeek[]
+    referenceEntityType: ReferenceEntityType | null
+    referenceEntityId: number | null
+    notes: string | null
+    active: boolean
+    createdAt: string
+    updatedAt: string
+}
+export type RecurringPlanInput = Omit<RecurringPlan, 'id' | 'createdAt' | 'updatedAt'>
 
 // ---------- Plan events (history, append-only) ----------
 export interface PlanEvent {
@@ -115,6 +138,19 @@ export interface PlanEvent {
     eventTime: string
     notes: string | null
     createdAt: string
+}
+
+// ---------- Proposals (change sets waiting for review, e.g. from the MCP server) ----------
+export type ProposalStatus = 'PENDING' | 'APPLIED' | 'DISMISSED'
+
+export interface Proposal {
+    id: number
+    source: string
+    summary: string
+    changes: import('../features/prompt/changeSet').Change[]
+    status: ProposalStatus
+    createdAt: string
+    updatedAt: string
 }
 
 // ---------- Enum option lists (single source for selects, pills, and labels) ----------

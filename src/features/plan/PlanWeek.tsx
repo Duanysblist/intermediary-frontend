@@ -45,9 +45,8 @@ function DayColumn({ day, items, referenceLabel, onOpen, onAdd }: { day: string;
 }
 
 /**
- * Calendar week. Dropping a card on a day sets its target date. Cards without a date, or dated
- * outside this week, sit in the tray below so they can be dragged in. The API can move a date but
- * not clear one, so the tray is a source only.
+ * Calendar week. Dropping a card on a day sets its target date; dropping it on the Unscheduled
+ * tray clears the date. Cards dated outside this week sit in the other trays so they can be dragged in.
  */
 export default function PlanWeek({ items, monday, onChangeWeek, referenceLabel, onOpen, onAdd }: Props) {
     const days = weekDays(monday)
@@ -80,7 +79,7 @@ export default function PlanWeek({ items, monday, onChangeWeek, referenceLabel, 
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-3">
-                <Tray title="Unscheduled" hint="Drag onto a day to schedule" items={unscheduled} referenceLabel={referenceLabel} onOpen={onOpen} />
+                <Tray title="Unscheduled" hint="Drop here to take an item off the calendar" items={unscheduled} referenceLabel={referenceLabel} onOpen={onOpen} droppable />
                 <Tray title="Overdue" hint="Dated before this week, still open" items={overdue} referenceLabel={referenceLabel} onOpen={onOpen} tone="red" />
                 <Tray title="Later" hint="Dated after this week" items={later} referenceLabel={referenceLabel} onOpen={onOpen} />
             </div>
@@ -91,9 +90,14 @@ export default function PlanWeek({ items, monday, onChangeWeek, referenceLabel, 
     )
 }
 
-function Tray({ title, hint, items, referenceLabel, onOpen, tone }: { title: string; hint: string; items: PlanItem[]; tone?: 'red' } & Pick<Props, 'referenceLabel' | 'onOpen'>) {
+type TrayProps = { title: string; hint: string; items: PlanItem[]; tone?: 'red'; droppable?: boolean } & Pick<Props, 'referenceLabel' | 'onOpen'>
+
+function Tray({ title, hint, items, referenceLabel, onOpen, tone, droppable }: TrayProps) {
+    // Only the Unscheduled tray accepts drops; landing there clears the date (targetDate: null).
+    const { setNodeRef, isOver } = useDroppable({ id: `tray-${title}`, data: { targetDate: null }, disabled: !droppable })
+    const highlight = droppable && isOver
     return (
-        <section className="rounded-xl border border-gray-200 bg-white p-3">
+        <section ref={setNodeRef} className={`rounded-xl border p-3 transition-colors ${highlight ? 'border-blue-400 bg-blue-50/60' : 'border-gray-200 bg-white'}`}>
             <header className="mb-2 flex items-center justify-between">
                 <div>
                     <h3 className={`text-sm font-semibold ${tone === 'red' && items.length ? 'text-red-700' : 'text-gray-800'}`}>{title}</h3>
@@ -103,7 +107,7 @@ function Tray({ title, hint, items, referenceLabel, onOpen, tone }: { title: str
             </header>
             <div className="flex flex-col gap-2">
                 {items.length === 0 ? (
-                    <p className="py-3 text-center text-xs text-gray-400">Empty</p>
+                    <p className="py-3 text-center text-xs text-gray-400">{droppable ? 'Drop here' : 'Empty'}</p>
                 ) : items.map((item) => (
                     <PlanItemCard key={item.id} item={item} referenceLabel={referenceLabel(item)} onOpen={onOpen} showStatus />
                 ))}

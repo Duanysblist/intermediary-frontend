@@ -2,12 +2,14 @@ import { PLAN_INTENTS, PLAN_STATUSES, type PlanIntent, type PlanItemStatus } fro
 
 /**
  * The change-set contract shared with the backend's ChangeSet record. Claude returns it from
- * POST /ai/suggest; any chat assistant can also produce it by hand and the user pastes it in.
+ * POST /ai/suggest, the MCP server posts it as a proposal, and any chat assistant can produce it
+ * by hand for the user to paste in.
  */
 export type PlanItemFields = {
     title?: string | null
     intent?: PlanIntent | null
     status?: PlanItemStatus | null
+    /** A date string moves the item; null clears it (the wire format uses the string "CLEAR" or null); absent leaves it alone. */
     targetDate?: string | null
     notes?: string | null
 }
@@ -29,6 +31,7 @@ export const CHANGE_SET_FORMAT = `{
   "summary": "one or two sentences",
   "changes": [
     { "op": "update", "id": 12, "fields": { "targetDate": "2026-09-20", "status": "IN_PROGRESS" }, "reason": "why" },
+    { "op": "update", "id": 7, "fields": { "targetDate": "CLEAR" }, "reason": "take it off the calendar" },
     { "op": "create", "id": null, "fields": { "title": "New item", "intent": "STUDY", "targetDate": "2026-09-22" }, "reason": "why" }
   ]
 }`
@@ -49,6 +52,11 @@ export function parseChangeSet(text: string): ChangeSet {
     } catch {
         throw new Error("That isn't valid JSON. Ask the assistant for the change set as a JSON code block.")
     }
+    return normalizeChangeSet(parsed)
+}
+
+/** Validates an already-parsed object (from paste, the API, or a proposal) into a ChangeSet. */
+export function normalizeChangeSet(parsed: unknown): ChangeSet {
     if (!parsed || typeof parsed !== 'object') throw new Error('Expected a JSON object with "changes".')
     const obj = parsed as Record<string, unknown>
     const changes = Array.isArray(obj.changes) ? obj.changes : null
@@ -72,8 +80,10 @@ export function parseChangeSet(text: string): ChangeSet {
             if (!PLAN_STATUSES.includes(f.status as PlanItemStatus)) throw new Error(`Change ${i + 1}: unknown status "${f.status}".`)
             fields.status = f.status as PlanItemStatus
         }
-        if (typeof f.targetDate === 'string') {
-            if (!ISO_DATE.test(f.targetDate)) throw new Error(`Change ${i + 1}: targetDate must be YYYY-MM-DD.`)
+        if (f.targetDate === null || f.targetDate === 'CLEAR') {
+            fields.targetDate = null
+        } else if (typeof f.targetDate === 'string') {
+            if (!ISO_DATE.test(f.targetDate)) throw new Error(`Change ${i + 1}: targetDate must be YYYY-MM-DD or CLEAR.`)
             fields.targetDate = f.targetDate
         }
         if (typeof f.notes === 'string') fields.notes = f.notes

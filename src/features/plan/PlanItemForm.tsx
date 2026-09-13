@@ -25,6 +25,7 @@ function toFormState(p?: PlanItem, defaults?: Partial<PlanItemInput>): PlanItemI
         status: p?.status ?? defaults?.status ?? 'PLANNED',
         referenceEntityType: p?.referenceEntityType ?? null,
         referenceEntityId: p?.referenceEntityId ?? null,
+        recurringPlanId: p?.recurringPlanId ?? null,
         notes: p?.notes ?? '',
     }
 }
@@ -77,7 +78,7 @@ export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, is
                         {PLAN_STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                     </select>
                 </Field>
-                <Field label="Target date" error={fieldErrors.targetDate} hint={initial?.targetDate ? 'Dates can be moved but not cleared once set.' : undefined}>
+                <Field label="Target date" error={fieldErrors.targetDate}>
                     <input type="date" className={inputClass} value={form.targetDate ?? ''} onChange={(e) => update('targetDate', e.target.value)} />
                 </Field>
                 <Field label="Relates to">

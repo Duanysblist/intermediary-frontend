@@ -11,6 +11,7 @@ export function toInput(item: PlanItem): PlanItemInput {
         status: item.status,
         referenceEntityType: item.referenceEntityType,
         referenceEntityId: item.referenceEntityId,
+        recurringPlanId: item.recurringPlanId,
         notes: item.notes,
     }
 }

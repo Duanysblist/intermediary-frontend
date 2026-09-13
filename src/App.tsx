@@ -9,6 +9,7 @@ import ApplicationsPage from './features/applications/ApplicationsPage'
 import CertificationsPage from './features/certifications/CertificationsPage'
 import DocumentsPage from './features/documents/DocumentsPage'
 import PromptPage from './features/prompt/PromptPage'
+import ReviewPage from './features/review/ReviewPage'
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                     <Route path="/certifications" element={<CertificationsPage />} />
                     <Route path="/documents" element={<DocumentsPage />} />
                     <Route path="/prompt" element={<PromptPage />} />
+                    <Route path="/review" element={<ReviewPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
             </Route>

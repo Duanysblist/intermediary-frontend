@@ -8,13 +8,15 @@ type Props = {
     item: PlanItem
     referenceLabel: string | null
     onEdit: () => void
+    onLog: () => void
     onDelete: () => void
     onClose: () => void
 }
 
 /** Read view of one plan item plus its append-only status history. */
-export default function PlanItemDetail({ item, referenceLabel, onEdit, onDelete, onClose }: Props) {
+export default function PlanItemDetail({ item, referenceLabel, onEdit, onLog, onDelete, onClose }: Props) {
     const events = usePlanEvents(item.id)
+    const loggable = item.intent === 'STUDY' || item.intent === 'EXERCISE' || item.intent === 'READ' || item.intent === 'WRITE' || item.intent === 'OTHER'
     return (
         <div>
             <div className="flex items-start justify-between gap-3">
@@ -23,6 +25,7 @@ export default function PlanItemDetail({ item, referenceLabel, onEdit, onDelete,
                     <div className="mt-2 flex flex-wrap gap-2">
                         <Pill value={item.status} />
                         <Pill value={item.intent} />
+                        {item.recurringPlanId != null && <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">routine</span>}
                     </div>
                 </div>
                 <button type="button" onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" aria-label="Close">
@@ -66,11 +69,16 @@ export default function PlanItemDetail({ item, referenceLabel, onEdit, onDelete,
                 )}
             </section>
 
-            <div className="mt-6 flex justify-between">
+            <div className="mt-6 flex flex-wrap justify-between gap-2">
                 <Button variant="ghost" className="text-red-600 hover:bg-red-50 hover:text-red-700" onClick={onDelete}>Delete</Button>
                 <div className="flex gap-2">
                     <Button variant="secondary" onClick={onClose}>Close</Button>
-                    <Button onClick={onEdit}>Edit</Button>
+                    <Button variant="secondary" onClick={onEdit}>Edit</Button>
+                    {loggable && item.status !== 'CANCELED' && (
+                        <Button onClick={onLog} title="Record the session that fulfilled this and mark it done">
+                            {item.intent === 'EXERCISE' ? 'Log workout' : 'Log session'}
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

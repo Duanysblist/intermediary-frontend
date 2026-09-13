@@ -1,19 +1,24 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { useMutation } from '@tanstack/react-query'
 import {
     DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors,
     type DragEndEvent, type DragStartEvent,
 } from '@dnd-kit/core'
+import { calendarApi } from '../../api/resources'
 import { planItems } from '../../hooks/resources'
 import { useMovePlanItem, useReferenceLabel } from './usePlanBoard'
 import PlanBoard from './PlanBoard'
 import PlanWeek from './PlanWeek'
 import PlanItemForm from './PlanItemForm'
 import PlanItemDetail from './PlanItemDetail'
+import LogSessionForm from './LogSessionForm'
+import RecurringPlansModal from './RecurringPlansModal'
 import { PlanItemCardBody } from './PlanItemCard'
 import Modal from '../../components/ui/Modal'
 import Button from '../../components/ui/Button'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import { inputClass } from '../../components/ui/Field'
 import { ErrorState, LoadingState, PageHeader } from '../../components/ui/Page'
 import { startOfWeek, todayISO } from '../../lib/format'
 import type { PlanItem, PlanItemInput, PlanItemStatus } from '../../types'
@@ -24,6 +29,11 @@ type Sheet =
     | { kind: 'create'; defaults: Partial<PlanItemInput> }
     | { kind: 'detail'; item: PlanItem }
     | { kind: 'edit'; item: PlanItem }
+    | { kind: 'log'; item: PlanItem }
+    | { kind: 'routines' }
+    | { kind: 'calendar' }
+
+type DropTarget = { status?: PlanItemStatus; targetDate?: string | null }
 
 export default function PlanPage() {
     const [params, setParams] = useSearchParams()
@@ -38,10 +48,12 @@ export default function PlanPage() {
     const deleteMut = planItems.useRemove()
     const moveMut = useMovePlanItem()
     const refLabel = useReferenceLabel()
+    const calendarLink = useMutation({ mutationFn: calendarApi.link })
 
     const [sheet, setSheet] = useState<Sheet>({ kind: 'none' })
     const [deleting, setDeleting] = useState<PlanItem | null>(null)
     const [dragging, setDragging] = useState<PlanItem | null>(null)
+    const [copied, setCopied] = useState(false)
 
     // A small movement threshold keeps plain clicks opening the detail view instead of starting a drag.
     const sensors = useSensors(
@@ -58,10 +70,13 @@ export default function PlanPage() {
     function onDragEnd(e: DragEndEvent) {
         setDragging(null)
         const item = (e.active.data.current as { item: PlanItem } | undefined)?.item
-        const target = e.over?.data.current as { status?: PlanItemStatus; targetDate?: string } | undefined
+        const target = e.over?.data.current as DropTarget | undefined
         if (!item || !target) return
-        if (target.status && target.status !== item.status) moveMut.mutate({ item, patch: { status: target.status } })
-        else if (target.targetDate && target.targetDate !== item.targetDate) moveMut.mutate({ item, patch: { targetDate: target.targetDate } })
+        if (target.status && target.status !== item.status) {
+            moveMut.mutate({ item, patch: { status: target.status } })
+        } else if (target.targetDate !== undefined && target.targetDate !== item.targetDate) {
+            moveMut.mutate({ item, patch: { targetDate: target.targetDate } })
+        }
     }
 
     function handleSubmit(input: PlanItemInput) {
@@ -74,12 +89,26 @@ export default function PlanPage() {
         }
     }
 
+    function openCalendar() {
+        setSheet({ kind: 'calendar' })
+        setCopied(false)
+        calendarLink.mutate()
+    }
+
+    async function copyCalendar() {
+        if (!calendarLink.data) return
+        try { await navigator.clipboard.writeText(calendarLink.data.url); setCopied(true) } catch { setCopied(false) }
+    }
+
     if (isPending) return <LoadingState what="plan" />
     if (isError) return <ErrorState what="plan" error={error} />
 
     const items = data
     const openCount = items.filter((i) => i.status === 'PLANNED' || i.status === 'IN_PROGRESS').length
     const referenceLabel = (it: PlanItem) => refLabel(it.referenceEntityType, it.referenceEntityId)
+    const current = sheet.kind === 'detail' || sheet.kind === 'edit' || sheet.kind === 'log'
+        ? items.find((i) => i.id === sheet.item.id) ?? sheet.item
+        : null
 
     return (
         <div>
@@ -96,6 +125,8 @@ export default function PlanPage() {
                                 </button>
                             ))}
                         </div>
+                        <Button variant="secondary" onClick={() => setSheet({ kind: 'routines' })}>Routines</Button>
+                        <Button variant="secondary" onClick={openCalendar} title="Subscribe to your plan from a calendar app">Calendar feed</Button>
                         <Button onClick={() => setSheet({ kind: 'create', defaults: {} })}>+ New item</Button>
                     </>
                 }
@@ -149,14 +180,45 @@ export default function PlanPage() {
             </Modal>
 
             <Modal open={sheet.kind === 'detail'} onClose={closeSheet}>
-                {sheet.kind === 'detail' && (
+                {sheet.kind === 'detail' && current && (
                     <PlanItemDetail
-                        item={items.find((i) => i.id === sheet.item.id) ?? sheet.item}
-                        referenceLabel={referenceLabel(sheet.item)}
-                        onEdit={() => setSheet({ kind: 'edit', item: sheet.item })}
-                        onDelete={() => setDeleting(sheet.item)}
+                        item={current}
+                        referenceLabel={referenceLabel(current)}
+                        onEdit={() => setSheet({ kind: 'edit', item: current })}
+                        onLog={() => setSheet({ kind: 'log', item: current })}
+                        onDelete={() => setDeleting(current)}
                         onClose={closeSheet}
                     />
+                )}
+            </Modal>
+
+            <Modal open={sheet.kind === 'log'} onClose={closeSheet}>
+                {sheet.kind === 'log' && current && (
+                    <LogSessionForm item={current} onDone={closeSheet} onCancel={() => setSheet({ kind: 'detail', item: current })} />
+                )}
+            </Modal>
+
+            <Modal open={sheet.kind === 'routines'} onClose={closeSheet} wide>
+                {sheet.kind === 'routines' && <RecurringPlansModal onClose={closeSheet} />}
+            </Modal>
+
+            <Modal open={sheet.kind === 'calendar'} onClose={closeSheet}>
+                <h2 className="text-lg font-semibold text-gray-900">Calendar feed</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                    Subscribe to this address from Google Calendar, Apple Calendar or Outlook and every dated plan item appears as an all-day event.
+                    Anyone with the link can read your plan titles, so treat it like a password.
+                </p>
+                {calendarLink.isPending && <p className="mt-4 text-sm text-gray-500">Fetching your link…</p>}
+                {calendarLink.isError && <p className="mt-4 text-sm text-red-600">{calendarLink.error.message}</p>}
+                {calendarLink.data && (
+                    <>
+                        <input readOnly className={`${inputClass} mt-4 font-mono text-xs`} value={calendarLink.data.url} onFocus={(e) => e.currentTarget.select()} />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <Button variant="secondary" onClick={closeSheet}>Close</Button>
+                            <Button onClick={copyCalendar}>{copied ? 'Copied ✓' : 'Copy link'}</Button>
+                        </div>
+                        <p className="mt-3 text-xs text-gray-500">Google Calendar: Other calendars → + → From URL. Apple Calendar: File → New Calendar Subscription.</p>
+                    </>
                 )}
             </Modal>
 
