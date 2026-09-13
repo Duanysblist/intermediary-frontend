@@ -1,35 +1,146 @@
+// Mirrors the backend DTO contract (see intermediary/src/main/java/.../dto).
+// Dates are ISO strings: LocalDate -> "2026-06-04", LocalDateTime -> "2026-06-04T09:30:00".
+
+// ---------- Applications ----------
 export type ApplicationStatus =
-    | "APPLIED"
-    | "SCREENING"
-    | "INTERVIEWING"
-    | "OFFER"
-    | "REJECTED"
-    | "WITHDRAWN"
-    | "GHOSTED";
+    | 'APPLIED' | 'SCREENING' | 'INTERVIEWING' | 'OFFER' | 'REJECTED' | 'WITHDRAWN' | 'GHOSTED'
 
-export type ApplicationSource =
-    | "COLD" | "REFERRAL" | "RECRUITER" | "EVENT" | "INTERNAL";
+export type ApplicationSource = 'COLD' | 'REFERRAL' | 'RECRUITER' | 'EVENT' | 'INTERNAL'
 
-export type ResumeVariant =
-    | "VARIANT_A_DEFENSE" | "VARIANT_B_COMMERCIAL" | "VARIANT_C_CACI_SPECIFIC";
+export type ResumeVariant = 'VARIANT_A_DEFENSE' | 'VARIANT_B_COMMERCIAL' | 'VARIANT_C_CACI_SPECIFIC'
 
 export interface Application {
-    id: number;
-    company: string;
-    role: string;
-    applicationDate: string;        // ISO date, e.g. "2026-06-04"
-    status: ApplicationStatus;
-    source: ApplicationSource;
-    resumeVariant: ResumeVariant;
-    location: string | null;
-    requisitionId: string | null;
-    jobUrl: string | null;
-    salaryRangeMin: number | null;
-    salaryRangeMax: number | null;
-    notes: string | null;
-    createdAt: string;              // ISO datetime, server-set
-    updatedAt: string;              // ISO datetime, server-set
+    id: number
+    company: string
+    role: string
+    applicationDate: string
+    status: ApplicationStatus
+    source: ApplicationSource
+    resumeVariant: ResumeVariant
+    location: string | null
+    requisitionId: string | null
+    jobUrl: string | null
+    salaryRangeMin: number | null
+    salaryRangeMax: number | null
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+}
+export type ApplicationInput = Omit<Application, 'id' | 'createdAt' | 'updatedAt'>
+
+// ---------- Certifications ----------
+export type CertificationStatus = 'PLANNING' | 'STUDYING' | 'SCHEDULED' | 'PASSED' | 'FAILED'
+
+export interface Certification {
+    id: number
+    name: string
+    vendor: string
+    status: CertificationStatus
+    examDate: string | null
+    hoursStudied: number | null
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+}
+export type CertificationInput = Omit<Certification, 'id' | 'createdAt' | 'updatedAt'>
+
+// ---------- Documents ----------
+export type DocumentType = 'RESUME' | 'PLAN' | 'GUIDE' | 'SPEC' | 'OTHER'
+
+export interface Document {
+    id: number
+    title: string
+    path: string
+    type: DocumentType
+    version: string | null
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+}
+export type DocumentInput = Omit<Document, 'id' | 'createdAt' | 'updatedAt'>
+
+// ---------- Sessions (reality) ----------
+export interface StudySession {
+    id: number
+    sessionDate: string
+    durationMinutes: number
+    certificationId: number | null
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+}
+export type StudySessionInput = Omit<StudySession, 'id' | 'createdAt' | 'updatedAt'>
+
+export type WorkoutType = 'WORKOUT_A' | 'WORKOUT_B' | 'WALK' | 'OTHER'
+
+export interface FitnessSession {
+    id: number
+    sessionDate: string
+    durationMinutes: number
+    workoutType: WorkoutType
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+}
+export type FitnessSessionInput = Omit<FitnessSession, 'id' | 'createdAt' | 'updatedAt'>
+
+// ---------- Plan items (intention) ----------
+export type PlanIntent = 'STUDY' | 'EXERCISE' | 'APPLY' | 'READ' | 'WRITE' | 'OTHER'
+
+export type PlanItemStatus = 'PLANNED' | 'IN_PROGRESS' | 'DONE' | 'CANCELED' | 'DEFERRED'
+
+export type ReferenceEntityType =
+    | 'CERTIFICATION' | 'APPLICATION' | 'DOCUMENT' | 'STUDY_SESSION' | 'FITNESS_SESSION' | 'PLAN_ITEM'
+
+export interface PlanItem {
+    id: number
+    title: string
+    intent: PlanIntent
+    targetDate: string | null
+    status: PlanItemStatus
+    referenceEntityType: ReferenceEntityType | null
+    referenceEntityId: number | null
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+}
+export type PlanItemInput = Omit<PlanItem, 'id' | 'createdAt' | 'updatedAt'>
+
+// ---------- Plan events (history, append-only) ----------
+export interface PlanEvent {
+    id: number
+    planItemId: number
+    fromStatus: PlanItemStatus | null
+    toStatus: PlanItemStatus
+    eventTime: string
+    notes: string | null
+    createdAt: string
 }
 
-// What to send on create/update — the server owns id + timestamps
-export type ApplicationInput = Omit<Application, "id" | "createdAt" | "updatedAt">;
+// ---------- Enum option lists (single source for selects, pills, and labels) ----------
+export const APPLICATION_STATUSES: ApplicationStatus[] =
+    ['APPLIED', 'SCREENING', 'INTERVIEWING', 'OFFER', 'REJECTED', 'WITHDRAWN', 'GHOSTED']
+export const APPLICATION_SOURCES: ApplicationSource[] = ['COLD', 'REFERRAL', 'RECRUITER', 'EVENT', 'INTERNAL']
+export const RESUME_VARIANTS: ResumeVariant[] = ['VARIANT_A_DEFENSE', 'VARIANT_B_COMMERCIAL', 'VARIANT_C_CACI_SPECIFIC']
+export const CERTIFICATION_STATUSES: CertificationStatus[] = ['PLANNING', 'STUDYING', 'SCHEDULED', 'PASSED', 'FAILED']
+export const DOCUMENT_TYPES: DocumentType[] = ['RESUME', 'PLAN', 'GUIDE', 'SPEC', 'OTHER']
+export const WORKOUT_TYPES: WorkoutType[] = ['WORKOUT_A', 'WORKOUT_B', 'WALK', 'OTHER']
+export const PLAN_INTENTS: PlanIntent[] = ['STUDY', 'EXERCISE', 'APPLY', 'READ', 'WRITE', 'OTHER']
+export const PLAN_STATUSES: PlanItemStatus[] = ['PLANNED', 'IN_PROGRESS', 'DONE', 'DEFERRED', 'CANCELED']
+export const REFERENCE_TYPES: ReferenceEntityType[] =
+    ['CERTIFICATION', 'APPLICATION', 'DOCUMENT', 'STUDY_SESSION', 'FITNESS_SESSION', 'PLAN_ITEM']
+
+/** Human label for any enum value: IN_PROGRESS -> "In progress", with a few explicit overrides. */
+const LABEL_OVERRIDES: Record<string, string> = {
+    VARIANT_A_DEFENSE: 'Variant A · Defense',
+    VARIANT_B_COMMERCIAL: 'Variant B · Commercial',
+    VARIANT_C_CACI_SPECIFIC: 'Variant C · CACI',
+    WORKOUT_A: 'Workout A',
+    WORKOUT_B: 'Workout B',
+}
+export function label(value: string | null | undefined): string {
+    if (!value) return '—'
+    if (LABEL_OVERRIDES[value]) return LABEL_OVERRIDES[value]
+    const lower = value.toLowerCase().replaceAll('_', ' ')
+    return lower.charAt(0).toUpperCase() + lower.slice(1)
+}

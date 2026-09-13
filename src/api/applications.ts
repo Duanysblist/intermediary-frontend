@@ -1,28 +1,8 @@
-import { request } from "./client";
-import type { Application, ApplicationInput } from "../types";
+import { applicationsApi } from './resources'
 
-export function getApplications() {
-    return request<Application[]>("/applications");
-}
-
-export function getApplication(id: number) {
-    return request<Application>(`/applications/${id}`);
-}
-
-export function createApplication(body: ApplicationInput) {
-    return request<Application>("/applications", {
-        method: "POST",
-        body: JSON.stringify(body),
-    });
-}
-
-export function updateApplication(id: number, body: ApplicationInput) {
-    return request<Application>(`/applications/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(body),
-    });
-}
-
-export function deleteApplication(id: number) {
-    return request<void>(`/applications/${id}`, { method: "DELETE" });
-}
+// Kept for compatibility with the first Applications board; new code uses `applicationsApi` directly.
+export const getApplications = applicationsApi.list
+export const getApplication = applicationsApi.get
+export const createApplication = applicationsApi.create
+export const updateApplication = applicationsApi.update
+export const deleteApplication = applicationsApi.remove
