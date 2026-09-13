@@ -16,7 +16,7 @@ export interface Resource<T, TInput> {
     remove(id: number): Promise<void>
 }
 
-export function resource<T, TInput>(path: string): Resource<T, TInput> {
+function resource<T, TInput>(path: string): Resource<T, TInput> {
     return {
         list: () => request<T[]>(path),
         get: (id) => request<T>(`${path}/${id}`),
@@ -26,7 +26,7 @@ export function resource<T, TInput>(path: string): Resource<T, TInput> {
     }
 }
 
-export type AiStatus = { enabled: boolean; model: string }
+type AiStatus = { enabled: boolean; model: string }
 
 export interface RecurringPlansApi extends Resource<RecurringPlan, RecurringPlanInput> {
     /** Creates plan items for every active routine from today through today + days. Returns what was created. */
@@ -44,7 +44,7 @@ export interface CalendarApi {
     link(): Promise<{ url: string }>
 }
 
-export interface AiApi {
+interface AiApi {
     status(): Promise<AiStatus>
     suggest(context: string, ask?: string): Promise<ChangeSet>
 }

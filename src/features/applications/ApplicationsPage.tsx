@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useApplications, useCreateApplication, useUpdateApplication, useDeleteApplication } from './useApplications'
+import { applications } from '../../hooks/resources'
 import Pill from '../../components/ui/Pill'
 import Modal from '../../components/ui/Modal'
 import Button from '../../components/ui/Button'
@@ -12,10 +12,10 @@ import { APPLICATION_STATUSES, label, type Application, type ApplicationInput, t
 const CLOSED: ApplicationStatus[] = ['REJECTED', 'WITHDRAWN', 'GHOSTED']
 
 export default function ApplicationsPage() {
-    const { data, isPending, isError, error } = useApplications()
-    const createMut = useCreateApplication()
-    const updateMut = useUpdateApplication()
-    const deleteMut = useDeleteApplication()
+    const { data, isPending, isError, error } = applications.useList()
+    const createMut = applications.useCreate()
+    const updateMut = applications.useUpdate()
+    const deleteMut = applications.useRemove()
 
     const [deleting, setDeleting] = useState<Application | null>(null)
     const [adding, setAdding] = useState(false)

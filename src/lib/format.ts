@@ -20,12 +20,6 @@ export function formatDateTime(iso: string | null | undefined): string {
     return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-/** Short weekday + day, e.g. "Mon 8" */
-export function formatDayShort(iso: string): string {
-    const d = parseLocal(iso)
-    return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
-}
-
 export function formatMinutes(total: number): string {
     if (total < 60) return `${total} min`
     const h = Math.floor(total / 60)
