@@ -33,6 +33,11 @@ function Toggle({ label, checked, onChange, hint }: { label: string; checked: bo
 
 type Review = { source: string; changeSet: ChangeSet; proposalId?: number } | null
 
+/** "mcp:Claude Desktop" reads as "Claude Desktop via MCP"; anything else is shown as-is. */
+function friendlySource(source: string): string {
+    return source.startsWith('mcp:') ? `${source.slice(4) || 'an agent'} via MCP` : source
+}
+
 /**
  * The point of the whole app: turn the structured data into context an AI can use without you
  * re-explaining anything, then bring its suggestions back in as reviewable changes. Proposals
@@ -125,7 +130,7 @@ export default function PromptPage() {
 
     function reviewProposal(p: Proposal) {
         try {
-            setReview({ source: p.source, changeSet: normalizeChangeSet({ summary: p.summary, changes: p.changes }), proposalId: p.id })
+            setReview({ source: friendlySource(p.source), changeSet: normalizeChangeSet({ summary: p.summary, changes: p.changes }), proposalId: p.id })
         } catch (err) {
             setRevertError(err instanceof Error ? err.message : 'Could not read that proposal.')
         }
@@ -195,7 +200,7 @@ export default function PromptPage() {
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
                                         <Pill value="PROPOSAL" tone="blue" />
-                                        <span className="text-xs text-gray-500">{p.source} · {formatDateTime(p.createdAt)} · {p.changes.length} change{p.changes.length === 1 ? '' : 's'}</span>
+                                        <span className="text-xs text-gray-500">{friendlySource(p.source)} · {formatDateTime(p.createdAt)} · {p.changes.length} change{p.changes.length === 1 ? '' : 's'}</span>
                                     </div>
                                     <p className="mt-1 truncate text-gray-800" title={p.summary}>{p.summary || 'No summary'}</p>
                                 </div>

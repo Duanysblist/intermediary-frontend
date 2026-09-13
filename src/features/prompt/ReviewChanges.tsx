@@ -150,7 +150,7 @@ function ChangeRow({ change, current, checked, outcome, disabled, onToggle }: {
                 <input type="checkbox" className="mt-1 h-4 w-4 rounded border-gray-300" checked={checked && !missing} disabled={disabled || missing} onChange={(e) => onToggle(e.target.checked)} />
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <Pill value={change.op === 'create' ? 'CREATE' : 'UPDATE'} tone={change.op === 'create' ? 'green' : 'blue'} />
+                        <Pill value={change.op === 'create' ? 'NEW_ITEM' : 'CHANGE'} tone={change.op === 'create' ? 'green' : 'blue'} />
                         <span className="font-medium text-gray-900">
                             {change.op === 'create' ? change.fields.title : current ? current.title : `Plan item #${change.id}`}
                         </span>

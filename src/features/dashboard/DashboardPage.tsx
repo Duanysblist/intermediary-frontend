@@ -84,7 +84,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <Stat label="Open intentions" value={open.length} sub={`${dueThisWeek.length} due this week`} to="/plan" />
                 <Stat label="Overdue" value={overdue.length} tone={overdue.length ? 'red' : undefined} sub={overdue.length ? 'past target date, still open' : 'nothing slipping'} to="/plan?view=week" />
-                <Stat label="Done this week" value={doneThisWeek.length} tone={doneThisWeek.length ? 'green' : undefined} sub="from the audit log" to="/plan" />
+                <Stat label="Done this week" value={doneThisWeek.length} tone={doneThisWeek.length ? 'green' : undefined} sub="marked done this week" to="/plan" />
                 <Stat label="Applications" value={activeApps.length} sub={`${interviewing.length} interviewing or offer`} to="/applications" />
                 <Stat label="Study this week" value={formatMinutes(studyMinutes)} sub={`${studyWeek.length} session${studyWeek.length === 1 ? '' : 's'} · ${plannedStudy} planned`} to="/sessions" tone="blue" />
                 <Stat label="Fitness this week" value={formatMinutes(fitnessMinutes)} sub={`${fitnessWeek.length} workout${fitnessWeek.length === 1 ? '' : 's'} · ${plannedExercise} planned`} to="/sessions?kind=fitness" tone="blue" />

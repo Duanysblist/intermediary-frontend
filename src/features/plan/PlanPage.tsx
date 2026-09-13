@@ -7,7 +7,8 @@ import {
 } from '@dnd-kit/core'
 import { calendarApi } from '../../api/resources'
 import { planItems } from '../../hooks/resources'
-import { useMovePlanItem, useReferenceLabel } from './usePlanBoard'
+import { useMovePlanItem } from './usePlanBoard'
+import { useReferenceOptions } from './references'
 import PlanBoard from './PlanBoard'
 import PlanWeek from './PlanWeek'
 import PlanItemForm from './PlanItemForm'
@@ -47,7 +48,7 @@ export default function PlanPage() {
     const updateMut = planItems.useUpdate()
     const deleteMut = planItems.useRemove()
     const moveMut = useMovePlanItem()
-    const refLabel = useReferenceLabel()
+    const { labelFor } = useReferenceOptions()
     const calendarLink = useMutation({ mutationFn: calendarApi.link })
 
     const [sheet, setSheet] = useState<Sheet>({ kind: 'none' })
@@ -105,7 +106,7 @@ export default function PlanPage() {
 
     const items = data
     const openCount = items.filter((i) => i.status === 'PLANNED' || i.status === 'IN_PROGRESS').length
-    const referenceLabel = (it: PlanItem) => refLabel(it.referenceEntityType, it.referenceEntityId)
+    const referenceLabel = (it: PlanItem) => labelFor(it.referenceEntityType, it.referenceEntityId)
     const current = sheet.kind === 'detail' || sheet.kind === 'edit' || sheet.kind === 'log'
         ? items.find((i) => i.id === sheet.item.id) ?? sheet.item
         : null

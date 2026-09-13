@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { recurringPlansApi } from '../../api/resources'
-import { applications, certifications, documents, planItems } from '../../hooks/resources'
+import { planItems } from '../../hooks/resources'
+import { useReferenceOptions } from './references'
 import Field, { inputClass } from '../../components/ui/Field'
 import Button from '../../components/ui/Button'
 import Pill from '../../components/ui/Pill'
@@ -34,9 +35,7 @@ function toForm(p?: RecurringPlan): RecurringPlanInput {
 export default function RecurringPlansModal({ onClose }: { onClose: () => void }) {
     const qc = useQueryClient()
     const plans = useQuery({ queryKey: KEY, queryFn: recurringPlansApi.list })
-    const certs = certifications.useList()
-    const apps = applications.useList()
-    const docs = documents.useList()
+    const { optionsFor } = useReferenceOptions()
     const [editing, setEditing] = useState<RecurringPlan | 'new' | null>(null)
     const [form, setForm] = useState<RecurringPlanInput>(toForm())
     const [generated, setGenerated] = useState<number | null>(null)
@@ -69,11 +68,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
     }
 
     const refType = form.referenceEntityType
-    const refOptions: { id: number; text: string }[] | null =
-        refType === 'CERTIFICATION' ? (certs.data ?? []).map((c) => ({ id: c.id, text: c.name }))
-        : refType === 'APPLICATION' ? (apps.data ?? []).map((a) => ({ id: a.id, text: `${a.company} · ${a.role}` }))
-        : refType === 'DOCUMENT' ? (docs.data ?? []).map((d) => ({ id: d.id, text: d.title }))
-        : null
+    const refOptions = refType ? optionsFor(refType) : []
 
     return (
         <div>
@@ -118,9 +113,9 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                                 {REFERENCE_TYPES.map((t) => <option key={t} value={t}>{label(t)}</option>)}
                             </select>
                         </Field>
-                        {refType && refOptions && (
-                            <Field label={`Which ${label(refType).toLowerCase()}?`}>
-                                <select className={inputClass} value={form.referenceEntityId ?? ''} onChange={(e) => update('referenceEntityId', e.target.value === '' ? null : Number(e.target.value))}>
+                        {refType && (
+                            <Field label={`Which ${label(refType).toLowerCase()}?`} hint={refOptions.length === 0 ? 'Nothing to choose from yet.' : undefined}>
+                                <select className={inputClass} value={form.referenceEntityId ?? ''} disabled={refOptions.length === 0} onChange={(e) => update('referenceEntityId', e.target.value === '' ? null : Number(e.target.value))}>
                                     <option value="">— Choose —</option>
                                     {refOptions.map((o) => <option key={o.id} value={o.id}>{o.text}</option>)}
                                 </select>

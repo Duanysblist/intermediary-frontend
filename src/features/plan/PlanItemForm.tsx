@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import Field, { inputClass } from '../../components/ui/Field'
 import Button from '../../components/ui/Button'
 import { ApiError } from '../../api/client'
-import { applications, certifications, documents } from '../../hooks/resources'
+import { useReferenceOptions } from './references'
 import {
     PLAN_INTENTS, PLAN_STATUSES, REFERENCE_TYPES, label,
     type PlanIntent, type PlanItem, type PlanItemInput, type PlanItemStatus, type ReferenceEntityType,
@@ -30,12 +30,19 @@ function toFormState(p?: PlanItem, defaults?: Partial<PlanItemInput>): PlanItemI
     }
 }
 
+const REFERENCE_HINT: Record<ReferenceEntityType, string> = {
+    CERTIFICATION: 'certification',
+    APPLICATION: 'application',
+    DOCUMENT: 'document',
+    STUDY_SESSION: 'study session',
+    FITNESS_SESSION: 'workout',
+    PLAN_ITEM: 'plan item',
+}
+
 export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, isSaving, error }: Props) {
     const [form, setForm] = useState<PlanItemInput>(toFormState(initial, defaults))
     const fieldErrors = error instanceof ApiError ? error.fieldErrors ?? {} : {}
-    const certs = certifications.useList()
-    const apps = applications.useList()
-    const docs = documents.useList()
+    const { optionsFor } = useReferenceOptions()
 
     function update<K extends keyof PlanItemInput>(key: K, value: PlanItemInput[K]) {
         setForm((f) => ({ ...f, [key]: value }))
@@ -43,22 +50,19 @@ export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, is
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault()
+        const hasReference = form.referenceEntityType != null && form.referenceEntityId != null
         onSubmit({
             ...form,
             title: form.title.trim(),
             targetDate: form.targetDate || null,
-            referenceEntityId: form.referenceEntityType ? form.referenceEntityId : null,
+            referenceEntityType: hasReference ? form.referenceEntityType : null,
+            referenceEntityId: hasReference ? form.referenceEntityId : null,
             notes: form.notes?.trim() || null,
         })
     }
 
-    // Reference picker: a dropdown of real records for the types we have lists for, an id box otherwise.
     const refType = form.referenceEntityType
-    const refOptions: { id: number; text: string }[] | null =
-        refType === 'CERTIFICATION' ? (certs.data ?? []).map((c) => ({ id: c.id, text: c.name }))
-        : refType === 'APPLICATION' ? (apps.data ?? []).map((a) => ({ id: a.id, text: `${a.company} · ${a.role}` }))
-        : refType === 'DOCUMENT' ? (docs.data ?? []).map((d) => ({ id: d.id, text: d.title }))
-        : null
+    const refOptions = refType ? optionsFor(refType, initial?.id) : []
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,7 +85,7 @@ export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, is
                 <Field label="Target date" error={fieldErrors.targetDate}>
                     <input type="date" className={inputClass} value={form.targetDate ?? ''} onChange={(e) => update('targetDate', e.target.value)} />
                 </Field>
-                <Field label="Relates to">
+                <Field label="Relates to" hint="Optional. Ties this intention to something you're tracking.">
                     <select className={inputClass} value={refType ?? ''}
                             onChange={(e) => { update('referenceEntityType', (e.target.value || null) as ReferenceEntityType | null); update('referenceEntityId', null) }}>
                         <option value="">— Nothing —</option>
@@ -89,17 +93,13 @@ export default function PlanItemForm({ initial, defaults, onSubmit, onCancel, is
                     </select>
                 </Field>
                 {refType && (
-                    <Field label={refOptions ? `Which ${label(refType).toLowerCase()}?` : 'Record id'} className="sm:col-span-2">
-                        {refOptions ? (
-                            <select className={inputClass} value={form.referenceEntityId ?? ''}
-                                    onChange={(e) => update('referenceEntityId', e.target.value === '' ? null : Number(e.target.value))}>
-                                <option value="">— Choose —</option>
-                                {refOptions.map((o) => <option key={o.id} value={o.id}>{o.text}</option>)}
-                            </select>
-                        ) : (
-                            <input type="number" min={1} className={inputClass} value={form.referenceEntityId ?? ''}
-                                   onChange={(e) => update('referenceEntityId', e.target.value === '' ? null : Number(e.target.value))} />
-                        )}
+                    <Field label={`Which ${REFERENCE_HINT[refType]}?`} className="sm:col-span-2"
+                           hint={refOptions.length === 0 ? `You haven't added any ${REFERENCE_HINT[refType]}s yet.` : undefined}>
+                        <select className={inputClass} value={form.referenceEntityId ?? ''} disabled={refOptions.length === 0}
+                                onChange={(e) => update('referenceEntityId', e.target.value === '' ? null : Number(e.target.value))}>
+                            <option value="">— Choose —</option>
+                            {refOptions.map((o) => <option key={o.id} value={o.id}>{o.text}</option>)}
+                        </select>
                     </Field>
                 )}
                 <Field label="Notes" className="sm:col-span-2" error={fieldErrors.notes}>

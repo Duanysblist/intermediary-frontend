@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { planItemsApi } from '../../api/resources'
-import { PLAN_EVENTS_KEY, applications, certifications, documents, planItems } from '../../hooks/resources'
-import type { PlanItem, PlanItemInput, ReferenceEntityType } from '../../types'
+import { PLAN_EVENTS_KEY, planItems } from '../../hooks/resources'
+import type { PlanItem, PlanItemInput } from '../../types'
 
 export function toInput(item: PlanItem): PlanItemInput {
     return {
@@ -46,23 +46,3 @@ export function useMovePlanItem() {
     })
 }
 
-/** Resolves a polymorphic reference (type + id) to something readable, e.g. "Certification · AWS SAA". */
-export function useReferenceLabel() {
-    const certs = certifications.useList()
-    const apps = applications.useList()
-    const docs = documents.useList()
-    return (type: ReferenceEntityType | null, id: number | null): string | null => {
-        if (!type || id == null) return null
-        switch (type) {
-            case 'CERTIFICATION': return certs.data?.find((c) => c.id === id)?.name ?? `Certification #${id}`
-            case 'APPLICATION': {
-                const a = apps.data?.find((x) => x.id === id)
-                return a ? `${a.company} · ${a.role}` : `Application #${id}`
-            }
-            case 'DOCUMENT': return docs.data?.find((d) => d.id === id)?.title ?? `Document #${id}`
-            case 'STUDY_SESSION': return `Study session #${id}`
-            case 'FITNESS_SESSION': return `Workout #${id}`
-            case 'PLAN_ITEM': return `Plan item #${id}`
-        }
-    }
-}
