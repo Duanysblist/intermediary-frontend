@@ -1,4 +1,5 @@
 import { addDays, todayISO } from '../../lib/format'
+import { CHANGE_SET_FORMAT } from './changeSet'
 import type { Application, Certification, Document, FitnessSession, PlanEvent, PlanItem, StudySession } from '../../types'
 
 export type ContextOptions = {
@@ -12,6 +13,7 @@ export type ContextOptions = {
     events: boolean
     documents: boolean
     endpoints: boolean
+    responseFormat: boolean
     compact: boolean
     instructions: string
 }
@@ -27,6 +29,7 @@ export const DEFAULT_OPTIONS: ContextOptions = {
     events: true,
     documents: false,
     endpoints: true,
+    responseFormat: true,
     compact: true,
     instructions:
         'You are helping me plan and prioritise. The JSON below is the current state of my planning system and is the source of truth. ' +
@@ -97,10 +100,20 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
     if (opts.documents) {
         parts.push(`## Documents — ${data.documents.length}\n${fence(strip(data.documents, opts.compact))}`)
     }
+    if (opts.responseFormat) {
+        parts.push(
+            '## How to answer\n' +
+            'Explain your reasoning briefly, then give the concrete changes as a single ```json code block in exactly this shape so I can import it:\n' +
+            '```json\n' + CHANGE_SET_FORMAT + '\n```\n' +
+            'Rules: only plan items; "update" needs an existing id from the data, "create" has id null and needs title + intent; ' +
+            'intent is one of STUDY, EXERCISE, APPLY, READ, WRITE, OTHER; status is one of PLANNED, IN_PROGRESS, DONE, DEFERRED, CANCELED; ' +
+            'targetDate is YYYY-MM-DD and never in the past; dates can be moved but not cleared.',
+        )
+    }
     if (opts.endpoints) {
         parts.push(
             '## How to change things\n' +
-            `The same data is available over REST at \`${apiBaseUrl}\` (JSON, no auth in this environment). ` +
+            `The same data is available over REST at \`${apiBaseUrl}\` (JSON). Sign in with \`POST /auth/login\` {username, password} and send the returned token as \`Authorization: Bearer …\`. ` +
             'Collections: `/plan-items`, `/study-sessions`, `/fitness-sessions`, `/certifications`, `/applications`, `/documents`, `/plan-events` (read-only, `?planItemId=`). ' +
             'Each supports `GET`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`. `PUT` needs the full record; changing a plan item\'s status appends a plan event automatically. ' +
             'Interactive docs: `/swagger-ui.html`.',
