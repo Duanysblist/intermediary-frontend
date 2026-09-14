@@ -17,7 +17,8 @@ import type {
 const data = buildDemoData()
 const nextId: Record<string, number> = {}
 
-const now = () => new Date().toISOString().slice(0, 19)
+// Server timestamps are UTC instants with a trailing Z; the demo store mimics that.
+const now = () => new Date().toISOString()
 const delay = <T,>(value: T, ms = 120): Promise<T> => new Promise((resolve) => setTimeout(() => resolve(value), ms))
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v))
 

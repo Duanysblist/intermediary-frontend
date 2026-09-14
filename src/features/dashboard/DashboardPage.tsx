@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 import { applications, certifications, fitnessSessions, planItems, studySessions, usePlanEvents } from '../../hooks/resources'
 import Pill from '../../components/ui/Pill'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
-import { addDays, formatDate, formatDateTime, formatMinutes, isBefore, relativeDay, startOfWeek, todayISO } from '../../lib/format'
+import { addDays, formatDate, formatDateTime, formatMinutes, isBefore, relativeDay, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
 import { label, type PlanItem } from '../../types'
 
 function Stat({ label: text, value, sub, to, tone }: { label: string; value: string | number; sub?: string; to: string; tone?: 'red' | 'blue' | 'green' }) {
@@ -40,7 +40,7 @@ export default function DashboardPage() {
     const open = plan.data.filter(isOpen)
     const overdue = open.filter((p) => p.targetDate != null && isBefore(p.targetDate, today))
     const dueThisWeek = open.filter((p) => inThisWeek(p.targetDate))
-    const doneThisWeek = events.data.filter((e) => e.toStatus === 'DONE' && inThisWeek(e.eventTime))
+    const doneThisWeek = events.data.filter((e) => e.toStatus === 'DONE' && inThisWeek(toLocalISO(e.eventTime)))
     const upcoming = [...open]
         .filter((p) => p.targetDate != null && !isBefore(p.targetDate, today))
         .sort((a, b) => a.targetDate!.localeCompare(b.targetDate!))

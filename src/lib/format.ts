@@ -37,11 +37,15 @@ export function relativeDay(iso: string | null | undefined): string {
     return diff > 0 ? `in ${diff} days` : `${-diff} days ago`
 }
 
+const HAS_ZONE = /(Z|[+-]\d{2}:?\d{2})$/
+
 /**
- * Parse an ISO local date or datetime string as local time. `new Date("2026-06-04")` would be UTC
- * midnight, which shifts the day in western time zones; this avoids that.
+ * Parse an ISO string into a Date. Zoned strings (server timestamps end in "Z") convert to the
+ * browser's zone; zone-less strings (dates, session times entered by the user) are taken as local
+ * time, because `new Date("2026-06-04")` would be UTC midnight and shift the day in western zones.
  */
 export function parseLocal(iso: string): Date {
+    if (HAS_ZONE.test(iso)) return new Date(iso)
     const [datePart, timePart] = iso.split('T')
     const [y, m, d] = datePart.split('-').map(Number)
     if (!timePart) return new Date(y, m - 1, d)
@@ -62,6 +66,17 @@ export function toDateTimeLocal(d: Date): string {
 
 export function todayISO(): string {
     return toISODate(new Date())
+}
+
+/**
+ * The local wall-clock form ("YYYY-MM-DDTHH:mm:ss") of any ISO string, so server instants can be
+ * compared with local dates and week boundaries. Zone-less input is returned unchanged.
+ */
+export function toLocalISO(iso: string): string {
+    if (!HAS_ZONE.test(iso)) return iso
+    const d = new Date(iso)
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${toISODate(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
 export function addDays(iso: string, days: number): string {

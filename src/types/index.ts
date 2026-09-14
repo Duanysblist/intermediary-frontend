@@ -1,5 +1,7 @@
 // Mirrors the backend DTO contract (see intermediary/src/main/java/.../dto).
-// Dates are ISO strings: LocalDate -> "2026-06-04", LocalDateTime -> "2026-06-04T09:30:00".
+// Dates are ISO strings: LocalDate -> "2026-06-04"; user-entered times (sessionDate) are zone-less local
+// wall-clock values "2026-06-04T09:30:00"; server-set timestamps (createdAt, updatedAt, eventTime) are
+// UTC instants "2026-06-04T13:30:00Z" that the UI converts to the browser zone.
 
 // ---------- Applications ----------
 export type ApplicationStatus =

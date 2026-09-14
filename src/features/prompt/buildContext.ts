@@ -1,4 +1,4 @@
-import { addDays, daysBetween, startOfWeek, todayISO } from '../../lib/format'
+import { addDays, daysBetween, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
 import { CHANGE_SET_FORMAT } from './changeSet'
 import type { Application, Certification, Document, FitnessSession, PlanEvent, PlanItem, StudySession } from '../../types'
 
@@ -88,7 +88,7 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
         parts.push(`## Fitness sessions, last ${opts.sessionDays} days — ${ft.length}\n${fence(strip(ft, opts.compact))}`)
     }
     if (opts.events) {
-        const ev = [...data.planEvents].filter((e) => e.eventTime >= since).sort((a, b) => b.eventTime.localeCompare(a.eventTime))
+        const ev = [...data.planEvents].filter((e) => toLocalISO(e.eventTime) >= since).sort((a, b) => b.eventTime.localeCompare(a.eventTime))
         parts.push(`## Plan events, last ${opts.sessionDays} days — ${ev.length}\n${fence(strip(ev, opts.compact))}`)
     }
     if (opts.certifications) {
@@ -138,7 +138,7 @@ export function weekSummary(data: ContextData, today: string): string {
     const overdue = open.filter((p) => p.targetDate != null && p.targetDate < today)
     const dueThisWeek = open.filter((p) => inWeek(p.targetDate))
     const unscheduled = open.filter((p) => p.targetDate == null)
-    const doneThisWeek = data.planEvents.filter((e) => e.toStatus === 'DONE' && inWeek(e.eventTime)).length
+    const doneThisWeek = data.planEvents.filter((e) => e.toStatus === 'DONE' && inWeek(toLocalISO(e.eventTime))).length
     const studyMin = data.studySessions.filter((s) => inWeek(s.sessionDate)).reduce((n, s) => n + s.durationMinutes, 0)
     const fitnessMin = data.fitnessSessions.filter((s) => inWeek(s.sessionDate)).reduce((n, s) => n + s.durationMinutes, 0)
     const plannedStudy = data.planItems.filter((p) => p.intent === 'STUDY' && inWeek(p.targetDate)).length

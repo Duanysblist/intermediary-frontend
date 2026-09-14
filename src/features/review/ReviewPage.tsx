@@ -4,7 +4,7 @@ import { certifications, fitnessSessions, planItems, studySessions, usePlanEvent
 import Pill from '../../components/ui/Pill'
 import Button from '../../components/ui/Button'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
-import { addDays, formatDate, formatMinutes, startOfWeek, todayISO } from '../../lib/format'
+import { addDays, formatDate, formatMinutes, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
 import { PLAN_INTENTS, type PlanIntent, type PlanItem } from '../../types'
 
 /**
@@ -27,7 +27,7 @@ export default function ReviewPage() {
     const stats = useMemo(() => {
         if (!plan.data || !study.data || !fitness.data || !certs.data || !events.data) return null
         const inWeek = (iso: string | null | undefined) => iso != null && iso >= monday && iso < nextMonday
-        const weekEvents = events.data.filter((e) => inWeek(e.eventTime))
+        const weekEvents = events.data.filter((e) => inWeek(toLocalISO(e.eventTime)))
         const titleOf = new Map(plan.data.map((p) => [p.id, p]))
 
         // Intended for this week: dated in the week, or completed in the week regardless of date.
