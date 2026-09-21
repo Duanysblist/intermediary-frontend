@@ -62,6 +62,41 @@ const strip = <T extends object>(rows: T[], compact: boolean): object[] =>
 
 const fence = (rows: unknown[]) => '```json\n' + JSON.stringify(rows, null, 1).replaceAll('\n ', '\n') + '\n```'
 
+const isOpen = (p: PlanItem) => p.status === 'PLANNED' || p.status === 'IN_PROGRESS'
+
+/**
+ * When each plan item last changed status, from the event log. Items have no closedAt column, so
+ * this is how "done on the 14th" is known; falls back to updatedAt for items with no events yet.
+ */
+function lastStatusChange(items: PlanItem[], events: PlanEvent[]): Map<number, string> {
+    const last = new Map<number, string>()
+    for (const e of events) {
+        const prev = last.get(e.planItemId)
+        if (prev == null || e.eventTime > prev) last.set(e.planItemId, e.eventTime)
+    }
+    for (const p of items) if (!last.has(p.id)) last.set(p.id, p.updatedAt)
+    return last
+}
+
+/** Closed items gain a closedAt so the assistant can tell what happened when, not just that it happened. */
+const withClosedAt = (rows: PlanItem[], closedAt: Map<number, string>) =>
+    rows.map((p) => (isOpen(p) ? p : { ...p, closedAt: closedAt.get(p.id) ?? p.updatedAt }))
+
+/**
+ * Rows that point at a plan item by id alone read as "item 42 became DONE" — meaningless to an
+ * assistant that only sees open items. Attach the title (and, for study, the certification name).
+ */
+function withNames<T extends { planItemId: number | null; certificationId?: number | null }>(rows: T[], items: PlanItem[], certs: Certification[]): object[] {
+    const titles = new Map(items.map((p) => [p.id, p.title]))
+    const certNames = new Map(certs.map((c) => [c.id, c.name]))
+    return rows.map((r) => {
+        const copy: Record<string, unknown> = { ...r }
+        if (r.planItemId != null) copy.planItemTitle = titles.get(r.planItemId) ?? '(deleted item)'
+        if (r.certificationId != null) copy.certificationName = certNames.get(r.certificationId) ?? '(deleted certification)'
+        return copy
+    })
+}
+
 /** Renders the selected slices of data as a Markdown document an AI assistant can consume directly. */
 export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl: string): string {
     const today = todayISO()
@@ -74,22 +109,38 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
     parts.push(
         'Model: **plan items** are intentions (status PLANNED / IN_PROGRESS / DONE / DEFERRED / CANCELED, optional targetDate). ' +
         '**Study and fitness sessions** are reality: what actually happened. **Plan events** are the append-only history of status changes. ' +
-        'A plan item may reference another record via referenceEntityType + referenceEntityId.',
+        'A plan item may reference another record via referenceEntityType + referenceEntityId. ' +
+        'Fields named closedAt, planItemTitle and certificationName are derived here for readability; they are not part of the records and must not be sent back.',
     )
 
+    const closedAt = lastStatusChange(data.planItems, data.planEvents)
     if (opts.plan) {
-        const rows = opts.includeClosedPlan ? data.planItems : data.planItems.filter((p) => p.status === 'PLANNED' || p.status === 'IN_PROGRESS')
-        parts.push(`## Plan items${opts.includeClosedPlan ? '' : ' (open only)'} — ${rows.length}\n${fence(strip(rows, opts.compact))}`)
+        if (opts.includeClosedPlan) {
+            parts.push(`## Plan items — ${data.planItems.length}\n${fence(strip(withClosedAt(data.planItems, closedAt), opts.compact))}`)
+        } else {
+            const open = data.planItems.filter(isOpen)
+            parts.push(`## Plan items (open only) — ${open.length}\n${fence(strip(open, opts.compact))}`)
+            // What got finished (or dropped) recently is half of "intended vs. happened"; without the
+            // rows themselves the assistant would only see anonymous ids in the event log.
+            const closed = data.planItems
+                .filter((p) => !isOpen(p) && toLocalISO(closedAt.get(p.id) ?? p.updatedAt) >= since)
+                .sort((a, b) => (closedAt.get(b.id) ?? '').localeCompare(closedAt.get(a.id) ?? ''))
+            parts.push(
+                `## Plan items closed in the last ${opts.sessionDays} days — ${closed.length}\n` +
+                'Done, deferred or canceled in the recent window, newest first. closedAt is when the status last changed.\n' +
+                fence(strip(withClosedAt(closed, closedAt), opts.compact)),
+            )
+        }
     }
     if (opts.sessions) {
         const st = data.studySessions.filter((s) => s.sessionDate >= since)
         const ft = data.fitnessSessions.filter((s) => s.sessionDate >= since)
-        parts.push(`## Study sessions, last ${opts.sessionDays} days — ${st.length}\n${fence(strip(st, opts.compact))}`)
-        parts.push(`## Fitness sessions, last ${opts.sessionDays} days — ${ft.length}\n${fence(strip(ft, opts.compact))}`)
+        parts.push(`## Study sessions, last ${opts.sessionDays} days — ${st.length}\n${fence(strip(withNames(st, data.planItems, data.certifications), opts.compact))}`)
+        parts.push(`## Fitness sessions, last ${opts.sessionDays} days — ${ft.length}\n${fence(strip(withNames(ft, data.planItems, data.certifications), opts.compact))}`)
     }
     if (opts.events) {
         const ev = [...data.planEvents].filter((e) => toLocalISO(e.eventTime) >= since).sort((a, b) => b.eventTime.localeCompare(a.eventTime))
-        parts.push(`## Plan events, last ${opts.sessionDays} days — ${ev.length}\n${fence(strip(ev, opts.compact))}`)
+        parts.push(`## Plan events, last ${opts.sessionDays} days — ${ev.length}\n${fence(strip(withNames(ev, data.planItems, data.certifications), opts.compact))}`)
     }
     if (opts.certifications) {
         parts.push(`## Certifications — ${data.certifications.length}\n${fence(strip(data.certifications, opts.compact))}`)
@@ -134,11 +185,12 @@ export function weekSummary(data: ContextData, today: string): string {
     const sunday = addDays(monday, 6)
     const nextMonday = addDays(monday, 7)
     const inWeek = (iso: string | null | undefined) => iso != null && iso >= monday && iso < nextMonday
-    const open = data.planItems.filter((p) => p.status === 'PLANNED' || p.status === 'IN_PROGRESS')
+    const open = data.planItems.filter(isOpen)
     const overdue = open.filter((p) => p.targetDate != null && p.targetDate < today)
     const dueThisWeek = open.filter((p) => inWeek(p.targetDate))
     const unscheduled = open.filter((p) => p.targetDate == null)
-    const doneThisWeek = data.planEvents.filter((e) => e.toStatus === 'DONE' && inWeek(toLocalISO(e.eventTime))).length
+    const closedAt = lastStatusChange(data.planItems, data.planEvents)
+    const doneThisWeek = data.planItems.filter((p) => p.status === 'DONE' && inWeek(toLocalISO(closedAt.get(p.id)!)))
     const studyMin = data.studySessions.filter((s) => inWeek(s.sessionDate)).reduce((n, s) => n + s.durationMinutes, 0)
     const fitnessMin = data.fitnessSessions.filter((s) => inWeek(s.sessionDate)).reduce((n, s) => n + s.durationMinutes, 0)
     const plannedStudy = data.planItems.filter((p) => p.intent === 'STUDY' && inWeek(p.targetDate)).length
@@ -149,7 +201,8 @@ export function weekSummary(data: ContextData, today: string): string {
 
     const s: string[] = []
     s.push(`Today is ${today} (week ${monday} to ${sunday}).`)
-    s.push(`${open.length} open plan item${open.length === 1 ? '' : 's'}: ${dueThisWeek.length} due this week, ${overdue.length} overdue, ${unscheduled.length} without a date; ${doneThisWeek} completed so far this week.`)
+    s.push(`${open.length} open plan item${open.length === 1 ? '' : 's'}: ${dueThisWeek.length} due this week, ${overdue.length} overdue, ${unscheduled.length} without a date; ${doneThisWeek.length} completed so far this week.`)
+    if (doneThisWeek.length) s.push(`Completed this week: ${doneThisWeek.slice(0, 5).map((p) => `"${p.title}"`).join(', ')}${doneThisWeek.length > 5 ? ', …' : ''}.`)
     if (overdue.length) s.push(`Overdue: ${overdue.slice(0, 5).map((p) => `"${p.title}" (${p.targetDate})`).join(', ')}${overdue.length > 5 ? ', …' : ''}.`)
     s.push(`Logged this week: ${studyMin} min of study across ${data.studySessions.filter((x) => inWeek(x.sessionDate)).length} session(s) against ${plannedStudy} planned study item(s); ${fitnessMin} min of exercise against ${plannedExercise} planned workout(s).`)
     if (exams.length) s.push(`Next exam: ${exams[0].name} on ${exams[0].examDate} (${daysBetween(today, exams[0].examDate!)} days away).`)

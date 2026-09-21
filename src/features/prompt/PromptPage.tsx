@@ -236,7 +236,7 @@ export default function PromptPage() {
                         <div className="space-y-3">
                             <Toggle label="Week summary" hint="A computed paragraph: counts, overdue, exams" checked={opts.summary} onChange={(v) => set('summary', v)} />
                             <Toggle label="Plan items" checked={opts.plan} onChange={(v) => set('plan', v)} />
-                            {opts.plan && <div className="pl-6"><Toggle label="Also closed items" checked={opts.includeClosedPlan} onChange={(v) => set('includeClosedPlan', v)} /></div>}
+                            {opts.plan && <div className="pl-6"><Toggle label="All closed items" hint="Items closed in the recent window are always included" checked={opts.includeClosedPlan} onChange={(v) => set('includeClosedPlan', v)} /></div>}
                             <Toggle label="Sessions" hint="Study and fitness, recent window" checked={opts.sessions} onChange={(v) => set('sessions', v)} />
                             <Toggle label="Plan events" hint="Status history, same window" checked={opts.events} onChange={(v) => set('events', v)} />
                             <Toggle label="Certifications" checked={opts.certifications} onChange={(v) => set('certifications', v)} />
