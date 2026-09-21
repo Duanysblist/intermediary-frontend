@@ -335,7 +335,9 @@ export default function PromptPage() {
                         value={text}
                         aria-label="Generated context"
                         className="h-[70vh] w-full resize-y rounded-xl border border-gray-200 bg-white p-4 font-mono text-xs leading-relaxed text-gray-800 shadow-xs focus:outline-none"
-                        onFocus={(e) => e.currentTarget.select()}
+                        // Select-all is a copy convenience for mouse users. On touch devices it would grab the whole
+                        // text on a stray tap, and WebKit zooms into a focused field with text this small.
+                        onFocus={(e) => { if (matchMedia('(hover: hover)').matches) e.currentTarget.select() }}
                     />
                 </section>
             </div>
