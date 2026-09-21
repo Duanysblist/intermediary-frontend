@@ -44,9 +44,12 @@ export interface CalendarApi {
     link(): Promise<{ url: string }>
 }
 
+/** The change set plus, when the server saved it to the inbox, the proposal's id. */
+export type Suggestion = ChangeSet & { proposalId?: number }
+
 interface AiApi {
     status(): Promise<AiStatus>
-    suggest(context: string, ask?: string): Promise<ChangeSet>
+    suggest(context: string, ask?: string): Promise<Suggestion>
 }
 
 // Demo mode swaps every API for the in-browser store; the rest of the app never knows.
@@ -86,5 +89,5 @@ export const calendarApi: CalendarApi = isDemo ? demo.demoCalendar : {
 export const aiApi: AiApi = isDemo ? demo.demoAi : {
     status: () => request<AiStatus>('/ai/status'),
     suggest: (context, ask) =>
-        request<ChangeSet>('/ai/suggest', { method: 'POST', body: JSON.stringify({ context, request: ask || null }) }),
+        request<Suggestion>('/ai/suggest', { method: 'POST', body: JSON.stringify({ context, request: ask || null }) }),
 }

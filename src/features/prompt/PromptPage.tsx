@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { API_BASE_URL } from '../../api/client'
+import { API_BASE_URL, ApiError } from '../../api/client'
 import { aiApi, planItemsApi, proposalsApi } from '../../api/resources'
 import { PLAN_EVENTS_KEY, applications, certifications, documents, fitnessSessions, planItems, studySessions, usePlanEvents } from '../../hooks/resources'
 import Button from '../../components/ui/Button'
@@ -31,11 +31,29 @@ function Toggle({ label, checked, onChange, hint }: { label: string; checked: bo
     )
 }
 
-type Review = { source: string; changeSet: ChangeSet; proposalId?: number } | null
+type Review = {
+    source: string
+    changeSet: ChangeSet
+    proposalId?: number
+    /** Set for answers to Ask Claude: closing without applying dismisses the proposal the server saved. */
+    dismissOnClose?: boolean
+    applied?: boolean
+} | null
 
-/** "mcp:Claude Desktop" reads as "Claude Desktop via MCP"; anything else is shown as-is. */
+/** "mcp:Claude Desktop" reads as "Claude Desktop via MCP", "ai:model" as "Claude (model)"; anything else is shown as-is. */
 function friendlySource(source: string): string {
-    return source.startsWith('mcp:') ? `${source.slice(4) || 'an agent'} via MCP` : source
+    if (source.startsWith('mcp:')) return `${source.slice(4) || 'an agent'} via MCP`
+    if (source.startsWith('ai:')) return `Claude (${source.slice(3) || 'server'})`
+    return source
+}
+
+/** Why an Ask Claude call failed, in the user's terms. A dropped connection is the common one on phones. */
+function suggestErrorMessage(err: Error): string {
+    if (err instanceof ApiError && err.status === 0) {
+        return 'The connection dropped while Claude was working (this happens when a phone switches apps). ' +
+            'If Claude finished, its answer will show up in the inbox above within a minute; otherwise ask again.'
+    }
+    return err.message
 }
 
 /**
@@ -53,7 +71,8 @@ export default function PromptPage() {
     const events = usePlanEvents()
     const docs = documents.useList()
     const aiStatus = useQuery({ queryKey: ['ai-status'], queryFn: aiApi.status, staleTime: Infinity, retry: false })
-    const inbox = useQuery({ queryKey: PROPOSALS_KEY, queryFn: () => proposalsApi.list('PENDING'), refetchInterval: 60_000 })
+    // Answers to Ask Claude are saved server-side too, so refetch when the tab comes back into view.
+    const inbox = useQuery({ queryKey: PROPOSALS_KEY, queryFn: () => proposalsApi.list('PENDING'), refetchInterval: 60_000, refetchOnWindowFocus: true })
 
     const [opts, setOpts] = useState<ContextOptions>(() => {
         try {
@@ -91,7 +110,12 @@ export default function PromptPage() {
 
     const suggest = useMutation({
         mutationFn: () => aiApi.suggest(text, ask.trim() || undefined),
-        onSuccess: (cs) => setReview({ source: `Claude (${aiStatus.data?.model ?? 'server'})`, changeSet: normalizeChangeSet(cs) }),
+        onSuccess: (cs) => {
+            setReview({ source: `Claude (${aiStatus.data?.model ?? 'server'})`, changeSet: normalizeChangeSet(cs), proposalId: cs.proposalId, dismissOnClose: cs.proposalId != null })
+            // The server saved the answer as a proposal; keep the inbox list in step so it does not double up once this review closes.
+            qc.invalidateQueries({ queryKey: PROPOSALS_KEY })
+        },
+        onError: () => qc.invalidateQueries({ queryKey: PROPOSALS_KEY }),
     })
     const resolveProposal = useMutation({
         mutationFn: (v: { id: number; status: 'APPLIED' | 'DISMISSED' }) => proposalsApi.setStatus(v.id, v.status),
@@ -126,6 +150,14 @@ export default function PromptPage() {
         } catch (err) {
             setImportError(err instanceof Error ? err.message : 'Could not read that.')
         }
+    }
+
+    /** An Ask Claude answer the user looked at and closed without applying should not linger in the inbox. */
+    function closeReview() {
+        if (review?.dismissOnClose && review.proposalId != null && !review.applied) {
+            resolveProposal.mutate({ id: review.proposalId, status: 'DISMISSED' })
+        }
+        setReview(null)
     }
 
     function reviewProposal(p: Proposal) {
@@ -185,7 +217,7 @@ export default function PromptPage() {
             />
 
             {suggest.isError && (
-                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{suggest.error.message}</p>
+                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{suggestErrorMessage(suggest.error)}</p>
             )}
             {revertError && (
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{revertError}</p>
@@ -328,15 +360,18 @@ export default function PromptPage() {
                 </div>
             </Modal>
 
-            <Modal open={review !== null} onClose={() => setReview(null)} wide>
+            <Modal open={review !== null} onClose={closeReview} wide>
                 {review && (
                     <ReviewChanges
                         source={review.source}
                         changeSet={review.changeSet}
-                        onClose={() => setReview(null)}
+                        onClose={closeReview}
                         onApplied={(applied) => {
                             setBatches(loadBatches())
-                            if (review.proposalId != null && applied > 0) resolveProposal.mutate({ id: review.proposalId, status: 'APPLIED' })
+                            if (review.proposalId != null && applied > 0) {
+                                setReview((r) => (r ? { ...r, applied: true } : r))
+                                resolveProposal.mutate({ id: review.proposalId, status: 'APPLIED' })
+                            }
                         }}
                     />
                 )}

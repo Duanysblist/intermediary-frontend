@@ -32,7 +32,7 @@ Both are the same build. The demo is the app mounted under `/demo` with an in-me
 | **Certifications** | Cards with exam countdown, manual hours, and minutes actually logged in sessions. |
 | **Documents** | Register resumes, plans, and guides so plan items can reference them. |
 | **Review** | Weekly review: completion rate, planned versus done by intent, study minutes per certification, what slipped, and which intentions get deferred most. |
-| **Prompt** | Builds a Markdown + JSON context block (with a computed week summary) from the slices you pick, then: **Ask Claude** (server-side call, returns structured changes), **Open in Claude** (prefills claude.ai), **Copy**, and **Import changes** (paste the JSON any assistant returns). Proposals from the MCP server appear in an inbox here. Every suggestion is shown as before → after, applied only when you accept it, and applied batches can be reverted for a week. |
+| **Prompt** | Builds a Markdown + JSON context block (with a computed week summary) from the slices you pick, then: **Ask Claude** (server-side call, returns structured changes; the answer is also saved to the inbox, so a phone that switches apps mid-request loses nothing), **Open in Claude** (prefills claude.ai), **Copy**, and **Import changes** (paste the JSON any assistant returns). Proposals from the MCP server appear in an inbox here. Every suggestion is shown as before → after, applied only when you accept it, and applied batches can be reverted for a week. |
 
 ## How to use it
 
