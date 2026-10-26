@@ -9,8 +9,6 @@ export type ApplicationStatus =
 
 export type ApplicationSource = 'COLD' | 'REFERRAL' | 'RECRUITER' | 'EVENT' | 'INTERNAL'
 
-export type ResumeVariant = 'VARIANT_A_DEFENSE' | 'VARIANT_B_COMMERCIAL' | 'VARIANT_C_CACI_SPECIFIC'
-
 export interface Application {
     id: number
     company: string
@@ -18,13 +16,20 @@ export interface Application {
     applicationDate: string
     status: ApplicationStatus
     source: ApplicationSource
-    resumeVariant: ResumeVariant
+    /** Name of the resume file that was sent, e.g. "Daniel_Duany_Resume_MASTER". */
+    resumeFile: string
     location: string | null
     requisitionId: string | null
     jobUrl: string | null
     salaryRangeMin: number | null
     salaryRangeMax: number | null
     notes: string | null
+    /** Who to follow up with. */
+    contactName: string | null
+    /** LocalDate: when the next step is due. */
+    nextActionDate: string | null
+    /** UTC instant of a booked interview. */
+    interviewAt: string | null
     createdAt: string
     updatedAt: string
 }
@@ -159,7 +164,6 @@ export interface Proposal {
 export const APPLICATION_STATUSES: ApplicationStatus[] =
     ['APPLIED', 'SCREENING', 'INTERVIEWING', 'OFFER', 'REJECTED', 'WITHDRAWN', 'GHOSTED']
 export const APPLICATION_SOURCES: ApplicationSource[] = ['COLD', 'REFERRAL', 'RECRUITER', 'EVENT', 'INTERNAL']
-export const RESUME_VARIANTS: ResumeVariant[] = ['VARIANT_A_DEFENSE', 'VARIANT_B_COMMERCIAL', 'VARIANT_C_CACI_SPECIFIC']
 export const CERTIFICATION_STATUSES: CertificationStatus[] = ['PLANNING', 'STUDYING', 'SCHEDULED', 'PASSED', 'FAILED']
 export const DOCUMENT_TYPES: DocumentType[] = ['RESUME', 'PLAN', 'GUIDE', 'SPEC', 'OTHER']
 export const WORKOUT_TYPES: WorkoutType[] = ['WORKOUT_A', 'WORKOUT_B', 'WALK', 'OTHER']
@@ -170,9 +174,6 @@ export const REFERENCE_PICKER_TYPES: ReferenceEntityType[] = ['CERTIFICATION', '
 
 /** Human label for any enum value: IN_PROGRESS -> "In progress", with a few explicit overrides. */
 const LABEL_OVERRIDES: Record<string, string> = {
-    VARIANT_A_DEFENSE: 'Variant A · Defense',
-    VARIANT_B_COMMERCIAL: 'Variant B · Commercial',
-    VARIANT_C_CACI_SPECIFIC: 'Variant C · CACI',
     WORKOUT_A: 'Workout A',
     WORKOUT_B: 'Workout B',
 }

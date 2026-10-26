@@ -3,10 +3,19 @@ import Field, { inputClass } from '../../components/ui/Field'
 import Button from '../../components/ui/Button'
 import { ApiError } from '../../api/client'
 import {
-    APPLICATION_SOURCES, APPLICATION_STATUSES, RESUME_VARIANTS, label,
-    type Application, type ApplicationInput, type ApplicationSource, type ApplicationStatus, type ResumeVariant,
+    APPLICATION_SOURCES, APPLICATION_STATUSES, label,
+    type Application, type ApplicationInput, type ApplicationSource, type ApplicationStatus,
 } from '../../types'
 import { todayISO } from '../../lib/format'
+
+// The API stores the interview as a UTC instant; <input type="datetime-local"> speaks browser-local wall-clock.
+const pad = (n: number) => String(n).padStart(2, '0')
+function toLocalInput(iso: string | null): string {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+const fromLocalInput = (value: string): string | null => (value ? new Date(value).toISOString() : null)
 
 function toFormState(a?: Application): ApplicationInput {
     return {
@@ -15,13 +24,16 @@ function toFormState(a?: Application): ApplicationInput {
         applicationDate: a?.applicationDate ?? todayISO(),
         status: a?.status ?? 'APPLIED',
         source: a?.source ?? 'COLD',
-        resumeVariant: a?.resumeVariant ?? 'VARIANT_B_COMMERCIAL',
+        resumeFile: a?.resumeFile ?? '',
         location: a?.location ?? '',
         requisitionId: a?.requisitionId ?? '',
         jobUrl: a?.jobUrl ?? '',
         salaryRangeMin: a?.salaryRangeMin ?? null,
         salaryRangeMax: a?.salaryRangeMax ?? null,
         notes: a?.notes ?? '',
+        contactName: a?.contactName ?? '',
+        nextActionDate: a?.nextActionDate ?? null,
+        interviewAt: a?.interviewAt ?? null,
     }
 }
 
@@ -47,6 +59,8 @@ export default function ApplicationForm({ initial, onSubmit, onCancel, isSaving,
             ...form,
             company: form.company.trim(),
             role: form.role.trim(),
+            resumeFile: form.resumeFile.trim(),
+            contactName: form.contactName?.trim() || null,
             location: form.location?.trim() || null,
             requisitionId: form.requisitionId?.trim() || null,
             jobUrl: form.jobUrl?.trim() || null,
@@ -78,10 +92,21 @@ export default function ApplicationForm({ initial, onSubmit, onCancel, isSaving,
                         {APPLICATION_SOURCES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                     </select>
                 </Field>
-                <Field label="Resume variant" required>
-                    <select className={inputClass} value={form.resumeVariant} onChange={(e) => update('resumeVariant', e.target.value as ResumeVariant)}>
-                        {RESUME_VARIANTS.map((s) => <option key={s} value={s}>{label(s)}</option>)}
-                    </select>
+                <Field label="Resume file" required error={fieldErrors.resumeFile}>
+                    <input className={inputClass} placeholder="Daniel_Duany_Resume_MASTER" value={form.resumeFile}
+                           onChange={(e) => update('resumeFile', e.target.value)} required />
+                </Field>
+                <Field label="Contact" error={fieldErrors.contactName}>
+                    <input className={inputClass} placeholder="Who to follow up with" value={form.contactName ?? ''}
+                           onChange={(e) => update('contactName', e.target.value)} />
+                </Field>
+                <Field label="Next action date" error={fieldErrors.nextActionDate}>
+                    <input type="date" className={inputClass} value={form.nextActionDate ?? ''}
+                           onChange={(e) => update('nextActionDate', e.target.value || null)} />
+                </Field>
+                <Field label="Interview" error={fieldErrors.interviewAt}>
+                    <input type="datetime-local" className={inputClass} value={toLocalInput(form.interviewAt)}
+                           onChange={(e) => update('interviewAt', fromLocalInput(e.target.value))} />
                 </Field>
                 <Field label="Salary min" error={fieldErrors.salaryRangeMin}>
                     <input type="number" min={0} step={1000} className={inputClass} value={form.salaryRangeMin ?? ''}

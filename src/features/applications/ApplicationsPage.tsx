@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import ApplicationForm from './ApplicationForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
-import { formatDate, formatSalary } from '../../lib/format'
+import { formatDate, formatDateTime, formatSalary, todayISO } from '../../lib/format'
 import { APPLICATION_STATUSES, label, type Application, type ApplicationInput, type ApplicationStatus } from '../../types'
 
 const CLOSED: ApplicationStatus[] = ['REJECTED', 'WITHDRAWN', 'GHOSTED']
@@ -43,6 +43,7 @@ export default function ApplicationsPage() {
     if (isError) return <ErrorState what="applications" error={error} />
 
     const activeCount = data.filter((a) => !CLOSED.includes(a.status)).length
+    const today = todayISO()
 
     return (
         <div>
@@ -80,6 +81,7 @@ export default function ApplicationsPage() {
                             <th className="px-4 py-2.5 font-medium">Company</th>
                             <th className="px-4 py-2.5 font-medium">Role</th>
                             <th className="px-4 py-2.5 font-medium">Status</th>
+                            <th className="px-4 py-2.5 font-medium">Next step</th>
                             <th className="px-4 py-2.5 font-medium">Source</th>
                             <th className="px-4 py-2.5 font-medium">Salary</th>
                             <th className="px-4 py-2.5 font-medium">Applied</th>
@@ -95,8 +97,20 @@ export default function ApplicationsPage() {
                                     ) : app.company}
                                     {app.location && <div className="text-xs font-normal text-gray-500">{app.location}</div>}
                                 </td>
-                                <td className="px-4 py-2.5">{app.role}</td>
+                                <td className="px-4 py-2.5">
+                                    {app.role}
+                                    {app.contactName && <div className="text-xs text-gray-500">Contact: {app.contactName}</div>}
+                                </td>
                                 <td className="px-4 py-2.5"><Pill value={app.status} /></td>
+                                <td className="px-4 py-2.5 text-gray-600">
+                                    {app.interviewAt && <div className="text-gray-900">Interview {formatDateTime(app.interviewAt)}</div>}
+                                    {app.nextActionDate && (
+                                        <div className={!CLOSED.includes(app.status) && app.nextActionDate < today ? 'font-medium text-red-600' : ''}>
+                                            {formatDate(app.nextActionDate)}{!CLOSED.includes(app.status) && app.nextActionDate < today ? ' · overdue' : ''}
+                                        </div>
+                                    )}
+                                    {!app.interviewAt && !app.nextActionDate && '—'}
+                                </td>
                                 <td className="px-4 py-2.5 text-gray-600">{label(app.source)}</td>
                                 <td className="px-4 py-2.5 text-gray-600">{formatSalary(app.salaryRangeMin, app.salaryRangeMax)}</td>
                                 <td className="px-4 py-2.5 text-gray-600">{formatDate(app.applicationDate)}</td>
