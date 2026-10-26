@@ -2,10 +2,11 @@ import type { PlanItemInput } from '../../types'
 
 /**
  * Every applied change set is remembered in the browser so it can be reverted. Updates keep the
- * full pre-change record; creates keep the new id. Kept for a week, ten batches max.
+ * pre-change values of only the fields the change touched (older batches hold a full record, which
+ * still works); creates keep the new id. Kept for a week, ten batches max.
  */
 export type AppliedEntry =
-    | { op: 'update'; id: number; title: string; before: PlanItemInput }
+    | { op: 'update'; id: number; title: string; before: Partial<PlanItemInput> }
     | { op: 'create'; id: number; title: string }
 
 export type AppliedBatch = {

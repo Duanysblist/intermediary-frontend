@@ -6,10 +6,8 @@ import Button from '../../components/ui/Button'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import DocumentForm from './DocumentForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
-import { formatDate } from '../../lib/format'
+import { formatDate, isLink } from '../../lib/format'
 import type { Document, DocumentInput } from '../../types'
-
-const isLink = (p: string) => /^https?:\/\//i.test(p)
 
 export default function DocumentsPage() {
     const { data, isPending, isError, error } = documents.useList()

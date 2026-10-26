@@ -1,20 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { planItemsApi } from '../../api/resources'
 import { PLAN_EVENTS_KEY, planItems } from '../../hooks/resources'
-import type { PlanItem, PlanItemInput } from '../../types'
-
-export function toInput(item: PlanItem): PlanItemInput {
-    return {
-        title: item.title,
-        intent: item.intent,
-        targetDate: item.targetDate,
-        status: item.status,
-        referenceEntityType: item.referenceEntityType,
-        referenceEntityId: item.referenceEntityId,
-        recurringPlanId: item.recurringPlanId,
-        notes: item.notes,
-    }
-}
+import { toInput, type PlanItem } from '../../types'
 
 export type PlanPatch = Partial<Pick<PlanItem, 'status' | 'targetDate'>>
 

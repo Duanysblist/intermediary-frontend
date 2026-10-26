@@ -1,6 +1,6 @@
-import { addDays, daysBetween, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
+import { addDays, daysBetween, isInWeek, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
 import { CHANGE_SET_FORMAT } from './changeSet'
-import type { Application, Certification, Document, FitnessSession, PlanEvent, PlanItem, StudySession } from '../../types'
+import { isOpenPlanItem, type Application, type Certification, type Document, type FitnessSession, type PlanEvent, type PlanItem, type StudySession } from '../../types'
 
 export type ContextOptions = {
     summary: boolean
@@ -62,8 +62,6 @@ const strip = <T extends object>(rows: T[], compact: boolean): object[] =>
 
 const fence = (rows: unknown[]) => '```json\n' + JSON.stringify(rows, null, 1).replaceAll('\n ', '\n') + '\n```'
 
-const isOpen = (p: PlanItem) => p.status === 'PLANNED' || p.status === 'IN_PROGRESS'
-
 /**
  * When each plan item last changed status, from the event log. Items have no closedAt column, so
  * this is how "done on the 14th" is known; falls back to updatedAt for items with no events yet.
@@ -80,7 +78,7 @@ function lastStatusChange(items: PlanItem[], events: PlanEvent[]): Map<number, s
 
 /** Closed items gain a closedAt so the assistant can tell what happened when, not just that it happened. */
 const withClosedAt = (rows: PlanItem[], closedAt: Map<number, string>) =>
-    rows.map((p) => (isOpen(p) ? p : { ...p, closedAt: closedAt.get(p.id) ?? p.updatedAt }))
+    rows.map((p) => (isOpenPlanItem(p) ? p : { ...p, closedAt: closedAt.get(p.id) ?? p.updatedAt }))
 
 /**
  * Rows that point at a plan item by id alone read as "item 42 became DONE" — meaningless to an
@@ -118,12 +116,12 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
         if (opts.includeClosedPlan) {
             parts.push(`## Plan items — ${data.planItems.length}\n${fence(strip(withClosedAt(data.planItems, closedAt), opts.compact))}`)
         } else {
-            const open = data.planItems.filter(isOpen)
+            const open = data.planItems.filter(isOpenPlanItem)
             parts.push(`## Plan items (open only) — ${open.length}\n${fence(strip(open, opts.compact))}`)
             // What got finished (or dropped) recently is half of "intended vs. happened"; without the
             // rows themselves the assistant would only see anonymous ids in the event log.
             const closed = data.planItems
-                .filter((p) => !isOpen(p) && toLocalISO(closedAt.get(p.id) ?? p.updatedAt) >= since)
+                .filter((p) => !isOpenPlanItem(p) && toLocalISO(closedAt.get(p.id) ?? p.updatedAt) >= since)
                 .sort((a, b) => (closedAt.get(b.id) ?? '').localeCompare(closedAt.get(a.id) ?? ''))
             parts.push(
                 `## Plan items closed in the last ${opts.sessionDays} days — ${closed.length}\n` +
@@ -183,9 +181,8 @@ export function buildContext(data: ContextData, opts: ContextOptions, apiBaseUrl
 export function weekSummary(data: ContextData, today: string): string {
     const monday = startOfWeek(today)
     const sunday = addDays(monday, 6)
-    const nextMonday = addDays(monday, 7)
-    const inWeek = (iso: string | null | undefined) => iso != null && iso >= monday && iso < nextMonday
-    const open = data.planItems.filter(isOpen)
+    const inWeek = (iso: string | null | undefined) => isInWeek(iso, monday)
+    const open = data.planItems.filter(isOpenPlanItem)
     const overdue = open.filter((p) => p.targetDate != null && p.targetDate < today)
     const dueThisWeek = open.filter((p) => inWeek(p.targetDate))
     const unscheduled = open.filter((p) => p.targetDate == null)

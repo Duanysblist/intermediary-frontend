@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { API_BASE_URL, ApiError } from '../../api/client'
 import { aiApi, planItemsApi, proposalsApi } from '../../api/resources'
+import { revertEntries } from './applyChanges'
 import { PLAN_EVENTS_KEY, applications, certifications, documents, fitnessSessions, planItems, studySessions, usePlanEvents } from '../../hooks/resources'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
@@ -10,7 +11,7 @@ import { inputClass } from '../../components/ui/Field'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
 import { formatDateTime } from '../../lib/format'
 import { DEFAULT_OPTIONS, buildContext, type ContextOptions } from './buildContext'
-import { normalizeChangeSet, parseChangeSet, type ChangeSet } from './changeSet'
+import { normalizeChangeSet, parseChangeSet, type Change, type ChangeSet } from './changeSet'
 import ReviewChanges from './ReviewChanges'
 import { loadBatches, markReverted, type AppliedBatch } from './appliedBatches'
 import type { Proposal } from '../../types'
@@ -32,11 +33,13 @@ function Toggle({ label, checked, onChange, hint }: { label: string; checked: bo
 }
 
 type Review = {
+    /** Raw source as stored on a proposal ("mcp:…", "ai:…", "pasted JSON"); shown through friendlySource. */
     source: string
     changeSet: ChangeSet
     proposalId?: number
     /** Set for answers to Ask Claude: closing without applying dismisses the proposal the server saved. */
     dismissOnClose?: boolean
+    /** Set once a proposal has been marked APPLIED, so closing the review does not dismiss it. */
     applied?: boolean
 } | null
 
@@ -89,6 +92,7 @@ export default function PromptPage() {
     const [batches, setBatches] = useState<AppliedBatch[]>(loadBatches)
     const [reverting, setReverting] = useState<string | null>(null)
     const [revertError, setRevertError] = useState<string | null>(null)
+    const [notice, setNotice] = useState<string | null>(null)
 
     function set<K extends keyof ContextOptions>(key: K, value: ContextOptions[K]) {
         setOpts((o) => {
@@ -111,7 +115,7 @@ export default function PromptPage() {
     const suggest = useMutation({
         mutationFn: () => aiApi.suggest(text, ask.trim() || undefined),
         onSuccess: (cs) => {
-            setReview({ source: `Claude (${aiStatus.data?.model ?? 'server'})`, changeSet: normalizeChangeSet(cs), proposalId: cs.proposalId, dismissOnClose: cs.proposalId != null })
+            setReview({ source: `ai:${aiStatus.data?.model ?? 'server'}`, changeSet: normalizeChangeSet(cs), proposalId: cs.proposalId, dismissOnClose: cs.proposalId != null })
             // The server saved the answer as a proposal; keep the inbox list in step so it does not double up once this review closes.
             qc.invalidateQueries({ queryKey: PROPOSALS_KEY })
         },
@@ -162,7 +166,7 @@ export default function PromptPage() {
 
     function reviewProposal(p: Proposal) {
         try {
-            setReview({ source: friendlySource(p.source), changeSet: normalizeChangeSet({ summary: p.summary, changes: p.changes }), proposalId: p.id })
+            setReview({ source: p.source, changeSet: normalizeChangeSet({ summary: p.summary, changes: p.changes }), proposalId: p.id })
         } catch (err) {
             setRevertError(err instanceof Error ? err.message : 'Could not read that proposal.')
         }
@@ -171,21 +175,44 @@ export default function PromptPage() {
     async function revert(batch: AppliedBatch) {
         setReverting(batch.id)
         setRevertError(null)
-        const failures: string[] = []
-        for (const entry of [...batch.entries].reverse()) {
-            try {
-                if (entry.op === 'create') await planItemsApi.remove(entry.id)
-                else await planItemsApi.update(entry.id, entry.before)
-            } catch (err) {
-                failures.push(`${entry.title}: ${err instanceof Error ? err.message : 'failed'}`)
-            }
-        }
+        const failures = await revertEntries(planItemsApi, batch.entries)
         markReverted(batch.id)
         setBatches(loadBatches())
         setReverting(null)
         if (failures.length) setRevertError(`Some changes could not be reverted. ${failures.join(' · ')}`)
         qc.invalidateQueries({ queryKey: planItems.queryKey })
         qc.invalidateQueries({ queryKey: [PLAN_EVENTS_KEY] })
+    }
+
+    /**
+     * After Apply. A proposal whose changes all applied is marked APPLIED. If some failed, only the
+     * failed ones go back to the inbox as a new pending proposal, and the original is marked APPLIED:
+     * re-applying the original would repeat the creates that worked. If none applied, the original
+     * stays in the inbox untouched.
+     */
+    async function settleProposal(r: NonNullable<Review>, applied: number, failed: Change[]) {
+        setBatches(loadBatches())
+        setNotice(null)
+        if (r.proposalId == null) return
+        const id = r.proposalId
+        if (failed.length === 0) {
+            setReview((x) => (x ? { ...x, applied: true } : x))
+            resolveProposal.mutate({ id, status: 'APPLIED' })
+            return
+        }
+        setReview(null)
+        try {
+            if (applied > 0) {
+                await proposalsApi.create(r.source, r.changeSet.summary, failed)
+                await proposalsApi.setStatus(id, 'APPLIED')
+                setNotice(`Applied ${applied}. ${failed.length} failed and ${failed.length === 1 ? 'is' : 'are'} back in the inbox as a new proposal.`)
+            } else {
+                setNotice(`None of the ${failed.length} change${failed.length === 1 ? '' : 's'} could be applied. The proposal is still in the inbox.`)
+            }
+        } catch (err) {
+            setRevertError(`Could not finish returning the failed changes to the inbox (${err instanceof Error ? err.message : 'failed'}). Check the inbox before applying again.`)
+        }
+        qc.invalidateQueries({ queryKey: PROPOSALS_KEY })
     }
 
     const approxTokens = Math.ceil(text.length / 4)
@@ -221,6 +248,9 @@ export default function PromptPage() {
             )}
             {revertError && (
                 <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{revertError}</p>
+            )}
+            {notice && (
+                <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800" role="status">{notice}</p>
             )}
 
             {pending.length > 0 && (
@@ -365,16 +395,10 @@ export default function PromptPage() {
             <Modal open={review !== null} onClose={closeReview} wide>
                 {review && (
                     <ReviewChanges
-                        source={review.source}
+                        source={friendlySource(review.source)}
                         changeSet={review.changeSet}
                         onClose={closeReview}
-                        onApplied={(applied) => {
-                            setBatches(loadBatches())
-                            if (review.proposalId != null && applied > 0) {
-                                setReview((r) => (r ? { ...r, applied: true } : r))
-                                resolveProposal.mutate({ id: review.proposalId, status: 'APPLIED' })
-                            }
-                        }}
+                        onApplied={(applied, failed) => { void settleProposal(review, applied, failed) }}
                     />
                 )}
             </Modal>

@@ -3,7 +3,7 @@ import Field, { inputClass } from '../../components/ui/Field'
 import Button from '../../components/ui/Button'
 import { ApiError } from '../../api/client'
 import { certifications } from '../../hooks/resources'
-import { toDateTimeLocal } from '../../lib/format'
+import { quarterHourNowLocal } from '../../lib/format'
 import {
     WORKOUT_TYPES, label,
     type FitnessSession, type FitnessSessionInput, type StudySession, type StudySessionInput, type WorkoutType,
@@ -15,13 +15,6 @@ type FormProps<T, TInput> = {
     onCancel: () => void
     isSaving?: boolean
     error?: Error | null
-}
-
-/** Round "now" down to the nearest 15 minutes for a sensible default session start. */
-function defaultSessionDate(): string {
-    const d = new Date()
-    d.setMinutes(Math.floor(d.getMinutes() / 15) * 15, 0, 0)
-    return toDateTimeLocal(d)
 }
 
 function Footer({ onCancel, isSaving }: { onCancel: () => void; isSaving?: boolean }) {
@@ -36,7 +29,7 @@ function Footer({ onCancel, isSaving }: { onCancel: () => void; isSaving?: boole
 export function StudySessionForm({ initial, onSubmit, onCancel, isSaving, error }: FormProps<StudySession, StudySessionInput>) {
     const certs = certifications.useList()
     const [form, setForm] = useState<StudySessionInput>({
-        sessionDate: initial?.sessionDate.slice(0, 16) ?? defaultSessionDate(),
+        sessionDate: initial?.sessionDate.slice(0, 16) ?? quarterHourNowLocal(),
         durationMinutes: initial?.durationMinutes ?? 60,
         certificationId: initial?.certificationId ?? null,
         planItemId: initial?.planItemId ?? null,
@@ -82,7 +75,7 @@ export function StudySessionForm({ initial, onSubmit, onCancel, isSaving, error 
 
 export function FitnessSessionForm({ initial, onSubmit, onCancel, isSaving, error }: FormProps<FitnessSession, FitnessSessionInput>) {
     const [form, setForm] = useState<FitnessSessionInput>({
-        sessionDate: initial?.sessionDate.slice(0, 16) ?? defaultSessionDate(),
+        sessionDate: initial?.sessionDate.slice(0, 16) ?? quarterHourNowLocal(),
         durationMinutes: initial?.durationMinutes ?? 45,
         workoutType: initial?.workoutType ?? 'WORKOUT_A',
         planItemId: initial?.planItemId ?? null,

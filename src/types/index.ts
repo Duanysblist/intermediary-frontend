@@ -118,6 +118,23 @@ export interface PlanItem {
 }
 export type PlanItemInput = Omit<PlanItem, 'id' | 'createdAt' | 'updatedAt'>
 
+/** The writable part of a plan item, as the PUT endpoint expects it (it needs the full record). */
+export function toInput(item: PlanItem): PlanItemInput {
+    return {
+        title: item.title,
+        intent: item.intent,
+        targetDate: item.targetDate,
+        status: item.status,
+        referenceEntityType: item.referenceEntityType,
+        referenceEntityId: item.referenceEntityId,
+        recurringPlanId: item.recurringPlanId,
+        notes: item.notes,
+    }
+}
+
+/** Not yet done or dropped: the items the plan treats as still in play. */
+export const isOpenPlanItem = (p: Pick<PlanItem, 'status'>): boolean => p.status === 'PLANNED' || p.status === 'IN_PROGRESS'
+
 // ---------- Recurring plans (routines that generate plan items) ----------
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
 export const DAYS_OF_WEEK: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']

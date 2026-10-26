@@ -37,7 +37,6 @@ export interface ProposalsApi {
     list(status?: ProposalStatus): Promise<Proposal[]>
     create(source: string, summary: string, changes: Change[]): Promise<Proposal>
     setStatus(id: number, status: ProposalStatus): Promise<Proposal>
-    remove(id: number): Promise<void>
 }
 
 export interface CalendarApi {
@@ -78,7 +77,6 @@ export const proposalsApi: ProposalsApi = isDemo ? demo.demoProposals : {
     list: (status) => request<Proposal[]>(status ? `/proposals?status=${status}` : '/proposals'),
     create: (source, summary, changes) => request<Proposal>('/proposals', { method: 'POST', body: JSON.stringify({ source, summary, changes }) }),
     setStatus: (id, status) => request<Proposal>(`/proposals/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
-    remove: (id) => request<void>(`/proposals/${id}`, { method: 'DELETE' }),
 }
 
 export const calendarApi: CalendarApi = isDemo ? demo.demoCalendar : {
