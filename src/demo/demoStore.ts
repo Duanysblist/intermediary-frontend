@@ -121,11 +121,6 @@ export const demoProposals: ProposalsApi = {
         p.updatedAt = now()
         return delay(clone(p))
     },
-    remove: (id) => {
-        const idx = data.proposals.findIndex((x) => x.id === id)
-        if (idx >= 0) data.proposals.splice(idx, 1)
-        return delay(undefined)
-    },
 }
 
 export const demoCalendar: CalendarApi = {

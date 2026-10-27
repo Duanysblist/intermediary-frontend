@@ -2,23 +2,21 @@ import { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { planItemsApi } from '../../api/resources'
 import { PLAN_EVENTS_KEY, planItems } from '../../hooks/resources'
-import { toInput } from '../plan/usePlanBoard'
 import Pill from '../../components/ui/Pill'
 import Button from '../../components/ui/Button'
 import { formatDate } from '../../lib/format'
 import { label, type PlanItem } from '../../types'
 import type { Change, ChangeSet, PlanItemFields } from './changeSet'
-import { recordBatch, type AppliedEntry } from './appliedBatches'
+import { recordBatch } from './appliedBatches'
+import { applyChanges, failedChanges, type Outcome } from './applyChanges'
 
 type Props = {
     source: string
     changeSet: ChangeSet
     onClose: () => void
-    /** Called once after Apply finishes, e.g. to mark a server-side proposal as applied. */
-    onApplied?: (applied: number, failed: number) => void
+    /** Called once after Apply finishes with the count applied and the changes that failed. */
+    onApplied?: (applied: number, failed: Change[]) => void
 }
-
-type Outcome = { ok: true } | { ok: false; error: string }
 
 function describeField(key: keyof PlanItemFields, value: string | null | undefined): string {
     if (value === null) return key === 'targetDate' ? 'no date' : 'cleared'
@@ -47,48 +45,17 @@ export default function ReviewChanges({ source, changeSet, onClose, onApplied }:
 
     async function apply() {
         setApplying(true)
-        const results: (Outcome | null)[] = [...outcomes]
-        const entries: AppliedEntry[] = []
-        for (let i = 0; i < changeSet.changes.length; i++) {
-            if (!selected[i] || results[i]?.ok) continue
-            const ch = changeSet.changes[i]
-            try {
-                if (ch.op === 'create') {
-                    const created = await planItemsApi.create({
-                        title: ch.fields.title ?? 'Untitled',
-                        intent: ch.fields.intent ?? 'OTHER',
-                        status: ch.fields.status ?? 'PLANNED',
-                        targetDate: ch.fields.targetDate ?? null,
-                        referenceEntityType: null,
-                        referenceEntityId: null,
-                        recurringPlanId: null,
-                        notes: ch.fields.notes ?? null,
-                    })
-                    entries.push({ op: 'create', id: created.id, title: created.title })
-                } else {
-                    const current = byId.get(ch.id!)
-                    if (!current) throw new Error(`Plan item #${ch.id} no longer exists.`)
-                    const before = toInput(current)
-                    const next = { ...before }
-                    if (ch.fields.title) next.title = ch.fields.title
-                    if (ch.fields.intent) next.intent = ch.fields.intent
-                    if (ch.fields.status) next.status = ch.fields.status
-                    if (ch.fields.targetDate !== undefined) next.targetDate = ch.fields.targetDate
-                    if (ch.fields.notes !== undefined) next.notes = ch.fields.notes
-                    await planItemsApi.update(ch.id!, next)
-                    entries.push({ op: 'update', id: ch.id!, title: current.title, before })
-                }
-                results[i] = { ok: true }
-            } catch (err) {
-                results[i] = { ok: false, error: err instanceof Error ? err.message : 'Failed' }
-            }
-            setOutcomes([...results])
-        }
+        const todo = changeSet.changes.map((_, i) => i).filter((i) => selected[i] && !outcomes[i]?.ok)
+        const { results, entries } = await applyChanges(
+            planItemsApi, changeSet.changes, todo, (id) => byId.get(id),
+            (i, outcome) => setOutcomes((prev) => prev.map((o, j) => (j === i ? outcome : o))),
+        )
+        const merged: (Outcome | null)[] = outcomes.map((o, i) => results[i] ?? o)
         setApplying(false)
         if (entries.length > 0) recordBatch({ source, summary: changeSet.summary, entries })
         qc.invalidateQueries({ queryKey: planItems.queryKey })
         qc.invalidateQueries({ queryKey: [PLAN_EVENTS_KEY] })
-        onApplied?.(results.filter((r) => r?.ok).length, results.filter((r) => r && !r.ok).length)
+        onApplied?.(merged.filter((r) => r?.ok).length, failedChanges(changeSet.changes, merged))
     }
 
     const acceptedCount = selected.filter((s, i) => s && !outcomes[i]?.ok).length

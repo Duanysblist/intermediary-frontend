@@ -7,7 +7,7 @@ import Button from '../../components/ui/Button'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { FitnessSessionForm, StudySessionForm } from './SessionForms'
 import { Card, EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
-import { addDays, formatDate, formatDateTime, formatMinutes, startOfWeek, todayISO } from '../../lib/format'
+import { addDays, formatDate, formatDateTime, formatMinutes, isInWeek, startOfWeek, todayISO } from '../../lib/format'
 import type { FitnessSession, FitnessSessionInput, StudySession, StudySessionInput } from '../../types'
 
 type Kind = 'study' | 'fitness'
@@ -30,8 +30,7 @@ function groupByDay<T extends { sessionDate: string }>(items: T[]): [string, T[]
 
 function WeekSummary({ items, kindLabel }: { items: { sessionDate: string; durationMinutes: number }[]; kindLabel: string }) {
     const monday = startOfWeek(todayISO())
-    const nextMonday = addDays(monday, 7)
-    const thisWeek = items.filter((s) => s.sessionDate >= monday && s.sessionDate < nextMonday)
+    const thisWeek = items.filter((s) => isInWeek(s.sessionDate, monday))
     const minutes = thisWeek.reduce((sum, s) => sum + s.durationMinutes, 0)
     const lastWeek = items.filter((s) => s.sessionDate >= addDays(monday, -7) && s.sessionDate < monday)
     const lastMinutes = lastWeek.reduce((sum, s) => sum + s.durationMinutes, 0)

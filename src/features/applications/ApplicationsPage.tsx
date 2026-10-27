@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import ApplicationForm from './ApplicationForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
-import { formatDate, formatDateTime, formatSalary, todayISO } from '../../lib/format'
+import { formatDate, formatDateTime, formatSalary, isLink, todayISO } from '../../lib/format'
 import { APPLICATION_STATUSES, label, type Application, type ApplicationInput, type ApplicationStatus } from '../../types'
 
 const CLOSED: ApplicationStatus[] = ['REJECTED', 'WITHDRAWN', 'GHOSTED']
@@ -92,7 +92,7 @@ export default function ApplicationsPage() {
                         {rows.map((app) => (
                             <tr key={app.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/60">
                                 <td className="px-4 py-2.5 font-medium text-gray-900">
-                                    {app.jobUrl ? (
+                                    {app.jobUrl && isLink(app.jobUrl) ? (
                                         <a href={app.jobUrl} target="_blank" rel="noreferrer" className="hover:underline">{app.company}</a>
                                     ) : app.company}
                                     {app.location && <div className="text-xs font-normal text-gray-500">{app.location}</div>}

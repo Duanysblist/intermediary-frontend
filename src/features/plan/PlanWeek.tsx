@@ -1,8 +1,8 @@
 import { useDroppable } from '@dnd-kit/core'
 import PlanItemCard from './PlanItemCard'
 import Button from '../../components/ui/Button'
-import { addDays, formatDate, isBefore, parseLocal, todayISO, weekDays } from '../../lib/format'
-import type { PlanItem } from '../../types'
+import { addDays, formatDate, isBefore, parseLocal, startOfWeek, todayISO, weekDays } from '../../lib/format'
+import { isOpenPlanItem, type PlanItem } from '../../types'
 
 type Props = {
     items: PlanItem[]
@@ -52,12 +52,10 @@ export default function PlanWeek({ items, monday, onChangeWeek, referenceLabel, 
     const days = weekDays(monday)
     const sunday = days[6]
     const inWeek = (it: PlanItem) => it.targetDate != null && it.targetDate >= monday && it.targetDate <= sunday
-    const open = (it: PlanItem) => it.status === 'PLANNED' || it.status === 'IN_PROGRESS'
-
-    const unscheduled = items.filter((it) => it.targetDate == null && open(it))
-    const overdue = items.filter((it) => it.targetDate != null && isBefore(it.targetDate, monday) && open(it))
-    const later = items.filter((it) => it.targetDate != null && it.targetDate > sunday && open(it))
-    const thisMonday = (() => { const t = todayISO(); return addDays(t, -((parseLocal(t).getDay() + 6) % 7)) })()
+    const unscheduled = items.filter((it) => it.targetDate == null && isOpenPlanItem(it))
+    const overdue = items.filter((it) => it.targetDate != null && isBefore(it.targetDate, monday) && isOpenPlanItem(it))
+    const later = items.filter((it) => it.targetDate != null && it.targetDate > sunday && isOpenPlanItem(it))
+    const thisMonday = startOfWeek(todayISO())
 
     return (
         <div>

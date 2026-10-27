@@ -4,8 +4,8 @@ import { certifications, fitnessSessions, planItems, studySessions, usePlanEvent
 import Pill from '../../components/ui/Pill'
 import Button from '../../components/ui/Button'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
-import { addDays, formatDate, formatMinutes, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
-import { PLAN_INTENTS, type PlanIntent, type PlanItem } from '../../types'
+import { addDays, formatDate, formatMinutes, isInWeek, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
+import { PLAN_INTENTS, isOpenPlanItem, type PlanIntent, type PlanItem } from '../../types'
 
 /**
  * Weekly review: the "did reality match intention?" questions the data model exists to answer.
@@ -15,7 +15,6 @@ export default function ReviewPage() {
     const [params, setParams] = useSearchParams()
     const thisMonday = startOfWeek(todayISO())
     const monday = params.get('week') ?? thisMonday
-    const nextMonday = addDays(monday, 7)
     const setWeek = (m: string) => setParams(m === thisMonday ? {} : { week: m })
 
     const plan = planItems.useList()
@@ -26,7 +25,7 @@ export default function ReviewPage() {
 
     const stats = useMemo(() => {
         if (!plan.data || !study.data || !fitness.data || !certs.data || !events.data) return null
-        const inWeek = (iso: string | null | undefined) => iso != null && iso >= monday && iso < nextMonday
+        const inWeek = (iso: string | null | undefined) => isInWeek(iso, monday)
         const weekEvents = events.data.filter((e) => inWeek(toLocalISO(e.eventTime)))
         const titleOf = new Map(plan.data.map((p) => [p.id, p]))
 
@@ -36,7 +35,7 @@ export default function ReviewPage() {
         const done = intended.filter((p) => p.status === 'DONE' || doneIds.has(p.id))
         const deferred = weekEvents.filter((e) => e.toStatus === 'DEFERRED').map((e) => titleOf.get(e.planItemId)).filter((p): p is PlanItem => !!p)
         const canceled = weekEvents.filter((e) => e.toStatus === 'CANCELED').map((e) => titleOf.get(e.planItemId)).filter((p): p is PlanItem => !!p)
-        const carried = intended.filter((p) => (p.status === 'PLANNED' || p.status === 'IN_PROGRESS') && p.targetDate != null && p.targetDate < todayISO())
+        const carried = intended.filter((p) => isOpenPlanItem(p) && p.targetDate != null && p.targetDate < todayISO())
 
         const byIntent = PLAN_INTENTS.map((intent) => ({
             intent,
@@ -64,7 +63,7 @@ export default function ReviewPage() {
 
         const completion = intended.length === 0 ? null : Math.round((done.length / intended.length) * 100)
         return { intended, done, deferred, canceled, carried, byIntent, studyWeek, fitnessWeek, studyMinutes, fitnessMinutes, perCert, mostDeferred, completion }
-    }, [plan.data, study.data, fitness.data, certs.data, events.data, monday, nextMonday])
+    }, [plan.data, study.data, fitness.data, certs.data, events.data, monday])
 
     const failed = [plan, study, fitness, certs, events].find((q) => q.isError)
     if (failed?.isError) return <ErrorState what="the review" error={failed.error} />

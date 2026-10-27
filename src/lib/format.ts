@@ -107,3 +107,20 @@ export function weekDays(mondayISO: string): string[] {
 export function isBefore(a: string, b: string): boolean {
     return a.slice(0, 10) < b.slice(0, 10)
 }
+
+/** True when `iso` (a date or zone-less datetime) falls in the seven days starting at `monday`. */
+export function isInWeek(iso: string | null | undefined, monday: string): boolean {
+    return iso != null && iso >= monday && iso < addDays(monday, 7)
+}
+
+/** Now, rounded down to the quarter hour, as a datetime-local value: the default start for a logged session. */
+export function quarterHourNowLocal(): string {
+    const d = new Date()
+    d.setMinutes(Math.floor(d.getMinutes() / 15) * 15, 0, 0)
+    return toDateTimeLocal(d)
+}
+
+/** True for http(s) URLs. Anything else (javascript:, mailto:, plain text) is shown as text, not linked. */
+export function isLink(value: string | null | undefined): boolean {
+    return !!value && /^https?:\/\//i.test(value)
+}

@@ -2,8 +2,8 @@ import { Link } from 'react-router'
 import { applications, certifications, fitnessSessions, planItems, studySessions, usePlanEvents } from '../../hooks/resources'
 import Pill from '../../components/ui/Pill'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
-import { addDays, formatDate, formatDateTime, formatMinutes, isBefore, relativeDay, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
-import { label, type PlanItem } from '../../types'
+import { formatDate, formatDateTime, formatMinutes, isBefore, isInWeek, relativeDay, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
+import { isOpenPlanItem, label } from '../../types'
 
 function Stat({ label: text, value, sub, to, tone }: { label: string; value: string | number; sub?: string; to: string; tone?: 'red' | 'blue' | 'green' }) {
     const color = tone === 'red' ? 'text-red-600' : tone === 'green' ? 'text-green-600' : tone === 'blue' ? 'text-blue-600' : 'text-gray-900'
@@ -33,11 +33,9 @@ export default function DashboardPage() {
 
     const today = todayISO()
     const monday = startOfWeek(today)
-    const nextMonday = addDays(monday, 7)
-    const inThisWeek = (iso: string | null) => iso != null && iso >= monday && iso < nextMonday
+    const inThisWeek = (iso: string | null) => isInWeek(iso, monday)
 
-    const isOpen = (p: PlanItem) => p.status === 'PLANNED' || p.status === 'IN_PROGRESS'
-    const open = plan.data.filter(isOpen)
+    const open = plan.data.filter(isOpenPlanItem)
     const overdue = open.filter((p) => p.targetDate != null && isBefore(p.targetDate, today))
     const dueThisWeek = open.filter((p) => inThisWeek(p.targetDate))
     const doneThisWeek = events.data.filter((e) => e.toStatus === 'DONE' && inThisWeek(toLocalISO(e.eventTime)))

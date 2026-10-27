@@ -1,12 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { fitnessSessionsApi, planItemsApi, studySessionsApi } from '../../api/resources'
 import { PLAN_EVENTS_KEY, fitnessSessions, planItems, studySessions } from '../../hooks/resources'
-import { toInput } from './usePlanBoard'
 import Field, { inputClass } from '../../components/ui/Field'
 import Button from '../../components/ui/Button'
-import { toDateTimeLocal } from '../../lib/format'
-import { WORKOUT_TYPES, label, type PlanItem, type WorkoutType } from '../../types'
+import { quarterHourNowLocal } from '../../lib/format'
+import { WORKOUT_TYPES, label, toInput, type PlanItem, type WorkoutType } from '../../types'
 
 type Props = { item: PlanItem; onDone: () => void; onCancel: () => void }
 
@@ -17,21 +16,28 @@ type Props = { item: PlanItem; onDone: () => void; onCancel: () => void }
 export default function LogSessionForm({ item, onDone, onCancel }: Props) {
     const qc = useQueryClient()
     const kind: 'study' | 'fitness' = item.intent === 'EXERCISE' ? 'fitness' : 'study'
-    const [when, setWhen] = useState(() => { const d = new Date(); d.setMinutes(Math.floor(d.getMinutes() / 15) * 15, 0, 0); return toDateTimeLocal(d) })
+    const [when, setWhen] = useState(quarterHourNowLocal)
     const [minutes, setMinutes] = useState(kind === 'fitness' ? 45 : 60)
     const [workoutType, setWorkoutType] = useState<WorkoutType>('WORKOUT_A')
     const [notes, setNotes] = useState('')
     const [markDone, setMarkDone] = useState(true)
+    // The session already saved for this item and kind. A retry after the DONE update failed must not create it again.
+    const savedFor = useRef<string | null>(null)
 
     const mut = useMutation({
         mutationFn: async () => {
-            if (kind === 'fitness') {
-                await fitnessSessionsApi.create({ sessionDate: when, durationMinutes: minutes, workoutType, planItemId: item.id, notes: notes.trim() || null })
-            } else {
-                await studySessionsApi.create({
-                    sessionDate: when, durationMinutes: minutes, planItemId: item.id, notes: notes.trim() || null,
-                    certificationId: item.referenceEntityType === 'CERTIFICATION' ? item.referenceEntityId : null,
-                })
+            const key = `${kind}:${item.id}`
+            if (savedFor.current !== key) {
+                if (kind === 'fitness') {
+                    await fitnessSessionsApi.create({ sessionDate: when, durationMinutes: minutes, workoutType, planItemId: item.id, notes: notes.trim() || null })
+                } else {
+                    await studySessionsApi.create({
+                        sessionDate: when, durationMinutes: minutes, planItemId: item.id, notes: notes.trim() || null,
+                        certificationId: item.referenceEntityType === 'CERTIFICATION' ? item.referenceEntityId : null,
+                    })
+                }
+                savedFor.current = key
+                qc.invalidateQueries({ queryKey: kind === 'fitness' ? fitnessSessions.queryKey : studySessions.queryKey })
             }
             if (markDone && item.status !== 'DONE') await planItemsApi.update(item.id, { ...toInput(item), status: 'DONE' })
         },

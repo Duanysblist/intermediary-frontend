@@ -22,7 +22,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { inputClass } from '../../components/ui/Field'
 import { ErrorState, LoadingState, PageHeader } from '../../components/ui/Page'
 import { startOfWeek, todayISO } from '../../lib/format'
-import type { PlanItem, PlanItemInput, PlanItemStatus } from '../../types'
+import { isOpenPlanItem, type PlanItem, type PlanItemInput, type PlanItemStatus } from '../../types'
 
 type View = 'board' | 'week'
 type Sheet =
@@ -105,7 +105,7 @@ export default function PlanPage() {
     if (isError) return <ErrorState what="plan" error={error} />
 
     const items = data
-    const openCount = items.filter((i) => i.status === 'PLANNED' || i.status === 'IN_PROGRESS').length
+    const openCount = items.filter(isOpenPlanItem).length
     const referenceLabel = (it: PlanItem) => labelFor(it.referenceEntityType, it.referenceEntityId)
     const current = sheet.kind === 'detail' || sheet.kind === 'edit' || sheet.kind === 'log'
         ? items.find((i) => i.id === sheet.item.id) ?? sheet.item

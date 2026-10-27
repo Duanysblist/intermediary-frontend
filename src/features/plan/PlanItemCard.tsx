@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import Pill from '../../components/ui/Pill'
 import { formatDate, isBefore, relativeDay, todayISO } from '../../lib/format'
-import type { PlanItem } from '../../types'
+import { isOpenPlanItem, type PlanItem } from '../../types'
 
 type Props = {
     item: PlanItem
@@ -16,8 +16,7 @@ type Props = {
 }
 
 export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: Pick<Props, 'item' | 'referenceLabel' | 'showStatus' | 'compact'>) {
-    const open = item.status === 'PLANNED' || item.status === 'IN_PROGRESS'
-    const overdue = open && item.targetDate != null && isBefore(item.targetDate, todayISO())
+    const overdue = isOpenPlanItem(item) && item.targetDate != null && isBefore(item.targetDate, todayISO())
     const meta: { key: string; node: ReactNode }[] = [
         {
             key: 'date',
