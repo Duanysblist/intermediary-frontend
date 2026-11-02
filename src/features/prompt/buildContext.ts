@@ -81,7 +81,7 @@ const withClosedAt = (rows: PlanItem[], closedAt: Map<number, string>) =>
     rows.map((p) => (isOpenPlanItem(p) ? p : { ...p, closedAt: closedAt.get(p.id) ?? p.updatedAt }))
 
 /**
- * Rows that point at a plan item by id alone read as "item 42 became DONE" — meaningless to an
+ * Rows that point at a plan item by id alone read as "item 42 became DONE", which means nothing to an
  * assistant that only sees open items. Attach the title (and, for study, the certification name).
  */
 function withNames<T extends { planItemId: number | null; certificationId?: number | null }>(rows: T[], items: PlanItem[], certs: Certification[]): object[] {

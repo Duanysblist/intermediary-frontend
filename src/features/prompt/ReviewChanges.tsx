@@ -30,8 +30,7 @@ const FIELD_LABEL: Record<keyof PlanItemFields, string> = { title: 'Title', inte
 
 /**
  * Shows each proposed change with its before/after, lets the user tick the ones to accept, then
- * applies them through the normal plan-item API so audit events are written as usual. What was
- * applied is remembered so the batch can be reverted from the Prompt page.
+ * applies them through the normal plan-item API so audit events are written as usual.
  */
 export default function ReviewChanges({ source, changeSet, onClose, onApplied }: Props) {
     const qc = useQueryClient()
