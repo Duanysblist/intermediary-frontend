@@ -7,3 +7,11 @@ html {
 body {
     @apply antialiased;
 }
+
+/* Base layer so components with their own focus ring (buttons, inputs) still win over this. */
+@layer base {
+    :focus-visible {
+        outline: 2px solid var(--color-blue-500);
+        outline-offset: 2px;
+    }
+}

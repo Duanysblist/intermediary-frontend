@@ -182,7 +182,8 @@
       "Do keep status tones consistent with Pill.tsx. Adding a status means adding its tone there.",
       "Do separate surfaces with a one-pixel border first and a shadow second.",
       "Do use tabular numerals for counts, durations, and dates that are compared.",
-      "Do show overdue state in red-600 text, not with a red fill on the whole card."
+      "Do show overdue state in red-600 text, not with a red fill on the whole card.",
+      "Do leave focus to the base Focus Blue outline unless the element has its own ring, and inset it where a container would clip it."
     ],
     "donts": [
       "Don't add a second accent color for branding. The accent is the signal blue.",

@@ -113,7 +113,7 @@ Type is the system UI stack, sized small and set in Tailwind's default scale. Hi
 The palette is Tailwind v4's default scale, used by role. There are no custom brand colors, and that is intentional: the accent and neutrals are chosen for legibility and to read as a ledger.
 
 ### Primary
-- **Signal Blue** (`blue-600`): the one live-state color. It fills primary buttons, marks the active nav tab, underlines links, and rings focus on inputs. It should stay rare on any given screen.
+- **Signal Blue** (`blue-600`): the one live-state color. It fills primary buttons, marks the active nav tab, colors text links (underlined on hover), and carries the focus indicator on links, tabs, cards, inputs, and primary buttons. Secondary and ghost buttons ring in gray. It should stay rare on any given screen.
 - **Signal Blue Hover** (`blue-700`): the pressed and hovered state of primary buttons.
 - **Signal Blue Tint** (`blue-50`): the background of an active drop target on the board and the calendar.
 - **Focus Blue** (`blue-500`): input border on focus, with a `blue-500` ring at 20% opacity. Button focus rings use the same hue at 40%.
@@ -220,6 +220,12 @@ Each component is a plain, precise version of the usual pattern. Nothing decorat
 - **Style:** a horizontal row of text tabs under the header. Each tab has a two-pixel bottom border.
 - **Typography:** body size. The active tab is Ink Strong with a medium weight and a Signal Blue bottom border. Inactive tabs are Ink Muted and turn Ink Strong on hover, with a `gray-300` bottom border.
 - **Mobile:** the same row, scrolled horizontally. It does not collapse into a menu.
+- **Focus:** the base Focus Blue outline, inset by 2px, because the scrolling row would clip an outline drawn outside the tab.
+
+### Focus
+- **Default:** every focusable element without its own focus style (links, nav tabs, plan cards, row actions) gets a 2px Focus Blue outline offset by 2px, from a base-layer rule in `src/index.css`.
+- **Own ring:** buttons and inputs keep the ring described above, since a utility class outranks the base rule.
+- **Clipping:** inside a scrolling container that clips overflow, inset the outline instead (`-outline-offset-2`).
 
 ### Plan Board Cards
 - **Shape:** 0.5rem radius, one-pixel `gray-200` border, 0.75rem padding.
@@ -239,6 +245,7 @@ Each component is a plain, precise version of the usual pattern. Nothing decorat
 - **Do** separate surfaces with a one-pixel border first and a shadow second.
 - **Do** use tabular numerals for counts, durations, and dates that are compared.
 - **Do** show overdue state in `red-600` text, not with a red fill on the whole card.
+- **Do** leave focus to the base Focus Blue outline unless the element has its own ring, and inset it where a container would clip it.
 
 ### Don't:
 - **Don't** add a second accent color for branding. The accent is the signal blue.
