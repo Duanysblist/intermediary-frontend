@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useMutation } from '@tanstack/react-query'
 import {
@@ -7,7 +7,8 @@ import {
 } from '@dnd-kit/core'
 import { calendarApi } from '../../api/resources'
 import { planItems } from '../../hooks/resources'
-import { useMovePlanItem } from './usePlanBoard'
+import { useMovePlanItem, useReorderPlanItems } from './usePlanBoard'
+import { placeInColumn } from './order'
 import { useReferenceOptions } from './references'
 import PlanBoard from './PlanBoard'
 import PlanWeek from './PlanWeek'
@@ -22,7 +23,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { inputClass } from '../../components/ui/Field'
 import { ErrorState, LoadingState, PageHeader } from '../../components/ui/Page'
 import { startOfWeek, todayISO } from '../../lib/format'
-import { isOpenPlanItem, type PlanItem, type PlanItemInput, type PlanItemStatus } from '../../types'
+import { comparePlanItems, isOpenPlanItem, type PlanItem, type PlanItemInput, type PlanItemStatus } from '../../types'
 
 type View = 'board' | 'week'
 type Sheet =
@@ -34,7 +35,8 @@ type Sheet =
     | { kind: 'routines' }
     | { kind: 'calendar' }
 
-type DropTarget = { status?: PlanItemStatus; targetDate?: string | null }
+/** A board column or card (status, plus overId for a card) or a week day or tray (targetDate). */
+type DropTarget = { status?: PlanItemStatus; targetDate?: string | null; overId?: number }
 
 export default function PlanPage() {
     const [params, setParams] = useSearchParams()
@@ -48,6 +50,7 @@ export default function PlanPage() {
     const updateMut = planItems.useUpdate()
     const deleteMut = planItems.useRemove()
     const moveMut = useMovePlanItem()
+    const reorderMut = useReorderPlanItems()
     const { labelFor } = useReferenceOptions()
     const calendarLink = useMutation({ mutationFn: calendarApi.link })
 
@@ -55,6 +58,7 @@ export default function PlanPage() {
     const [deleting, setDeleting] = useState<PlanItem | null>(null)
     const [dragging, setDragging] = useState<PlanItem | null>(null)
     const [copied, setCopied] = useState(false)
+    const items = useMemo(() => [...(data ?? [])].sort(comparePlanItems), [data])
 
     // A small movement threshold keeps plain clicks opening the detail view instead of starting a drag.
     const sensors = useSensors(
@@ -73,8 +77,10 @@ export default function PlanPage() {
         const item = (e.active.data.current as { item: PlanItem } | undefined)?.item
         const target = e.over?.data.current as DropTarget | undefined
         if (!item || !target) return
-        if (target.status && target.status !== item.status) {
-            moveMut.mutate({ item, patch: { status: target.status } })
+        if (target.status) {
+            const column = items.filter((it) => it.status === target.status).map((it) => it.id)
+            const ids = placeInColumn(column, item.id, target.overId)
+            if (target.status !== item.status || ids.join() !== column.join()) reorderMut.mutate({ status: target.status, ids })
         } else if (target.targetDate !== undefined && target.targetDate !== item.targetDate) {
             moveMut.mutate({ item, patch: { targetDate: target.targetDate } })
         }
@@ -104,7 +110,6 @@ export default function PlanPage() {
     if (isPending) return <LoadingState what="plan" />
     if (isError) return <ErrorState what="plan" error={error} />
 
-    const items = data
     const openCount = items.filter(isOpenPlanItem).length
     const referenceLabel = (it: PlanItem) => labelFor(it.referenceEntityType, it.referenceEntityId)
     const current = sheet.kind === 'detail' || sheet.kind === 'edit' || sheet.kind === 'log'
@@ -115,7 +120,7 @@ export default function PlanPage() {
         <div>
             <PageHeader
                 title="Plan"
-                subtitle={`${openCount} open intention${openCount === 1 ? '' : 's'} · drag cards to change status or date`}
+                subtitle={`${openCount} open intention${openCount === 1 ? '' : 's'} · drag cards to reorder, or to change status or date`}
                 actions={
                     <>
                         <div className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm shadow-xs" role="tablist">
@@ -133,9 +138,9 @@ export default function PlanPage() {
                 }
             />
 
-            {moveMut.isError && (
+            {(moveMut.isError || reorderMut.isError) && (
                 <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-                    Couldn't move that item: {moveMut.error.message}
+                    Couldn't move that item: {(moveMut.error ?? reorderMut.error)?.message}
                 </p>
             )}
 

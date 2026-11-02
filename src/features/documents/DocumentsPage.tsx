@@ -7,7 +7,17 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import DocumentForm from './DocumentForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, isLink } from '../../lib/format'
-import type { Document, DocumentInput } from '../../types'
+import { DOCUMENT_TYPES, type Document, type DocumentInput } from '../../types'
+
+type SortKey = 'title' | 'type' | 'updated'
+
+const byTitle = (a: Document, b: Document) => a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' })
+// Each key's natural direction: titles A to Z ("Week 2" before "Week 10"), types in menu order then by title, newest first.
+const SORTS: Record<SortKey, (a: Document, b: Document) => number> = {
+    title: byTitle,
+    type: (a, b) => DOCUMENT_TYPES.indexOf(a.type) - DOCUMENT_TYPES.indexOf(b.type) || byTitle(a, b),
+    updated: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
+}
 
 export default function DocumentsPage() {
     const { data, isPending, isError, error } = documents.useList()
@@ -19,7 +29,25 @@ export default function DocumentsPage() {
     const [editing, setEditing] = useState<Document | null>(null)
     const [deleting, setDeleting] = useState<Document | null>(null)
 
-    const rows = useMemo(() => [...(data ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), [data])
+    const [sort, setSort] = useState<{ key: SortKey; reversed: boolean }>({ key: 'type', reversed: false })
+    const rows = useMemo(() => {
+        const sorted = [...(data ?? [])].sort(SORTS[sort.key])
+        return sort.reversed ? sorted.reverse() : sorted
+    }, [data, sort])
+    // Clicking the sorted column flips it; clicking another column sorts by it in its natural direction.
+    function sortBy(key: SortKey) { setSort((s) => ({ key, reversed: s.key === key && !s.reversed })) }
+    function header(key: SortKey, text: string) {
+        const active = sort.key === key
+        const descending = sort.reversed !== (key === 'updated')
+        return (
+            <th className="px-4 py-2.5 font-medium" aria-sort={active ? (descending ? 'descending' : 'ascending') : 'none'}>
+                <button type="button" onClick={() => sortBy(key)} className={`inline-flex items-center gap-1 uppercase tracking-wide hover:text-gray-800 ${active ? 'text-gray-800' : ''}`}>
+                    {text}
+                    <span aria-hidden="true" className={active ? '' : 'invisible'}>{descending ? '▼' : '▲'}</span>
+                </button>
+            </th>
+        )
+    }
 
     function close() { setAdding(false); setEditing(null); createMut.reset(); updateMut.reset() }
     function handleSubmit(input: DocumentInput) {
@@ -49,11 +77,11 @@ export default function DocumentsPage() {
                     <table className="w-full text-sm">
                         <thead>
                         <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                            <th className="px-4 py-2.5 font-medium">Title</th>
-                            <th className="px-4 py-2.5 font-medium">Type</th>
+                            {header('title', 'Title')}
+                            {header('type', 'Type')}
                             <th className="px-4 py-2.5 font-medium">Version</th>
                             <th className="px-4 py-2.5 font-medium">Location</th>
-                            <th className="px-4 py-2.5 font-medium">Updated</th>
+                            {header('updated', 'Updated')}
                             <th className="px-4 py-2.5 font-medium"><span className="sr-only">Actions</span></th>
                         </tr>
                         </thead>
