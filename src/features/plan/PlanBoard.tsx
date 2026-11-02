@@ -36,7 +36,7 @@ function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: Plan
             </header>
             <div className="flex flex-1 flex-col gap-2">
                 {items.map((item) => (
-                    <PlanItemCard key={item.id} item={item} referenceLabel={referenceLabel(item)} onOpen={onOpen} />
+                    <PlanItemCard key={item.id} item={item} referenceLabel={referenceLabel(item)} onOpen={onOpen} dropStatus={status} />
                 ))}
                 {items.length === 0 && (
                     <p className="rounded-lg border border-dashed border-gray-300 px-3 py-6 text-center text-xs text-gray-400">Drop here</p>
@@ -53,13 +53,13 @@ function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: Plan
     )
 }
 
-/** Kanban by status. Dropping a card on a column changes its status. */
+/**
+ * Kanban by status, in the order PlanPage sorted the items. Dropping a card on another card puts it
+ * in that card's place; dropping it on a column's empty space puts it at the end. Either can change its status.
+ */
 export default function PlanBoard({ items, referenceLabel, onOpen, onAdd }: Props) {
     const byStatus = new Map<PlanItemStatus, PlanItem[]>(PLAN_STATUSES.map((s) => [s, []]))
     for (const it of items) byStatus.get(it.status)?.push(it)
-    for (const list of byStatus.values()) {
-        list.sort((a, b) => (a.targetDate ?? '9999').localeCompare(b.targetDate ?? '9999') || a.id - b.id)
-    }
     return (
         <div className="flex gap-3 overflow-x-auto pb-4">
             {PLAN_STATUSES.map((status) => (

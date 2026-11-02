@@ -113,10 +113,12 @@ export interface PlanItem {
     /** Set when the item was generated from a recurring plan. */
     recurringPlanId: number | null
     notes: string | null
+    /** Order within its board column, set by dragging; absent or null sorts last. */
+    position?: number | null
     createdAt: string
     updatedAt: string
 }
-export type PlanItemInput = Omit<PlanItem, 'id' | 'createdAt' | 'updatedAt'>
+export type PlanItemInput = Omit<PlanItem, 'id' | 'createdAt' | 'updatedAt' | 'position'>
 
 /** The writable part of a plan item, as the PUT endpoint expects it (it needs the full record). */
 export function toInput(item: PlanItem): PlanItemInput {
@@ -134,6 +136,15 @@ export function toInput(item: PlanItem): PlanItemInput {
 
 /** Not yet done or dropped: the items the plan treats as still in play. */
 export const isOpenPlanItem = (p: Pick<PlanItem, 'status'>): boolean => p.status === 'PLANNED' || p.status === 'IN_PROGRESS'
+
+/** Board order: status column, then where you dragged it, then date (undated last), then oldest first. */
+export function comparePlanItems(a: PlanItem, b: PlanItem): number {
+    const unplaced = Number.MAX_SAFE_INTEGER
+    return PLAN_STATUSES.indexOf(a.status) - PLAN_STATUSES.indexOf(b.status)
+        || (a.position ?? unplaced) - (b.position ?? unplaced)
+        || (a.targetDate ?? '9999').localeCompare(b.targetDate ?? '9999')
+        || a.id - b.id
+}
 
 // ---------- Recurring plans (routines that generate plan items) ----------
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'

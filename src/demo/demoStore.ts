@@ -5,7 +5,7 @@ import { addDays, parseLocal, todayISO } from '../lib/format'
 import type { Change, ChangeSet } from '../features/prompt/changeSet'
 import type {
     Application, ApplicationInput, Certification, CertificationInput, Document, DocumentInput,
-    FitnessSession, FitnessSessionInput, PlanItem, PlanItemInput, Proposal, RecurringPlan, RecurringPlanInput,
+    FitnessSession, FitnessSessionInput, PlanItem, PlanItemInput, PlanItemStatus, Proposal, RecurringPlan, RecurringPlanInput,
     StudySession, StudySessionInput, DayOfWeek,
 } from '../types'
 
@@ -68,12 +68,24 @@ export const demoStudySessions = makeResource<StudySession, StudySessionInput>('
 export const demoFitnessSessions = makeResource<FitnessSession, FitnessSessionInput>('fitness-sessions', data.fitnessSessions)
 export const demoPlanItems = makeResource<PlanItem, PlanItemInput>('plan-items', data.planItems, (before, after) => {
     if (before.status !== after.status) {
+        after.position = null // like the server: a new column, so the bottom until dragged
         data.planEvents.push({
             id: nextEventId++, planItemId: after.id, fromStatus: before.status, toStatus: after.status,
             eventTime: now(), notes: null, createdAt: now(),
         })
     }
 })
+
+export async function demoOrderPlanItems(status: PlanItemStatus, ids: number[]): Promise<void> {
+    if (ids.some((id) => !data.planItems.some((p) => p.id === id))) {
+        throw new ApiError(404, "That item couldn't be found; it may have already been removed.")
+    }
+    for (const [i, id] of ids.entries()) {
+        const row = data.planItems.find((p) => p.id === id)!
+        if (row.status !== status) await demoPlanItems.update(id, { ...row, status }) // logs the plan event
+        row.position = i
+    }
+}
 
 export const demoPlanEvents = {
     list: (planItemId?: number) =>

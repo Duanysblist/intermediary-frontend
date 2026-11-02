@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { useDraggable } from '@dnd-kit/core'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Pill from '../../components/ui/Pill'
 import { formatDate, isBefore, relativeDay, todayISO } from '../../lib/format'
-import { isOpenPlanItem, type PlanItem } from '../../types'
+import { isOpenPlanItem, type PlanItem, type PlanItemStatus } from '../../types'
 
 type Props = {
     item: PlanItem
@@ -13,6 +13,8 @@ type Props = {
     onOpen?: (item: PlanItem) => void
     /** Presentational clone used inside DragOverlay. */
     overlay?: boolean
+    /** Board column this card sits in; makes the card a drop target so a dragged card can take its place. */
+    dropStatus?: PlanItemStatus
 }
 
 export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: Pick<Props, 'item' | 'referenceLabel' | 'showStatus' | 'compact'>) {
@@ -50,21 +52,26 @@ export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: 
     )
 }
 
-export default function PlanItemCard({ item, referenceLabel, showStatus, compact, onOpen, overlay }: Props) {
+export default function PlanItemCard({ item, referenceLabel, showStatus, compact, onOpen, overlay, dropStatus }: Props) {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: `item-${item.id}`,
         data: { item },
         disabled: overlay,
     })
+    const drop = useDroppable({
+        id: `slot-${item.id}`,
+        data: { status: dropStatus, overId: item.id },
+        disabled: overlay || dropStatus === undefined,
+    })
     return (
         <div
-            ref={overlay ? undefined : setNodeRef}
+            ref={overlay ? undefined : (node) => { setNodeRef(node); drop.setNodeRef(node) }}
             {...(overlay ? {} : attributes)}
             {...(overlay ? {} : listeners)}
             onClick={() => onOpen?.(item)}
             className={`cursor-grab touch-none rounded-lg border bg-white p-3 shadow-xs transition-shadow active:cursor-grabbing ` +
                 `${overlay ? 'rotate-1 border-blue-300 shadow-lg' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'} ` +
-                `${isDragging ? 'opacity-30' : ''}`}
+                `${isDragging ? 'opacity-30' : ''} ${drop.isOver && !isDragging ? 'ring-2 ring-blue-400' : ''}`}
             data-testid={`plan-item-${item.id}`}
         >
             <PlanItemCardBody item={item} referenceLabel={referenceLabel} showStatus={showStatus} compact={compact} />

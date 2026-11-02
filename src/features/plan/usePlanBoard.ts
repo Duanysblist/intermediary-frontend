@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { planItemsApi } from '../../api/resources'
+import { orderPlanItems, planItemsApi } from '../../api/resources'
 import { PLAN_EVENTS_KEY, planItems } from '../../hooks/resources'
-import { toInput, type PlanItem } from '../../types'
+import { toInput, type PlanItem, type PlanItemStatus } from '../../types'
 
 export type PlanPatch = Partial<Pick<PlanItem, 'status' | 'targetDate'>>
 
@@ -21,6 +21,31 @@ export function useMovePlanItem() {
             await qc.cancelQueries({ queryKey: key })
             const previous = qc.getQueryData<PlanItem[]>(key)
             qc.setQueryData<PlanItem[]>(key, (old) => old?.map((p) => (p.id === item.id ? { ...p, ...patch } : p)))
+            return { previous }
+        },
+        onError: (_err, _vars, ctx) => {
+            if (ctx?.previous) qc.setQueryData(key, ctx.previous)
+        },
+        onSettled: () => {
+            qc.invalidateQueries({ queryKey: key })
+            qc.invalidateQueries({ queryKey: [PLAN_EVENTS_KEY] })
+        },
+    })
+}
+
+/** Board drop: saves the column the card landed in, with the same optimistic update and rollback. */
+export function useReorderPlanItems() {
+    const qc = useQueryClient()
+    const key = planItems.queryKey
+    return useMutation({
+        mutationFn: ({ status, ids }: { status: PlanItemStatus; ids: number[] }) => orderPlanItems(status, ids),
+        onMutate: async ({ status, ids }) => {
+            await qc.cancelQueries({ queryKey: key })
+            const previous = qc.getQueryData<PlanItem[]>(key)
+            qc.setQueryData<PlanItem[]>(key, (old) => old?.map((p) => {
+                const position = ids.indexOf(p.id)
+                return position < 0 ? p : { ...p, status, position }
+            }))
             return { previous }
         },
         onError: (_err, _vars, ctx) => {

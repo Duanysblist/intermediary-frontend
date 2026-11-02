@@ -2,7 +2,7 @@ import { request } from './client'
 import { isDemo } from '../demo/mode'
 import type {
     Application, ApplicationInput, Certification, CertificationInput, Document, DocumentInput,
-    FitnessSession, FitnessSessionInput, PlanEvent, PlanItem, PlanItemInput, Proposal, ProposalStatus,
+    FitnessSession, FitnessSessionInput, PlanEvent, PlanItem, PlanItemInput, PlanItemStatus, Proposal, ProposalStatus,
     RecurringPlan, RecurringPlanInput, StudySession, StudySessionInput,
 } from '../types'
 import type { Change, ChangeSet } from '../features/prompt/changeSet'
@@ -60,6 +60,11 @@ export const documentsApi: Resource<Document, DocumentInput> = isDemo ? demo.dem
 export const studySessionsApi: Resource<StudySession, StudySessionInput> = isDemo ? demo.demoStudySessions : resource('/study-sessions')
 export const fitnessSessionsApi: Resource<FitnessSession, FitnessSessionInput> = isDemo ? demo.demoFitnessSessions : resource('/fitness-sessions')
 export const planItemsApi: Resource<PlanItem, PlanItemInput> = isDemo ? demo.demoPlanItems : resource('/plan-items')
+
+/** Saves one board column after a drag: every id moves to `status` and takes its index as its position. */
+export const orderPlanItems: (status: PlanItemStatus, ids: number[]) => Promise<void> = isDemo
+    ? demo.demoOrderPlanItems
+    : (status, ids) => request<void>('/plan-items/order', { method: 'PUT', body: JSON.stringify({ status, ids }) })
 
 export const recurringPlansApi: RecurringPlansApi = isDemo ? demo.demoRecurringPlans : {
     ...resource<RecurringPlan, RecurringPlanInput>('/recurring-plans'),
