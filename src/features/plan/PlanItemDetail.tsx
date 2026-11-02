@@ -2,6 +2,7 @@ import { usePlanEvents } from '../../hooks/resources'
 import Pill from '../../components/ui/Pill'
 import Button from '../../components/ui/Button'
 import { formatDate, formatDateTime, relativeDay } from '../../lib/format'
+import { splitLinks } from '../../lib/links'
 import { label, type PlanItem } from '../../types'
 
 type Props = {
@@ -44,7 +45,19 @@ export default function PlanItemDetail({ item, referenceLabel, onEdit, onLog, on
                 <dd>{formatDateTime(item.updatedAt)}</dd>
             </dl>
 
-            {item.notes && <p className="mt-4 whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-sm text-gray-700">{item.notes}</p>}
+            {item.notes && (
+                <p className="mt-4 whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
+                    {splitLinks(item.notes).map((part, i) =>
+                        typeof part === 'string' ? (
+                            part
+                        ) : (
+                            <a key={i} href={part.href} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                                {part.text}
+                            </a>
+                        ),
+                    )}
+                </p>
+            )}
 
             <section className="mt-6">
                 <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">History</h3>
