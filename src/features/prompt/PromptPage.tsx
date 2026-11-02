@@ -59,11 +59,7 @@ function suggestErrorMessage(err: Error): string {
     return err.message
 }
 
-/**
- * The point of the whole app: turn the structured data into context an AI can use without you
- * re-explaining anything, then bring its suggestions back in as reviewable changes. Proposals
- * posted by agents (the MCP server) land in the inbox here; applied batches can be reverted.
- */
+/** Builds the AI context, brings suggestions back as reviewable changes, and lists the proposal inbox and revertable batches. */
 export default function PromptPage() {
     const qc = useQueryClient()
     const plan = planItems.useList()

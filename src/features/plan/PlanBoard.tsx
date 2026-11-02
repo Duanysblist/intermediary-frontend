@@ -53,7 +53,7 @@ function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: Plan
     )
 }
 
-/** Kanban by status. Dropping a card on a column changes its status (and the server writes a PlanEvent). */
+/** Kanban by status. Dropping a card on a column changes its status. */
 export default function PlanBoard({ items, referenceLabel, onOpen, onAdd }: Props) {
     const byStatus = new Map<PlanItemStatus, PlanItem[]>(PLAN_STATUSES.map((s) => [s, []]))
     for (const it of items) byStatus.get(it.status)?.push(it)

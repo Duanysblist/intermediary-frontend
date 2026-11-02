@@ -1,105 +1,80 @@
 # intermediary-frontend
 
-The human-facing side of [intermediary](https://github.com/Duanysblist/intermediary): a planning
-interface where you drag intentions between status columns and calendar days, log what actually
-happened, package all of it as context for an AI assistant, and bring the assistant's suggested
-schedule changes back in for review. The AI never lives in this app; it reads the same REST API
-this UI does.
+The web UI for [intermediary](https://github.com/Duanysblist/intermediary). You plan intentions on a
+status board and a calendar week, log what actually happened, and package both as context for an AI
+assistant. The assistant's suggested schedule changes come back as a change set you review before
+anything is applied. The AI never runs inside this app; it reads the same REST API the UI does.
 
-**Live:** [intermediary-frontend.vercel.app](https://intermediary-frontend.vercel.app) (sign in) ·
-[**/demo**](https://intermediary-frontend.vercel.app/demo) (sample data, no sign-in)
+Live: [intermediary-frontend.vercel.app](https://intermediary-frontend.vercel.app) (sign in), or
+[/demo](https://intermediary-frontend.vercel.app/demo) for sample data with no sign-in.
 
-## Two ways to run it
-
-| | Demo (`/demo`) | Your account (`/`) |
-|---|---|---|
-| Data | Sample dataset generated in the browser, relative to today | Your real data from the API |
-| Sign-in | None | Username + password configured on the API server |
-| Persistence | None; a reload starts over | PostgreSQL behind the API |
-| Claude | A built-in stand-in returns a realistic suggestion so the review flow can be tried | Real Claude call through the API when the server has an `ANTHROPIC_API_KEY`; otherwise copy/paste and import |
-
-Both are the same build. The demo is the app mounted under `/demo` with an in-memory store
-(`src/demo/`) swapped in for the API client, so every screen and interaction is identical.
-
-## What's here
+## Screens
 
 | Screen | What it does |
 |---|---|
-| **Dashboard** | Week-at-a-glance: open and overdue intentions, what got done (from the audit log), study and fitness minutes versus what was planned, application pipeline, next exam. |
-| **Plan** | Kanban board by status and a calendar week view. Drag a card to a column to change its status (the server appends a `PlanEvent`), onto a day to set its target date, or onto the Unscheduled tray to clear it. Click a card for details, its history, and **Log session** to record the study time or workout that fulfilled it. **Routines** generate recurring items; **Calendar feed** gives a subscribable iCalendar URL. |
-| **Sessions** | Log study sessions (optionally against a certification) and workouts. Weekly totals up top. |
-| **Applications** | Job application tracker with status filter. |
-| **Certifications** | Cards with exam countdown, manual hours, and minutes actually logged in sessions. |
-| **Documents** | Register resumes, plans, and guides so plan items can reference them. |
-| **Review** | Weekly review: completion rate, planned versus done by intent, study minutes per certification, what slipped, and which intentions get deferred most. |
-| **Prompt** | Builds a Markdown + JSON context block (with a computed week summary) from the slices you pick, then: **Ask Claude** (server-side call, returns structured changes; the answer is also saved to the inbox, so a phone that switches apps mid-request loses nothing), **Open in Claude** (prefills claude.ai), **Copy**, and **Import changes** (paste the JSON any assistant returns). Proposals from the MCP server appear in an inbox here. Every suggestion is shown as before → after, applied only when you accept it, and applied batches can be reverted for a week. |
+| Dashboard | The week at a glance: open and overdue items, what got done, planned versus logged minutes, application pipeline, next exam. |
+| Plan | Kanban by status and a calendar week. Drag a card to a column to change status, onto a day to set its date, or onto Unscheduled to clear it. A card's detail view shows its history and **Log session**. Routines generate recurring items, and the calendar feed gives an iCalendar URL. |
+| Sessions | Study sessions (optionally against a certification) and workouts, with weekly totals. |
+| Applications, Certifications, Documents | Reference data that plan items can point at. |
+| Review | Weekly review: completion rate, planned versus done by intent, study minutes per certification, what slipped, what keeps getting deferred. |
+| Prompt | Builds a Markdown and JSON context block from the slices you pick. See below. |
 
-## How to use it
+### The Claude round trip
 
-1. **Set up the reference data once.** Add the certifications you're studying for, the
-   applications you have open, and any documents you maintain. Plan items can point at these.
-2. **Plan on the board.** Create plan items with an intent (study, exercise, apply, read, write)
-   and a target date. Drag between columns as work starts and finishes; switch to the Week view
-   and drag cards onto days to schedule them.
-3. **Log reality as it happens.** Under Sessions, log study time (against a certification) and
-   workouts. The Dashboard compares this with what you planned for the week.
-4. **Ask for help without re-explaining.** On the Prompt page pick what to include and either
-   press Ask Claude, or Open in Claude / Copy and paste into any assistant. Ask it what to
-   change; it answers with a JSON change set.
-5. **Import and review.** Press Import changes, paste the JSON, tick what you accept, Apply.
-   Every accepted change goes through the same API as a manual edit, so the history stays honest.
+1. The Prompt page renders your data plus a "How to answer" section that asks for changes in the
+   JSON shape defined in `src/features/prompt/changeSet.ts`.
+2. Get a change set one of three ways: **Ask Claude** (the server calls Claude through
+   `POST /ai/suggest`, and the answer is also saved to the inbox so switching apps mid-request loses
+   nothing), **Open in Claude** or **Copy** and paste into any assistant, then **Import changes**
+   with the JSON it returns. Proposals posted by the MCP server show up in the inbox.
+3. The review dialog shows each change as before and after. Tick what you accept and apply. Changes
+   go through the normal plan-item API, so the audit log records them like manual edits. Applied
+   batches can be reverted for a week.
 
-### The Claude round-trip
+## Demo mode
 
-1. The Prompt page renders your data plus a "How to answer" section that asks for changes in a fixed
-   JSON shape (`src/features/prompt/changeSet.ts`).
-2. Either the server calls Claude (`POST /ai/suggest`, structured output constrained to that shape),
-   or you paste the assistant's JSON into **Import changes**.
-3. The review dialog lists each proposed update or new item with the current value struck through.
-   Tick what you want, click Apply, and the changes go through the normal plan-item API, so the
-   audit log records them like any other edit.
+`/demo` is the same build with an in-memory store (`src/demo/`) in place of the API client. It has
+sample data relative to today, no sign-in, no persistence, and a built-in stand-in for Claude so the
+review flow works.
 
-## Stack
+## Code layout
 
 React 19, TypeScript, Vite, Tailwind CSS 4, TanStack Query, React Router 7, dnd-kit.
 
-`src/` is organised by feature. Every backend entity has the same CRUD shape, so
-`src/api/resources.ts` builds a typed client per resource (or its demo stand-in) and
-`src/hooks/resources.ts` derives the query/mutation hooks. Types in `src/types/index.ts` mirror
-the backend DTOs exactly. Auth is a JWT in `localStorage`, attached by `src/api/client.ts`; a 401
-anywhere returns you to the sign-in screen.
+- `src/features/` has one folder per screen.
+- `src/api/resources.ts` builds a typed client per backend resource, and `src/hooks/resources.ts`
+  derives the query hooks from it.
+- `src/types/index.ts` mirrors the backend DTOs.
+- Auth is a JWT in `localStorage`, attached in `src/api/client.ts`. A 401 opens a sign-in prompt
+  over the current page.
 
-## Running locally
+## Run, test, build
 
-Requires Node 20+ and the backend running on `http://localhost:8080` (see the backend README).
+Needs Node 20.19+ (CI and the Dockerfile use 24) and the backend on `http://localhost:8080`.
 
 ```bash
-npm install
-npm run dev
+npm ci
+npm run dev        # http://localhost:5173
 ```
 
-Open <http://localhost:5173>. Sign in with the backend's `APP_USERNAME` / `APP_PASSWORD` (the
-IntelliJ run configurations and `docker compose` use `dev` / `dev`), or open
-<http://localhost:5173/demo>. The dev server defaults to the local backend; set
-`VITE_API_BASE_URL` in `.env.local` to point elsewhere (see `.env.example`).
+Sign in with the backend's `APP_USERNAME` / `APP_PASSWORD` (`dev` / `dev` under the IntelliJ run
+configurations in `.run/` and the backend's `docker compose`), or open `/demo`. Set
+`VITE_API_BASE_URL` in `.env.local` to use a different API (see `.env.example`).
 
-| Command | What it does |
+| Command | Does |
 |---|---|
-| `npm run check` | Lint, type-check, and production build. Run before pushing. |
-| `npm run lint` / `npm run typecheck` / `npm run build` | The individual steps. |
-| `npm run preview` | Serve the production bundle locally. |
+| `npm run check` | Lint, test, build. This is what CI runs. |
+| `npm run lint`, `npm test`, `npm run typecheck`, `npm run build` | The individual steps. `build` also type-checks. |
+| `npm run preview` | Serve the production bundle. |
 
-IntelliJ run configurations for `dev` and `check` are in `.run/`. A `Dockerfile` (nginx, SPA
-fallback) is included; the backend's `docker compose --profile web up --build` runs the whole stack.
+## Deploy
 
-## Deploying
+The output is a static bundle. `vercel.json` rewrites every path to `index.html`, which makes client
+routes and `/demo/...` work. Set `VITE_API_BASE_URL` in the Vercel project to the API origin with no
+trailing slash, and add the frontend origin to the API's `APP_CORS_ORIGINS`. The `Dockerfile` serves
+the bundle with nginx; the backend's `docker compose --profile web up --build` runs the whole stack.
 
-The app is a static bundle. `vercel.json` rewrites every path to `index.html` for client-side
-routing, which is also what makes `/demo/...` work. In the Vercel project set
-`VITE_API_BASE_URL` to the API origin (the Render URL, no trailing slash); the API's
-`APP_CORS_ORIGINS` must include the frontend origin.
+## Limits
 
-## Known limits
-
-- Undo history for imported change sets lives in the browser, not the server.
-- Single user. The API has one account; there is no sign-up.
+- Undo history for applied change sets is stored in the browser, not on the server.
+- Single user: the API has one account and no sign-up.
