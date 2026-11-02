@@ -36,10 +36,10 @@ function WeekSummary({ items, kindLabel }: { items: { sessionDate: string; durat
     const lastMinutes = lastWeek.reduce((sum, s) => sum + s.durationMinutes, 0)
     return (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">This week</p><p className="mt-1 text-2xl font-semibold">{formatMinutes(minutes)}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">Sessions</p><p className="mt-1 text-2xl font-semibold">{thisWeek.length}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">Last week</p><p className="mt-1 text-2xl font-semibold">{formatMinutes(lastMinutes)}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">All time</p><p className="mt-1 text-2xl font-semibold">{items.length} <span className="text-sm font-normal text-gray-500">{kindLabel}</span></p></Card>
+            <Card><p className="text-xs uppercase tracking-wide text-gray-500">This week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(minutes)}</p></Card>
+            <Card><p className="text-xs uppercase tracking-wide text-gray-500">Sessions</p><p className="mt-1 text-2xl font-semibold tabular-nums">{thisWeek.length}</p></Card>
+            <Card><p className="text-xs uppercase tracking-wide text-gray-500">Last week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(lastMinutes)}</p></Card>
+            <Card><p className="text-xs uppercase tracking-wide text-gray-500">All time</p><p className="mt-1 text-2xl font-semibold tabular-nums">{items.length} <span className="text-sm font-normal text-gray-500">{kindLabel}</span></p></Card>
         </div>
     )
 }
