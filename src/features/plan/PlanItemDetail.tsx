@@ -4,6 +4,7 @@ import Button from '../../components/ui/Button'
 import { formatDate, formatDateTime, relativeDay } from '../../lib/format'
 import { splitLinks } from '../../lib/links'
 import { label, type PlanItem } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type Props = {
     item: PlanItem
@@ -29,8 +30,8 @@ export default function PlanItemDetail({ item, referenceLabel, onEdit, onLog, on
                         {item.recurringPlanId != null && <span className="rounded-full bg-sunken px-2.5 py-0.5 text-xs text-ink-2">routine</span>}
                     </div>
                 </div>
-                <button type="button" onClick={onClose} className="rounded p-1 text-faint hover:bg-sunken hover:text-ink-2" aria-label="Close">
-                    ✕
+                <button type="button" onClick={onClose} className="-mr-2 -mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted hover:bg-sunken hover:text-ink" aria-label="Close">
+                    <Icon name="close" className="h-5 w-5" />
                 </button>
             </div>
 
@@ -60,7 +61,7 @@ export default function PlanItemDetail({ item, referenceLabel, onEdit, onLog, on
             )}
 
             <section className="mt-6">
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">History</h3>
+                <h3 className="mb-2 text-[15px] font-semibold text-ink-2">History</h3>
                 {events.isPending ? (
                     <p className="text-sm text-muted">Loading…</p>
                 ) : events.isError ? (
@@ -82,17 +83,18 @@ export default function PlanItemDetail({ item, referenceLabel, onEdit, onLog, on
                 )}
             </section>
 
-            <div className="mt-6 flex flex-wrap justify-between gap-2">
-                <Button variant="ghost" className="text-danger hover:bg-danger-tint hover:text-danger" onClick={onDelete}>Delete</Button>
-                <div className="flex gap-2">
-                    <Button variant="secondary" onClick={onClose}>Close</Button>
-                    <Button variant="secondary" onClick={onEdit}>Edit</Button>
+            {/* Phones stack the actions with the main one on top; wider screens line them up with it on the right. */}
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse sm:justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row-reverse">
                     {loggable && item.status !== 'CANCELED' && (
                         <Button onClick={onLog} title="Record the session that fulfilled this and mark it done">
                             {item.intent === 'EXERCISE' ? 'Log workout' : 'Log session'}
                         </Button>
                     )}
+                    <Button variant="secondary" onClick={onEdit}>Edit</Button>
+                    <span className="hidden sm:contents"><Button variant="secondary" onClick={onClose}>Close</Button></span>
                 </div>
+                <Button variant="ghost" className="text-danger hover:bg-danger-tint hover:text-danger" onClick={onDelete}>Delete</Button>
             </div>
         </div>
     )

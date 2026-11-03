@@ -8,6 +8,7 @@ import ApplicationForm from './ApplicationForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, formatDateTime, formatSalary, isLink, todayISO } from '../../lib/format'
 import { APPLICATION_STATUSES, label, type Application, type ApplicationInput, type ApplicationStatus } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 const CLOSED: ApplicationStatus[] = ['REJECTED', 'WITHDRAWN', 'GHOSTED']
 
@@ -54,7 +55,7 @@ export default function ApplicationsPage() {
                     <>
                         <select
                             aria-label="Filter by status"
-                            className="rounded-md border border-rule-strong bg-surface px-2.5 py-1.5 text-sm"
+                            className="min-h-11 rounded-[10px] border border-rule-strong bg-surface px-2.5 text-base sm:min-h-0 sm:py-1.5 sm:text-sm"
                             value={filter}
                             onChange={(e) => setFilter(e.target.value as typeof filter)}
                         >
@@ -62,7 +63,7 @@ export default function ApplicationsPage() {
                             <option value="all">All</option>
                             {APPLICATION_STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                         </select>
-                        <Button onClick={() => setAdding(true)}>+ Add</Button>
+                        <Button onClick={() => setAdding(true)}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Add</Button>
                     </>
                 }
             />
@@ -75,7 +76,7 @@ export default function ApplicationsPage() {
                 />
             ) : (
                 <>
-                <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs md:hidden">
+                <ul className="divide-y divide-rule rounded-xl bg-surface md:hidden">
                     {rows.map((app) => {
                         const late = !CLOSED.includes(app.status) && app.nextActionDate != null && app.nextActionDate < today
                         return (
@@ -98,10 +99,10 @@ export default function ApplicationsPage() {
                         )
                     })}
                 </ul>
-                <div className="hidden overflow-x-auto rounded-xl border border-rule bg-surface shadow-xs md:block">
+                <div className="hidden overflow-x-auto rounded-xl bg-surface md:block">
                     <table className="w-full text-sm">
                         <thead>
-                        <tr className="border-b border-rule bg-page text-left text-xs uppercase tracking-wide text-muted">
+                        <tr className="border-b border-rule bg-page text-left text-xs text-muted">
                             <th className="px-4 py-2.5 font-medium">Company</th>
                             <th className="px-4 py-2.5 font-medium">Role</th>
                             <th className="px-4 py-2.5 font-medium">Status</th>

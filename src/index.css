@@ -2,74 +2,74 @@
 
 /* Semantic colours. Components use these names only; the values below switch with the phone's light or dark setting. */
 @theme {
-    --color-page: oklch(98.5% 0.002 247.839);
+    --color-page: #f2f2f7;
     --color-surface: #ffffff;
-    --color-sunken: oklch(96.7% 0.003 264.542);
-    --color-ink: oklch(21% 0.034 264.665);
-    --color-ink-2: oklch(37.3% 0.034 259.733);
-    --color-muted: oklch(50% 0.027 264.364);
-    --color-faint: oklch(62% 0.022 261.325);
-    --color-rule: oklch(92.8% 0.006 264.531);
-    --color-rule-strong: oklch(87.2% 0.01 258.338);
-    --color-accent: oklch(54.6% 0.245 262.881);
-    --color-accent-strong: oklch(48.8% 0.243 264.376);
-    --color-accent-tint: oklch(97% 0.014 254.604);
+    --color-sunken: #e9e9ee;
+    --color-ink: #1c1c1e;
+    --color-ink-2: #3a3a3c;
+    --color-muted: #5c5c61;
+    --color-faint: #636368;
+    --color-rule: #e5e5ea;
+    --color-rule-strong: #d1d1d6;
+    --color-accent: #5856d6;
+    --color-accent-strong: #4644c4;
+    --color-accent-tint: #eeeefc;
     --color-on-accent: #ffffff;
-    --color-focus: oklch(62.3% 0.214 259.815);
-    --color-danger: oklch(57.7% 0.245 27.325);
-    --color-danger-strong: oklch(50.5% 0.213 27.518);
-    --color-danger-tint: oklch(97.1% 0.013 17.38);
-    --color-ok: oklch(52.7% 0.154 150.069);
-    --color-ok-tint: oklch(98.2% 0.018 155.826);
-    --color-warn: oklch(47.3% 0.137 46.201);
-    --color-warn-tint: oklch(98.7% 0.022 95.277);
-    --color-scrim: oklch(21% 0.034 264.665 / 0.4);
+    --color-focus: #5856d6;
+    --color-danger: #d70015;
+    --color-danger-strong: #b80012;
+    --color-danger-tint: #fdecee;
+    --color-ok: #1e7b34;
+    --color-ok-tint: #e7f5eb;
+    --color-warn: #a05a00;
+    --color-warn-tint: #fff4e0;
+    --color-scrim: rgb(0 0 0 / 0.35);
 
     /* Status and kind tones: a soft fill with an ink of the same hue, mapped per value in Pill.tsx. */
     --color-tone-blue-soft: oklch(93.2% 0.032 255.585);
     --color-tone-blue: oklch(48.8% 0.243 264.376);
     --color-tone-amber-soft: oklch(96.2% 0.059 95.617);
-    --color-tone-amber: oklch(55.5% 0.163 48.998);
+    --color-tone-amber: oklch(48% 0.14 48.998);
     --color-tone-violet-soft: oklch(94.3% 0.029 294.588);
     --color-tone-violet: oklch(49.1% 0.27 292.581);
     --color-tone-green-soft: oklch(96.2% 0.044 156.743);
-    --color-tone-green: oklch(52.7% 0.154 150.069);
+    --color-tone-green: oklch(48% 0.14 150.069);
     --color-tone-red-soft: oklch(93.6% 0.032 17.717);
     --color-tone-red: oklch(50.5% 0.213 27.518);
     --color-tone-gray-soft: oklch(96.7% 0.003 264.542);
     --color-tone-gray: oklch(44.6% 0.03 256.802);
     --color-tone-slate-soft: oklch(96.8% 0.007 247.896);
-    --color-tone-slate: oklch(55.4% 0.046 257.417);
+    --color-tone-slate: oklch(48% 0.046 257.417);
     --color-tone-teal-soft: oklch(95.3% 0.051 180.801);
     --color-tone-teal: oklch(51.1% 0.096 186.391);
     --color-tone-orange-soft: oklch(95.4% 0.038 75.164);
-    --color-tone-orange: oklch(55.3% 0.195 38.402);
+    --color-tone-orange: oklch(48% 0.17 38.402);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-page: oklch(17% 0.01 260);
-        --color-surface: oklch(21% 0.012 260);
-        --color-sunken: oklch(14.5% 0.008 260);
-        --color-ink: oklch(96% 0.005 260);
-        --color-ink-2: oklch(86% 0.01 260);
-        --color-muted: oklch(72% 0.015 260);
-        --color-faint: oklch(60% 0.015 260);
-        --color-rule: oklch(29% 0.012 260);
-        --color-rule-strong: oklch(37% 0.014 260);
-        --color-accent: oklch(68% 0.17 258);
-        --color-accent-strong: oklch(74% 0.15 258);
-        --color-accent-tint: oklch(28% 0.06 258);
-        --color-on-accent: oklch(17% 0.01 260);
-        --color-focus: oklch(72% 0.16 258);
-        --color-danger: oklch(70% 0.19 25);
-        --color-danger-strong: oklch(76% 0.16 25);
-        --color-danger-tint: oklch(27% 0.06 25);
-        --color-ok: oklch(75% 0.15 150);
-        --color-ok-tint: oklch(26% 0.05 150);
-        --color-warn: oklch(82% 0.14 80);
-        --color-warn-tint: oklch(27% 0.05 80);
-        --color-scrim: oklch(0% 0 0 / 0.6);
+        --color-page: #0e0e10;
+        --color-surface: #1c1c1e;
+        --color-sunken: #161618;
+        --color-ink: #f5f5f7;
+        --color-ink-2: #d1d1d6;
+        --color-muted: #98989f;
+        --color-faint: #85858b;
+        --color-rule: #2c2c2e;
+        --color-rule-strong: #3a3a3c;
+        --color-accent: #8e8cff;
+        --color-accent-strong: #a9a7ff;
+        --color-accent-tint: #25244a;
+        --color-on-accent: #0e0e10;
+        --color-focus: #8e8cff;
+        --color-danger: #ff6961;
+        --color-danger-strong: #ff8a84;
+        --color-danger-tint: #3a1c1c;
+        --color-ok: #30d158;
+        --color-ok-tint: #11301b;
+        --color-warn: #ffb340;
+        --color-warn-tint: #33270f;
+        --color-scrim: rgb(0 0 0 / 0.6);
         --color-tone-blue-soft: oklch(30% 0.07 258);
         --color-tone-blue: oklch(85% 0.12 258);
         --color-tone-amber-soft: oklch(30% 0.07 75);
@@ -97,6 +97,33 @@ html {
 
 body {
     @apply bg-page text-ink antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    accent-color: var(--color-accent);
+    caret-color: var(--color-accent);
+    scrollbar-color: var(--color-rule-strong) transparent;
+}
+
+::selection {
+    background: var(--color-accent-tint);
+    color: var(--color-ink);
+}
+
+a {
+    text-underline-offset: 0.2em;
+}
+
+/* Completing a task: the circle pops and the check draws itself. Only runs on a tap, and never under reduced motion. */
+@keyframes check-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+}
+@keyframes check-draw {
+    from { stroke-dashoffset: 20; }
+    to { stroke-dashoffset: 0; }
 }
 
 /* Base layer so components with their own focus ring (buttons, inputs) still win over this. */

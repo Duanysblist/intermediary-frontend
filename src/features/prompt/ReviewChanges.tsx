@@ -9,6 +9,7 @@ import { label, type PlanItem } from '../../types'
 import type { Change, ChangeSet, PlanItemFields } from './changeSet'
 import { recordBatch } from './appliedBatches'
 import { applyChanges, failedChanges, type Outcome } from './applyChanges'
+import Icon from '../../components/ui/Icon'
 
 type Props = {
     source: string
@@ -67,7 +68,7 @@ export default function ReviewChanges({ source, changeSet, onClose, onApplied }:
                     <h2 className="text-lg font-semibold text-ink">Review suggested changes</h2>
                     <p className="mt-0.5 text-xs text-muted">From {source}. Nothing is applied until you click Apply; applied batches can be reverted from the Prompt page.</p>
                 </div>
-                <button type="button" onClick={onClose} className="rounded p-1 text-faint hover:bg-sunken hover:text-ink-2" aria-label="Close">✕</button>
+                <button type="button" onClick={onClose} className="-mr-2 -mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted hover:bg-sunken hover:text-ink" aria-label="Close"><Icon name="close" className="h-5 w-5" /></button>
             </div>
 
             {changeSet.summary && <p className="mt-4 rounded-lg bg-accent-tint px-3 py-2 text-sm text-ink">{changeSet.summary}</p>}

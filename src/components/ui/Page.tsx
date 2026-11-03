@@ -4,7 +4,7 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
     return (
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6">
             <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+                <h1 className="text-[2rem] font-bold leading-tight tracking-tight text-ink lg:text-2xl">{title}</h1>
                 {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
             </div>
             {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -13,13 +13,13 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-    return <div className={`rounded-xl border border-rule bg-surface p-4 shadow-xs ${className}`}>{children}</div>
+    return <div className={`rounded-xl bg-surface p-4 ${className}`}>{children}</div>
 }
 
 export function SectionTitle({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
     return (
-        <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{children}</h2>
+        <div className="mb-2 flex items-center justify-between">
+            <h2 className="px-1 text-[15px] font-semibold text-ink-2">{children}</h2>
             {aside}
         </div>
     )
@@ -27,7 +27,7 @@ export function SectionTitle({ children, aside }: { children: ReactNode; aside?:
 
 export function EmptyState({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
     return (
-        <div className="rounded-xl border border-dashed border-rule-strong px-6 py-10 text-center">
+        <div className="rounded-xl bg-surface px-6 py-10 text-center">
             <p className="text-sm font-medium text-ink-2">{title}</p>
             {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
             {action && <div className="mt-4">{action}</div>}
@@ -45,7 +45,7 @@ export function LoadingState({ what }: { what: string }) {
 
 export function ErrorState({ what, error }: { what: string; error: Error }) {
     return (
-        <div className="rounded-xl border border-danger/30 bg-danger-tint px-4 py-3 text-sm text-danger" role="alert">
+        <div className="rounded-xl bg-danger-tint px-4 py-3 text-sm text-danger" role="alert">
             Couldn't load {what}: {error.message}
         </div>
     )

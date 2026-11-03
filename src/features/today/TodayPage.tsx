@@ -5,6 +5,8 @@ import Pill from '../../components/ui/Pill'
 import Modal from '../../components/ui/Modal'
 import Button from '../../components/ui/Button'
 import Icon from '../../components/ui/Icon'
+import Fab from '../../components/ui/Fab'
+import TaskCheck from '../../components/ui/TaskCheck'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
 import PlanItemSheet from '../plan/PlanItemSheet'
 import { useMovePlanItem } from '../plan/usePlanBoard'
@@ -21,29 +23,24 @@ function byTodayOrder(a: PlanItem, b: PlanItem) {
 }
 
 function TaskRow({ item, meta, late, onOpen, onToggle }: { item: PlanItem; meta: string | null; late?: boolean; onOpen: () => void; onToggle: () => void }) {
-    const done = item.status === 'DONE'
-    const dropped = item.status === 'CANCELED' || item.status === 'DEFERRED'
+    const finished = item.status === 'DONE' || item.status === 'CANCELED' || item.status === 'DEFERRED'
+    const status = item.status === 'PLANNED' || item.status === 'DONE' ? null : label(item.status)
     return (
-        <li className="flex items-center gap-1">
-            <button type="button" onClick={onOpen} className="flex min-h-14 min-w-0 flex-1 items-center gap-3 py-2 pl-4 text-left focus-visible:-outline-offset-2">
+        <li className="flex items-center pl-1">
+            <TaskCheck item={item} onToggle={onToggle} />
+            <button type="button" onClick={onOpen} className="flex min-h-14 min-w-0 flex-1 items-center gap-3 py-2 pr-4 text-left focus-visible:-outline-offset-2">
                 <span className="min-w-0 flex-1">
-                    <span className={`block text-base font-medium leading-snug sm:text-sm ${done || dropped ? 'text-muted line-through' : 'text-ink'}`}>{item.title}</span>
-                    <span className={`mt-0.5 block truncate text-xs ${late ? 'font-medium text-danger' : 'text-muted'}`}>
-                        {[late ? `Due ${relativeDay(item.targetDate)}` : item.status === 'PLANNED' ? null : label(item.status), meta].filter(Boolean).join(' · ') || label(item.intent)}
+                    <span className={`block text-base leading-snug motion-safe:transition-colors motion-safe:duration-200 lg:text-sm ${finished ? 'text-muted' : 'text-ink'}`}>
+                        {/* The strike is a background line so it can draw across; reduced motion swaps it in at once. */}
+                        <span className={`box-decoration-clone bg-[linear-gradient(currentColor,currentColor)] bg-[position:0_58%] bg-no-repeat motion-safe:transition-[background-size] motion-safe:duration-[240ms] motion-safe:ease-out ${finished ? 'bg-[length:100%_1px]' : 'bg-[length:0%_1px]'}`}>{item.title}</span>
                     </span>
+                    {(late || status || meta) && (
+                        <span className={`mt-0.5 block truncate text-xs ${late ? 'font-medium text-danger' : 'text-muted'}`}>
+                            {[late ? `Due ${relativeDay(item.targetDate)}` : status, meta].filter(Boolean).join(' · ')}
+                        </span>
+                    )}
                 </span>
                 <Pill value={item.intent} className="shrink-0" />
-            </button>
-            <button
-                type="button"
-                onClick={onToggle}
-                aria-pressed={done}
-                aria-label={done ? `Mark “${item.title}” not done` : `Mark “${item.title}” done`}
-                className="grid h-14 w-14 shrink-0 place-items-center focus-visible:-outline-offset-4"
-            >
-                <span className={`grid h-7 w-7 place-items-center rounded-md border-2 transition-colors ${done ? 'border-ok bg-ok text-surface' : 'border-rule-strong text-transparent'}`}>
-                    <Icon name="check" className="h-4 w-4" strokeWidth={3} />
-                </span>
             </button>
         </li>
     )
@@ -52,7 +49,7 @@ function TaskRow({ item, meta, late, onOpen, onToggle }: { item: PlanItem; meta:
 function Stat({ label: text, value, sub, to, tone }: { label: string; value: string | number; sub?: string; to: string; tone?: 'danger' | 'ok' | 'accent' }) {
     const color = tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : tone === 'accent' ? 'text-accent' : 'text-ink'
     return (
-        <Link to={to} className="block rounded-xl border border-rule bg-surface p-3 shadow-xs transition-colors hover:border-rule-strong sm:p-4">
+        <Link to={to} className="block rounded-xl bg-surface p-3 transition-colors hover:bg-sunken sm:p-4">
             <p className="text-xs text-muted">{text}</p>
             <p className={`mt-0.5 text-xl font-semibold tabular-nums sm:text-2xl ${color}`}>{value}</p>
             {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
@@ -112,6 +109,7 @@ export default function TodayPage() {
     const titleOf = new Map(plan.data.map((p) => [p.id, p.title]))
     const recent = [...events.data].sort((a, b) => b.eventTime.localeCompare(a.eventTime)).slice(0, 6)
     const meta = (p: PlanItem) => labelFor(p.referenceEntityType, p.referenceEntityId)
+    const closeLog = () => { setLogging(null); createStudy.reset(); createFitness.reset() }
     const toggle = (p: PlanItem) => moveMut.mutate({ item: p, patch: { status: p.status === 'DONE' ? 'PLANNED' : 'DONE' } })
 
     const logged = [studyToday && `${formatMinutes(studyToday)} studied`, fitnessToday && `${formatMinutes(fitnessToday)} trained`].filter(Boolean)
@@ -122,6 +120,7 @@ export default function TodayPage() {
             <PageHeader
                 title="Today"
                 subtitle={`${parseLocal(today).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} · ${summary}`}
+                actions={<span className="hidden lg:block"><Button onClick={() => setLogging('study')}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log session</Button></span>}
             />
 
             {moveMut.isError && (
@@ -135,7 +134,7 @@ export default function TodayPage() {
                     {overdue.length > 0 && (
                         <section>
                             <SectionTitle><span className="text-danger">Running late</span></SectionTitle>
-                            <ul className="divide-y divide-rule rounded-xl border border-danger/30 bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {overdue.map((p) => (
                                     <TaskRow key={p.id} item={p} meta={meta(p)} late onOpen={() => setSelected(p)} onToggle={() => toggle(p)} />
                                 ))}
@@ -144,11 +143,11 @@ export default function TodayPage() {
                     )}
 
                     <section>
-                        <SectionTitle aside={<Link to="/plan?view=week" className="py-1 text-xs text-accent hover:underline">Week view</Link>}>Today</SectionTitle>
+                        <SectionTitle aside={<Link to="/plan?view=week" className="-my-2 inline-flex min-h-11 items-center px-1 text-sm text-accent hover:underline sm:min-h-0 sm:text-xs">Week view</Link>}>Today</SectionTitle>
                         {todays.length === 0 ? (
                             <Card><p className="text-sm text-muted">Nothing is dated today. Items you give today's date on the <Link to="/plan" className="text-accent underline">Plan</Link> land here.</p></Card>
                         ) : (
-                            <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {todays.map((p) => (
                                     <TaskRow key={p.id} item={p} meta={meta(p)} onOpen={() => setSelected(p)} onToggle={() => toggle(p)} />
                                 ))}
@@ -156,15 +155,10 @@ export default function TodayPage() {
                         )}
                     </section>
 
-                    <div className="grid grid-cols-2 gap-2">
-                        <Button variant="secondary" onClick={() => setLogging('study')}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log study</Button>
-                        <Button variant="secondary" onClick={() => setLogging('fitness')}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log workout</Button>
-                    </div>
-
                     {upcoming.length > 0 && (
                         <section>
                             <SectionTitle>Coming up</SectionTitle>
-                            <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {upcoming.map((p) => (
                                     <li key={p.id}>
                                         <button type="button" onClick={() => setSelected(p)} className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left text-sm focus-visible:-outline-offset-2">
@@ -197,7 +191,7 @@ export default function TodayPage() {
                         {recent.length === 0 ? (
                             <Card><p className="text-sm text-muted">Status changes on plan items are recorded here automatically.</p></Card>
                         ) : (
-                            <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {recent.map((e) => (
                                     <li key={e.id} className="px-4 py-2.5 text-sm">
                                         <div className="flex items-center justify-between gap-3">
@@ -217,13 +211,23 @@ export default function TodayPage() {
 
             {selected && <PlanItemSheet key={selected.id} item={selected} onClose={() => setSelected(null)} />}
 
-            <Modal open={logging !== null} onClose={() => { setLogging(null); createStudy.reset(); createFitness.reset() }}>
+            <Fab onClick={() => setLogging('study')}>Log session</Fab>
+
+            <Modal open={logging !== null} onClose={closeLog}>
+                <div className="mb-4 grid grid-cols-2 rounded-[10px] bg-sunken p-0.5 text-sm" role="tablist" aria-label="Kind of session">
+                    {(['study', 'fitness'] as const).map((k) => (
+                        <button key={k} type="button" role="tab" aria-selected={logging === k} onClick={() => setLogging(k)}
+                                className={`min-h-11 rounded-lg font-medium transition-colors sm:min-h-9 ${logging === k ? 'bg-surface text-ink shadow-sm' : 'text-ink-2'}`}>
+                            {k === 'study' ? 'Study' : 'Workout'}
+                        </button>
+                    ))}
+                </div>
                 {logging === 'study' && (
-                    <StudySessionForm onSubmit={(input) => createStudy.mutate(input, { onSuccess: () => setLogging(null) })} onCancel={() => setLogging(null)}
+                    <StudySessionForm onSubmit={(input) => createStudy.mutate(input, { onSuccess: closeLog })} onCancel={closeLog}
                                       isSaving={createStudy.isPending} error={createStudy.error} />
                 )}
                 {logging === 'fitness' && (
-                    <FitnessSessionForm onSubmit={(input) => createFitness.mutate(input, { onSuccess: () => setLogging(null) })} onCancel={() => setLogging(null)}
+                    <FitnessSessionForm onSubmit={(input) => createFitness.mutate(input, { onSuccess: closeLog })} onCancel={closeLog}
                                         isSaving={createFitness.isPending} error={createFitness.error} />
                 )}
             </Modal>

@@ -8,6 +8,7 @@ import CertificationForm from './CertificationForm'
 import { Card, EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, formatMinutes, relativeDay } from '../../lib/format'
 import { CERTIFICATION_STATUSES, type Certification, type CertificationInput } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 export default function CertificationsPage() {
     const { data, isPending, isError, error } = certifications.useList()
@@ -52,7 +53,7 @@ export default function CertificationsPage() {
             <PageHeader
                 title="Certifications"
                 subtitle="What you're studying for, and the exams on the calendar."
-                actions={<Button onClick={() => setAdding(true)}>+ Add</Button>}
+                actions={<Button onClick={() => setAdding(true)}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Add</Button>}
             />
 
             {sorted.length === 0 ? (

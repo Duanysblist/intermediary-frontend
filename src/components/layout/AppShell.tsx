@@ -26,47 +26,51 @@ export default function AppShell() {
     const [moreOpen, setMoreOpen] = useState(false)
     return (
         <div className="min-h-dvh bg-page text-ink">
-            {isDemo && (
-                <div className="bg-warn-tint px-4 py-1.5 text-center text-xs text-warn ring-1 ring-warn/30">
-                    <span className="font-medium">Demo</span> with sample data. Nothing is saved, and a reload starts over.{' '}
-                    <a href="/login" className="font-medium underline">Sign in to your own</a>
-                </div>
-            )}
-
-            <header className="sticky top-0 z-40 hidden border-b border-rule bg-surface/95 backdrop-blur md:block">
-                <nav className="mx-auto flex max-w-6xl items-center gap-1 px-6" aria-label="Primary">
-                    <NavLink to="/" className="-ml-1 mr-3 flex shrink-0 items-center gap-2 rounded-md px-1 py-3 font-semibold tracking-tight">
-                        <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
-                        intermediary
-                    </NavLink>
+            <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-rule bg-surface px-3 py-5 lg:flex" aria-label="Primary">
+                <NavLink to="/" className="mb-6 flex items-center gap-2 rounded-md px-3 py-1 text-lg font-bold tracking-tight">
+                    <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+                    intermediary
+                </NavLink>
+                <nav className="flex flex-col gap-0.5">
                     {[...primary, ...secondary].map((tab) => (
                         <NavLink
                             key={tab.to}
                             to={tab.to}
                             end={tab.to === '/'}
                             className={({ isActive }) =>
-                                `shrink-0 border-b-2 px-3 py-3 text-sm transition-colors focus-visible:-outline-offset-2 ${
-                                    isActive ? 'border-accent font-medium text-ink' : 'border-transparent text-muted hover:border-rule-strong hover:text-ink'
+                                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                    isActive ? 'bg-accent-tint font-semibold text-accent' : 'text-ink-2 hover:bg-sunken hover:text-ink'
                                 }`
                             }
                         >
+                            <Icon name={tab.icon} className="h-5 w-5" />
                             {tab.label}
                         </NavLink>
                     ))}
-                    {!isDemo && username && (
-                        <div className="ml-auto flex shrink-0 items-center gap-3 pl-4 text-xs text-muted">
-                            <span className="hidden lg:inline">{username}</span>
-                            <button type="button" onClick={logout} className="rounded px-2 py-1 hover:bg-sunken hover:text-ink">Sign out</button>
-                        </div>
-                    )}
                 </nav>
-            </header>
+                {!isDemo && username && (
+                    <div className="mt-auto flex items-center justify-between gap-2 px-3 text-xs text-muted">
+                        <span className="truncate">{username}</span>
+                        <button type="button" onClick={logout} className="rounded px-2 py-1 hover:bg-sunken hover:text-ink">Sign out</button>
+                    </div>
+                )}
+            </aside>
 
-            <main className="mx-auto max-w-6xl px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6 md:pb-10 md:pt-6">
-                <Outlet />
-            </main>
+            <div className="lg:pl-60">
+                {isDemo && (
+                    <div className="bg-warn-tint px-4 pb-1.5 pt-[calc(0.375rem+env(safe-area-inset-top))] text-center text-xs text-warn ring-1 ring-warn/30">
+                        <span className="font-medium">Demo</span> with sample data. Nothing is saved, and a reload starts over.{' '}
+                        {/* Padding on an inline link widens the tap area without growing the banner. */}
+                        <a href="/login" className="py-3 font-medium underline">Sign in to your own</a>
+                    </div>
+                )}
+                {/* Bottom padding clears the tab bar and the floating button on phones. */}
+                <main className="mx-auto max-w-5xl px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6 lg:px-10 lg:pb-12 lg:pt-8">
+                    <Outlet />
+                </main>
+            </div>
 
-            <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label="Primary">
+            <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-rule bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Primary">
                 <div className="grid grid-cols-5">
                     {primary.map((tab) => (
                         <NavLink

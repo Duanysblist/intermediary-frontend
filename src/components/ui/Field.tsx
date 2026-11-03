@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 export const inputClass =
     // 16px text on phones stops iOS zooming into a field on focus.
-    'w-full rounded-md border border-rule-strong bg-surface px-3 py-2.5 text-base text-ink shadow-xs sm:py-2 sm:text-sm ' +
+    'w-full rounded-[10px] border border-rule-strong bg-surface px-3 py-2.5 text-base text-ink sm:py-2 sm:text-sm ' +
     'placeholder:text-faint focus:border-focus focus:outline-none focus:ring-2 focus:ring-focus/20 ' +
     'disabled:bg-page disabled:text-muted'
 

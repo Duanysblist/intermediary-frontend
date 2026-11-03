@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button'
 import Pill from '../../components/ui/Pill'
 import { ApiError } from '../../api/client'
 import { EmptyState } from '../../components/ui/Page'
+import Icon from '../../components/ui/Icon'
 import {
     DAYS_OF_WEEK, PLAN_INTENTS, REFERENCE_PICKER_TYPES, label,
     type DayOfWeek, type PlanIntent, type RecurringPlan, type RecurringPlanInput, type ReferenceEntityType,
@@ -79,7 +80,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                     <h2 className="text-lg font-semibold text-ink">Routines</h2>
                     <p className="mt-0.5 text-xs text-muted">Things you intend to do on the same days every week. Generate creates the plan items for the next two weeks.</p>
                 </div>
-                <button type="button" onClick={onClose} className="rounded p-1 text-faint hover:bg-sunken hover:text-ink-2" aria-label="Close">✕</button>
+                <button type="button" onClick={onClose} className="-mr-2 -mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted hover:bg-sunken hover:text-ink" aria-label="Close"><Icon name="close" className="h-5 w-5" /></button>
             </div>
 
             {editing ? (
@@ -103,7 +104,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                             <div className="flex flex-wrap gap-1.5">
                                 {DAYS_OF_WEEK.map((d) => (
                                     <button key={d} type="button" onClick={() => toggleDay(d)} aria-pressed={form.days.includes(d)}
-                                            className={`rounded-md border px-2.5 py-1 text-sm ${form.days.includes(d) ? 'border-accent bg-accent text-on-accent' : 'border-rule-strong bg-surface text-ink-2 hover:bg-page'}`}>
+                                            className={`min-h-11 min-w-11 rounded-lg border px-2.5 text-sm sm:min-h-0 sm:min-w-0 sm:py-1 ${form.days.includes(d) ? 'border-accent bg-accent text-on-accent' : 'border-rule-strong bg-surface text-ink-2 hover:bg-page'}`}>
                                         {DAY_SHORT[d]}
                                     </button>
                                 ))}
@@ -136,7 +137,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
             ) : (
                 <>
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                        <Button variant="secondary" onClick={() => startEdit()}>+ New routine</Button>
+                        <Button variant="secondary" onClick={() => startEdit()}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />New routine</Button>
                         <div className="flex items-center gap-3">
                             {generated != null && <span className="text-xs text-muted">{generated === 0 ? 'Nothing new to add.' : `${generated} item${generated === 1 ? '' : 's'} added to the plan.`}</span>}
                             <Button onClick={() => generateMut.mutate()} disabled={generateMut.isPending || !(plans.data ?? []).some((p) => p.active)}>

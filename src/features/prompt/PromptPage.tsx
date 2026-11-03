@@ -15,6 +15,7 @@ import { normalizeChangeSet, parseChangeSet, type Change, type ChangeSet } from 
 import ReviewChanges from './ReviewChanges'
 import { loadBatches, markReverted, type AppliedBatch } from './appliedBatches'
 import type { Proposal } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 // claude.ai accepts a prefilled prompt via ?q=; browsers cap URLs, so fall back to copy above this.
 const OPEN_IN_CLAUDE_LIMIT = 7000
@@ -225,10 +226,10 @@ export default function PromptPage() {
                     <>
                         <Button variant="secondary" onClick={() => setImportOpen(true)}>Import changes…</Button>
                         <Button variant="secondary" onClick={copy} disabled={!text}>
-                            {copied === 'ok' ? 'Copied ✓' : copied === 'fail' ? 'Copy failed' : 'Copy'}
+                            {copied === 'ok' ? <><Icon name="check" className="h-4 w-4" strokeWidth={2.6} />Copied</> : copied === 'fail' ? 'Copy failed' : 'Copy'}
                         </Button>
                         <Button variant="secondary" onClick={openInClaude} disabled={!canOpenInClaude} title={canOpenInClaude ? 'Open claude.ai with this prompt prefilled' : 'Too long for a link; use Copy instead'}>
-                            Open in Claude ↗
+                            Open in Claude <Icon name="external" className="h-4 w-4" />
                         </Button>
                         {aiEnabled && (
                             <Button onClick={() => suggest.mutate()} disabled={suggest.isPending}>
@@ -255,8 +256,8 @@ export default function PromptPage() {
                     <ul className="divide-y divide-rule rounded-xl border border-accent/30 bg-surface shadow-xs">
                         {pending.map((p) => (
                             <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
+                                <div className="min-w-0 flex-1 basis-full sm:basis-0">
+                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                         <Pill value="PROPOSAL" tone="blue" />
                                         <span className="text-xs text-muted">{friendlySource(p.source)} · {formatDateTime(p.createdAt)} · {p.changes.length} change{p.changes.length === 1 ? '' : 's'}</span>
                                     </div>
@@ -360,7 +361,7 @@ export default function PromptPage() {
                         readOnly
                         value={text}
                         aria-label="Generated context"
-                        className="h-[70vh] w-full resize-y rounded-xl border border-rule bg-surface p-4 font-mono text-xs leading-relaxed text-ink shadow-xs focus:outline-none"
+                        className="h-[70vh] w-full resize-y rounded-xl border border-rule bg-surface p-4 font-mono text-base leading-relaxed text-ink shadow-xs focus:border-focus focus:outline-none focus:ring-2 focus:ring-focus/20 sm:text-xs"
                         // Select-all is a copy convenience for mouse users. On touch devices it would grab the whole
                         // text on a stray tap, and WebKit zooms into a focused field with text this small.
                         onFocus={(e) => { if (matchMedia('(hover: hover)').matches) e.currentTarget.select() }}

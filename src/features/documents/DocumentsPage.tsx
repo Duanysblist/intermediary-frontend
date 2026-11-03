@@ -8,6 +8,7 @@ import DocumentForm from './DocumentForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, isLink } from '../../lib/format'
 import { DOCUMENT_TYPES, type Document, type DocumentInput } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type SortKey = 'title' | 'type' | 'updated'
 
@@ -41,9 +42,9 @@ export default function DocumentsPage() {
         const descending = sort.reversed !== (key === 'updated')
         return (
             <th className="px-4 py-2.5 font-medium" aria-sort={active ? (descending ? 'descending' : 'ascending') : 'none'}>
-                <button type="button" onClick={() => sortBy(key)} className={`inline-flex items-center gap-1 uppercase tracking-wide hover:text-ink ${active ? 'text-ink' : ''}`}>
+                <button type="button" onClick={() => sortBy(key)} className={`inline-flex items-center gap-1 hover:text-ink ${active ? 'text-ink' : ''}`}>
                     {text}
-                    <span aria-hidden="true" className={active ? '' : 'invisible'}>{descending ? '▼' : '▲'}</span>
+                    <Icon name={descending ? 'chevronDown' : 'chevronUp'} className={`h-3.5 w-3.5 ${active ? '' : 'invisible'}`} strokeWidth={2.4} />
                 </button>
             </th>
         )
@@ -63,7 +64,7 @@ export default function DocumentsPage() {
             <PageHeader
                 title="Documents"
                 subtitle="Resumes, plans, and guides you're drafting or maintaining."
-                actions={<Button onClick={() => setAdding(true)}>+ Add</Button>}
+                actions={<Button onClick={() => setAdding(true)}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Add</Button>}
             />
 
             {rows.length === 0 ? (
@@ -76,7 +77,7 @@ export default function DocumentsPage() {
                 <>
                 <div className="mb-2 flex items-center justify-end gap-2 md:hidden">
                     <label htmlFor="doc-sort" className="text-sm text-muted">Sort</label>
-                    <select id="doc-sort" className="rounded-md border border-rule-strong bg-surface px-2.5 py-2 text-base"
+                    <select id="doc-sort" className="min-h-11 rounded-[10px] border border-rule-strong bg-surface px-2.5 text-base"
                             value={`${sort.key}:${sort.reversed}`}
                             onChange={(e) => { const [key, reversed] = e.target.value.split(':'); setSort({ key: key as SortKey, reversed: reversed === 'true' }) }}>
                         <option value="type:false">Type</option>
@@ -86,7 +87,7 @@ export default function DocumentsPage() {
                         <option value="updated:true">Oldest first</option>
                     </select>
                 </div>
-                <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs md:hidden">
+                <ul className="divide-y divide-rule rounded-xl bg-surface md:hidden">
                     {rows.map((d) => (
                         <li key={d.id} className="flex items-center gap-1">
                             {isLink(d.path) ? (
@@ -104,10 +105,10 @@ export default function DocumentsPage() {
                         </li>
                     ))}
                 </ul>
-                <div className="hidden overflow-x-auto rounded-xl border border-rule bg-surface shadow-xs md:block">
+                <div className="hidden overflow-x-auto rounded-xl bg-surface md:block">
                     <table className="w-full text-sm">
                         <thead>
-                        <tr className="border-b border-rule bg-page text-left text-xs uppercase tracking-wide text-muted">
+                        <tr className="border-b border-rule bg-page text-left text-xs text-muted">
                             {header('title', 'Title')}
                             {header('type', 'Type')}
                             <th className="px-4 py-2.5 font-medium">Version</th>

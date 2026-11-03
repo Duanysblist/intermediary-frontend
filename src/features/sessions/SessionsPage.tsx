@@ -9,6 +9,7 @@ import { FitnessSessionForm, StudySessionForm } from './SessionForms'
 import { Card, EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { addDays, formatDate, formatDateTime, formatMinutes, isInWeek, startOfWeek, todayISO } from '../../lib/format'
 import type { FitnessSession, FitnessSessionInput, StudySession, StudySessionInput } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type Kind = 'study' | 'fitness'
 
@@ -36,10 +37,10 @@ function WeekSummary({ items, kindLabel }: { items: { sessionDate: string; durat
     const lastMinutes = lastWeek.reduce((sum, s) => sum + s.durationMinutes, 0)
     return (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Card><p className="text-xs uppercase tracking-wide text-muted">This week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(minutes)}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-muted">Sessions</p><p className="mt-1 text-2xl font-semibold tabular-nums">{thisWeek.length}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-muted">Last week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(lastMinutes)}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-muted">All time</p><p className="mt-1 text-2xl font-semibold tabular-nums">{items.length} <span className="text-sm font-normal text-muted">{kindLabel}</span></p></Card>
+            <Card><p className="text-xs text-muted">This week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(minutes)}</p></Card>
+            <Card><p className="text-xs text-muted">Sessions</p><p className="mt-1 text-2xl font-semibold tabular-nums">{thisWeek.length}</p></Card>
+            <Card><p className="text-xs text-muted">Last week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(lastMinutes)}</p></Card>
+            <Card><p className="text-xs text-muted">All time</p><p className="mt-1 text-2xl font-semibold tabular-nums">{items.length} <span className="text-sm font-normal text-muted">{kindLabel}</span></p></Card>
         </div>
     )
 }
@@ -52,14 +53,14 @@ export default function SessionsPage() {
                 title="Sessions"
                 subtitle="What actually happened. Log it as it happens; the plan is compared against this."
             />
-            <div className="mb-6 inline-flex rounded-lg border border-rule bg-surface p-0.5 text-sm shadow-xs" role="tablist">
+            <div className="mb-6 inline-flex rounded-[10px] bg-sunken p-0.5 text-sm" role="tablist">
                 {(['study', 'fitness'] as Kind[]).map((k) => (
                     <button
                         key={k}
                         role="tab"
                         aria-selected={kind === k}
                         onClick={() => setKind(k)}
-                        className={`rounded-md px-4 py-1.5 font-medium transition-colors ${kind === k ? 'bg-ink text-page' : 'text-ink-2 hover:text-ink'}`}
+                        className={`min-h-11 rounded-lg px-4 font-medium transition-colors sm:min-h-9 ${kind === k ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'}`}
                     >
                         {k === 'study' ? 'Study' : 'Fitness'}
                     </button>
@@ -95,7 +96,8 @@ function StudyLog() {
     return (
         <div>
             <WeekSummary items={data} kindLabel="sessions" />
-            <div className="mb-3 flex justify-end"><Button className="w-full sm:w-auto" onClick={() => setAdding(true)}>+ Log study session</Button></div>
+            <div className="mb-3 flex justify-end"><Button className="w-full sm:w-auto" onClick={() => setAdding(true)}>
+                <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log study session</Button></div>
             {groups.length === 0 ? (
                 <EmptyState title="No study sessions logged." hint="Log the first one; it takes ten seconds." />
             ) : (
@@ -105,7 +107,7 @@ function StudyLog() {
                             <h3 className="mb-2 text-sm font-medium text-muted">
                                 {formatDate(day)} · {formatMinutes(items.reduce((s, i) => s + i.durationMinutes, 0))}
                             </h3>
-                            <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {items.map((s) => (
                                     <li key={s.id} className="flex items-center gap-3 py-2 pl-4 pr-2 text-sm sm:gap-4 sm:py-3 sm:pr-4">
                                         <span className="w-16 shrink-0 tabular-nums text-muted sm:w-20">{formatDateTime(s.sessionDate).split(', ').pop()}</span>
@@ -160,7 +162,8 @@ function FitnessLog() {
     return (
         <div>
             <WeekSummary items={data} kindLabel="workouts" />
-            <div className="mb-3 flex justify-end"><Button className="w-full sm:w-auto" onClick={() => setAdding(true)}>+ Log workout</Button></div>
+            <div className="mb-3 flex justify-end"><Button className="w-full sm:w-auto" onClick={() => setAdding(true)}>
+                <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log workout</Button></div>
             {groups.length === 0 ? (
                 <EmptyState title="No workouts logged." hint="Log the first one; it takes ten seconds." />
             ) : (
@@ -170,7 +173,7 @@ function FitnessLog() {
                             <h3 className="mb-2 text-sm font-medium text-muted">
                                 {formatDate(day)} · {formatMinutes(items.reduce((s, i) => s + i.durationMinutes, 0))}
                             </h3>
-                            <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {items.map((s) => (
                                     <li key={s.id} className="flex items-center gap-3 py-2 pl-4 pr-2 text-sm sm:gap-4 sm:py-3 sm:pr-4">
                                         <span className="w-16 shrink-0 tabular-nums text-muted sm:w-20">{formatDateTime(s.sessionDate).split(', ').pop()}</span>

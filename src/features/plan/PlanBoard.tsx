@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import PlanItemCard from './PlanItemCard'
 import { PLAN_STATUSES, label, type PlanItem, type PlanItemStatus } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type Props = {
     items: PlanItem[]
@@ -45,9 +46,9 @@ function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: Plan
             <button
                 type="button"
                 onClick={() => onAdd(status)}
-                className="mt-2 min-h-10 rounded-lg px-2 text-left text-sm text-muted hover:bg-surface hover:text-ink sm:min-h-0 sm:py-1.5 sm:text-xs"
+                className="mt-2 min-h-11 rounded-lg px-2 text-left text-sm text-muted hover:bg-surface hover:text-ink sm:min-h-0 sm:py-1.5 sm:text-xs"
             >
-                + Add item
+                <span className="inline-flex items-center gap-1"><Icon name="plus" className="h-3.5 w-3.5" strokeWidth={2.2} />Add item</span>
             </button>
         </section>
     )

@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
 import { addDays, formatDate, formatMinutes, isInWeek, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
 import { PLAN_INTENTS, isOpenPlanItem, type PlanIntent, type PlanItem } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 /**
  * Weekly review: the "did reality match intention?" questions the data model exists to answer.
@@ -78,18 +79,18 @@ export default function ReviewPage() {
                 subtitle={`${formatDate(monday)} – ${formatDate(addDays(monday, 6))} · what you meant to do versus what happened`}
                 actions={
                     <div className="flex gap-1">
-                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, -7))}>‹ Prev</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, -7))}><Icon name="chevronLeft" className="h-4 w-4" />Prev</Button>
                         <Button variant="secondary" size="sm" onClick={() => setWeek(thisMonday)} disabled={monday === thisMonday}>This week</Button>
-                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, 7))} disabled={monday >= thisMonday}>Next ›</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, 7))} disabled={monday >= thisMonday}>Next<Icon name="chevronRight" className="h-4 w-4" /></Button>
                     </div>
                 }
             />
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <Card><p className="text-xs uppercase tracking-wide text-muted">Completion</p><p className={`mt-1 text-2xl font-semibold tabular-nums ${stats.completion == null ? 'text-faint' : stats.completion >= 70 ? 'text-ok' : stats.completion >= 40 ? 'text-warn' : 'text-danger'}`}>{stats.completion == null ? '—' : `${stats.completion}%`}</p><p className="mt-0.5 text-xs text-muted">{stats.done.length} of {stats.intended.length} intended</p></Card>
-                <Card><p className="text-xs uppercase tracking-wide text-muted">Deferred</p><p className="mt-1 text-2xl font-semibold tabular-nums">{stats.deferred.length}</p><p className="mt-0.5 text-xs text-muted">{stats.canceled.length} canceled</p></Card>
-                <Card><p className="text-xs uppercase tracking-wide text-muted">Study</p><p className="mt-1 text-2xl font-semibold tabular-nums text-accent">{formatMinutes(stats.studyMinutes)}</p><p className="mt-0.5 text-xs text-muted">{stats.studyWeek.length} sessions · {intentPlanned('STUDY')?.planned ?? 0} planned</p></Card>
-                <Card><p className="text-xs uppercase tracking-wide text-muted">Fitness</p><p className="mt-1 text-2xl font-semibold tabular-nums text-accent">{formatMinutes(stats.fitnessMinutes)}</p><p className="mt-0.5 text-xs text-muted">{stats.fitnessWeek.length} workouts · {intentPlanned('EXERCISE')?.planned ?? 0} planned</p></Card>
+                <Card><p className="text-xs text-muted">Completion</p><p className={`mt-1 text-2xl font-semibold tabular-nums ${stats.completion == null ? 'text-faint' : stats.completion >= 70 ? 'text-ok' : stats.completion >= 40 ? 'text-warn' : 'text-danger'}`}>{stats.completion == null ? '—' : `${stats.completion}%`}</p><p className="mt-0.5 text-xs text-muted">{stats.done.length} of {stats.intended.length} intended</p></Card>
+                <Card><p className="text-xs text-muted">Deferred</p><p className="mt-1 text-2xl font-semibold tabular-nums">{stats.deferred.length}</p><p className="mt-0.5 text-xs text-muted">{stats.canceled.length} canceled</p></Card>
+                <Card><p className="text-xs text-muted">Study</p><p className="mt-1 text-2xl font-semibold tabular-nums text-accent">{formatMinutes(stats.studyMinutes)}</p><p className="mt-0.5 text-xs text-muted">{stats.studyWeek.length} sessions · {intentPlanned('STUDY')?.planned ?? 0} planned</p></Card>
+                <Card><p className="text-xs text-muted">Fitness</p><p className="mt-1 text-2xl font-semibold tabular-nums text-accent">{formatMinutes(stats.fitnessMinutes)}</p><p className="mt-0.5 text-xs text-muted">{stats.fitnessWeek.length} workouts · {intentPlanned('EXERCISE')?.planned ?? 0} planned</p></Card>
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -119,7 +120,7 @@ export default function ReviewPage() {
                     {stats.perCert.length === 0 ? (
                         <Card><p className="text-sm text-muted">No study sessions logged this week.</p></Card>
                     ) : (
-                        <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                        <ul className="divide-y divide-rule rounded-xl bg-surface">
                             {stats.perCert.map(({ cert, minutes }) => (
                                 <li key={cert.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
                                     <span className="min-w-0 truncate text-ink">{cert.name}</span>
@@ -135,7 +136,7 @@ export default function ReviewPage() {
                     {stats.carried.length === 0 ? (
                         <Card><p className="text-sm text-muted">Nothing slipped. Everything dated this week is done or still ahead.</p></Card>
                     ) : (
-                        <ul className="divide-y divide-rule rounded-xl border border-warn/30 bg-surface shadow-xs">
+                        <ul className="divide-y divide-rule rounded-xl bg-surface">
                             {stats.carried.map((p) => (
                                 <li key={p.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                                     <span className="min-w-0 flex-1 truncate text-ink">{p.title}</span>
@@ -150,7 +151,7 @@ export default function ReviewPage() {
                     {stats.mostDeferred.length === 0 ? (
                         <Card><p className="text-sm text-muted">Nothing has been deferred yet.</p></Card>
                     ) : (
-                        <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                        <ul className="divide-y divide-rule rounded-xl bg-surface">
                             {stats.mostDeferred.map(({ item, n }) => (
                                 <li key={item.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                                     <span className="min-w-0 flex-1 truncate text-ink">{item.title}</span>
@@ -164,7 +165,7 @@ export default function ReviewPage() {
                     {(stats.deferred.length > 0 || stats.canceled.length > 0) && (
                         <>
                             <SectionTitle>Dropped this week</SectionTitle>
-                            <ul className="divide-y divide-rule rounded-xl border border-rule bg-surface shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {stats.deferred.map((p) => (
                                     <li key={`d${p.id}`} className="flex items-center gap-3 px-4 py-2.5 text-sm"><span className="min-w-0 flex-1 truncate">{p.title}</span><Pill value="DEFERRED" /></li>
                                 ))}

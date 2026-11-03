@@ -23,6 +23,7 @@ import { ErrorState, LoadingState, PageHeader } from '../../components/ui/Page'
 import { startOfWeek, todayISO } from '../../lib/format'
 import { comparePlanItems, isOpenPlanItem, type PlanItem, type PlanItemInput, type PlanItemStatus } from '../../types'
 import Icon from '../../components/ui/Icon'
+import Fab from '../../components/ui/Fab'
 
 type View = 'board' | 'week'
 type Sheet =
@@ -109,17 +110,19 @@ export default function PlanPage() {
                 title="Plan"
                 subtitle={`${openCount} open intention${openCount === 1 ? '' : 's'} · hold and drag a card to move it`}
                 actions={
-                    <Button onClick={() => setSheet({ kind: 'create', defaults: {} })}>
-                        <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />New item
-                    </Button>
+                    <span className="hidden lg:block">
+                        <Button onClick={() => setSheet({ kind: 'create', defaults: {} })}>
+                            <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />New item
+                        </Button>
+                    </span>
                 }
             />
 
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <div className="inline-flex rounded-lg border border-rule bg-surface p-0.5 text-sm shadow-xs" role="tablist">
+                <div className="inline-flex rounded-[10px] bg-sunken p-0.5 text-sm" role="tablist">
                     {(['board', 'week'] as View[]).map((v) => (
                         <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
-                                className={`min-h-9 rounded-md px-4 font-medium transition-colors ${view === v ? 'bg-ink text-page' : 'text-ink-2 hover:text-ink'}`}>
+                                className={`min-h-11 rounded-lg px-4 font-medium sm:min-h-9 transition-colors ${view === v ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'}`}>
                             {v === 'board' ? 'Board' : 'Week'}
                         </button>
                     ))}
@@ -163,6 +166,8 @@ export default function PlanPage() {
                 </DragOverlay>
             </DndContext>
 
+            <Fab onClick={() => setSheet({ kind: 'create', defaults: {} })}>New item</Fab>
+
             <Modal open={sheet.kind === 'create'} onClose={closeSheet}>
                 {sheet.kind === 'create' && (
                     <PlanItemForm
@@ -194,7 +199,7 @@ export default function PlanPage() {
                         <input readOnly className={`${inputClass} mt-4 font-mono text-xs`} value={calendarLink.data.url} onFocus={(e) => e.currentTarget.select()} />
                         <div className="mt-4 flex justify-end gap-2">
                             <Button variant="secondary" onClick={closeSheet}>Close</Button>
-                            <Button onClick={copyCalendar}>{copied ? 'Copied ✓' : 'Copy link'}</Button>
+                            <Button onClick={copyCalendar}>{copied ? <><Icon name="check" className="h-4 w-4" strokeWidth={2.6} />Copied</> : 'Copy link'}</Button>
                         </div>
                         <p className="mt-3 text-xs text-muted">Google Calendar: Other calendars → + → From URL. Apple Calendar: File → New Calendar Subscription.</p>
                     </>

@@ -3,6 +3,7 @@ import PlanItemCard from './PlanItemCard'
 import Button from '../../components/ui/Button'
 import { addDays, formatDate, isBefore, parseLocal, startOfWeek, todayISO, weekDays } from '../../lib/format'
 import { isOpenPlanItem, type PlanItem } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type Props = {
     items: PlanItem[]
@@ -27,7 +28,7 @@ function DayColumn({ day, items, referenceLabel, onOpen, onAdd }: { day: string;
             aria-label={formatDate(day)}
         >
             <header className="flex items-baseline justify-between px-1 pb-2 pt-1">
-                <span className={`text-xs font-semibold uppercase tracking-wide ${today ? 'text-accent-strong' : 'text-muted'}`}>
+                <span className={`text-sm font-semibold ${today ? 'text-accent-strong' : 'text-ink-2'}`}>
                     {d.toLocaleDateString(undefined, { weekday: 'short' })}
                 </span>
                 <span className={`text-sm font-semibold ${today ? 'rounded-full bg-accent px-2 text-on-accent' : 'text-ink-2'}`}>{d.getDate()}</span>
@@ -37,8 +38,8 @@ function DayColumn({ day, items, referenceLabel, onOpen, onAdd }: { day: string;
                     <PlanItemCard key={item.id} item={item} referenceLabel={referenceLabel(item)} onOpen={onOpen} showStatus compact />
                 ))}
             </div>
-            <button type="button" onClick={() => onAdd(day)} className="mt-2 min-h-10 rounded-lg px-2 text-left text-sm text-muted hover:bg-surface hover:text-ink sm:min-h-0 sm:py-1 sm:text-xs">
-                + Add
+            <button type="button" onClick={() => onAdd(day)} className="mt-2 min-h-11 rounded-lg px-2 text-left text-sm text-muted hover:bg-surface hover:text-ink sm:min-h-0 sm:py-1 sm:text-xs">
+                <span className="inline-flex items-center gap-1"><Icon name="plus" className="h-3.5 w-3.5" strokeWidth={2.2} />Add</span>
             </button>
         </section>
     )
@@ -64,9 +65,9 @@ export default function PlanWeek({ items, monday, onChangeWeek, referenceLabel, 
                     {formatDate(monday)} – {formatDate(sunday)}
                 </h2>
                 <div className="flex gap-1">
-                    <Button variant="secondary" size="sm" onClick={() => onChangeWeek(addDays(monday, -7))} aria-label="Previous week">‹ Prev</Button>
+                    <Button variant="secondary" size="sm" onClick={() => onChangeWeek(addDays(monday, -7))} aria-label="Previous week"><Icon name="chevronLeft" className="h-4 w-4" />Prev</Button>
                     <Button variant="secondary" size="sm" onClick={() => onChangeWeek(thisMonday)} disabled={monday === thisMonday}>Today</Button>
-                    <Button variant="secondary" size="sm" onClick={() => onChangeWeek(addDays(monday, 7))} aria-label="Next week">Next ›</Button>
+                    <Button variant="secondary" size="sm" onClick={() => onChangeWeek(addDays(monday, 7))} aria-label="Next week">Next<Icon name="chevronRight" className="h-4 w-4" /></Button>
                 </div>
             </div>
 
