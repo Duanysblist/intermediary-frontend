@@ -67,7 +67,7 @@ export function StudySessionForm({ initial, onSubmit, onCancel, isSaving, error 
                     <textarea className={inputClass} rows={3} value={form.notes ?? ''} onChange={(e) => update('notes', e.target.value)} placeholder="What did you cover?" />
                 </Field>
             </div>
-            {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-red-600">{error.message}</p>}
+            {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-danger">{error.message}</p>}
             <Footer onCancel={onCancel} isSaving={isSaving} />
         </form>
     )
@@ -111,7 +111,7 @@ export function FitnessSessionForm({ initial, onSubmit, onCancel, isSaving, erro
                     <textarea className={inputClass} rows={3} value={form.notes ?? ''} onChange={(e) => update('notes', e.target.value)} />
                 </Field>
             </div>
-            {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-red-600">{error.message}</p>}
+            {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-danger">{error.message}</p>}
             <Footer onCancel={onCancel} isSaving={isSaving} />
         </form>
     )

@@ -4,107 +4,68 @@
   "title": "Design System: intermediary",
   "extensions": {
     "colorMeta": {
-      "signal-blue": {
-        "role": "primary",
-        "displayName": "Signal Blue",
-        "canonical": "oklch(54.6% 0.245 262.881)",
-        "tonalRamp": ["oklch(37.9% 0.146 265.522)", "oklch(48.8% 0.243 264.376)", "oklch(54.6% 0.245 262.881)", "oklch(62.3% 0.214 259.815)", "oklch(70.7% 0.165 254.624)", "oklch(80.9% 0.105 251.813)", "oklch(93.2% 0.032 255.585)", "oklch(97% 0.014 254.604)"]
-      },
-      "signal-blue-hover": {
-        "role": "primary",
-        "displayName": "Signal Blue Hover",
-        "canonical": "oklch(48.8% 0.243 264.376)",
-        "tonalRamp": ["oklch(37.9% 0.146 265.522)", "oklch(48.8% 0.243 264.376)", "oklch(54.6% 0.245 262.881)", "oklch(62.3% 0.214 259.815)", "oklch(70.7% 0.165 254.624)", "oklch(80.9% 0.105 251.813)", "oklch(93.2% 0.032 255.585)", "oklch(97% 0.014 254.604)"]
-      },
-      "signal-blue-tint": {
-        "role": "tint",
-        "displayName": "Signal Blue Tint",
-        "canonical": "oklch(97% 0.014 254.604)",
-        "tonalRamp": ["oklch(37.9% 0.146 265.522)", "oklch(48.8% 0.243 264.376)", "oklch(54.6% 0.245 262.881)", "oklch(62.3% 0.214 259.815)", "oklch(70.7% 0.165 254.624)", "oklch(80.9% 0.105 251.813)", "oklch(93.2% 0.032 255.585)", "oklch(97% 0.014 254.604)"]
-      },
-      "focus-blue": {
-        "role": "focus",
-        "displayName": "Focus Blue",
-        "canonical": "oklch(62.3% 0.214 259.815)",
-        "tonalRamp": ["oklch(37.9% 0.146 265.522)", "oklch(48.8% 0.243 264.376)", "oklch(54.6% 0.245 262.881)", "oklch(62.3% 0.214 259.815)", "oklch(70.7% 0.165 254.624)", "oklch(80.9% 0.105 251.813)", "oklch(93.2% 0.032 255.585)", "oklch(97% 0.014 254.604)"]
-      },
-      "ink-strong": {
-        "role": "neutral",
-        "displayName": "Ink Strong",
-        "canonical": "oklch(21% 0.034 264.665)",
-        "tonalRamp": ["oklch(21% 0.034 264.665)", "oklch(27.8% 0.033 256.848)", "oklch(37.3% 0.034 259.733)", "oklch(55.1% 0.027 264.364)", "oklch(70.7% 0.022 261.325)", "oklch(87.2% 0.01 258.338)", "oklch(92.8% 0.006 264.531)", "oklch(96.7% 0.003 264.542)"]
-      },
-      "ink-body": {
-        "role": "neutral",
-        "displayName": "Ink Body",
-        "canonical": "oklch(37.3% 0.034 259.733)",
-        "tonalRamp": ["oklch(21% 0.034 264.665)", "oklch(27.8% 0.033 256.848)", "oklch(37.3% 0.034 259.733)", "oklch(55.1% 0.027 264.364)", "oklch(70.7% 0.022 261.325)", "oklch(87.2% 0.01 258.338)", "oklch(92.8% 0.006 264.531)", "oklch(96.7% 0.003 264.542)"]
-      },
-      "ink-muted": {
-        "role": "neutral",
-        "displayName": "Ink Muted",
-        "canonical": "oklch(55.1% 0.027 264.364)",
-        "tonalRamp": ["oklch(21% 0.034 264.665)", "oklch(27.8% 0.033 256.848)", "oklch(37.3% 0.034 259.733)", "oklch(55.1% 0.027 264.364)", "oklch(70.7% 0.022 261.325)", "oklch(87.2% 0.01 258.338)", "oklch(92.8% 0.006 264.531)", "oklch(96.7% 0.003 264.542)"]
-      },
-      "ink-subtle": {
-        "role": "neutral",
-        "displayName": "Ink Subtle",
-        "canonical": "oklch(70.7% 0.022 261.325)",
-        "tonalRamp": ["oklch(21% 0.034 264.665)", "oklch(27.8% 0.033 256.848)", "oklch(37.3% 0.034 259.733)", "oklch(55.1% 0.027 264.364)", "oklch(70.7% 0.022 261.325)", "oklch(87.2% 0.01 258.338)", "oklch(92.8% 0.006 264.531)", "oklch(96.7% 0.003 264.542)"]
-      },
-      "rule": {
-        "role": "neutral",
-        "displayName": "Rule",
-        "canonical": "oklch(92.8% 0.006 264.531)",
-        "tonalRamp": ["oklch(21% 0.034 264.665)", "oklch(27.8% 0.033 256.848)", "oklch(37.3% 0.034 259.733)", "oklch(55.1% 0.027 264.364)", "oklch(70.7% 0.022 261.325)", "oklch(87.2% 0.01 258.338)", "oklch(92.8% 0.006 264.531)", "oklch(96.7% 0.003 264.542)"]
-      },
-      "surface-page": {
-        "role": "surface",
-        "displayName": "Surface Page",
-        "canonical": "oklch(98.5% 0.002 247.839)"
-      },
-      "surface-column": {
-        "role": "surface",
-        "displayName": "Surface Column",
-        "canonical": "oklch(96.7% 0.003 264.542)"
-      },
-      "surface-card": {
-        "role": "surface",
-        "displayName": "Surface Card",
-        "canonical": "#ffffff"
-      },
-      "danger": {
-        "role": "danger",
-        "displayName": "Danger",
-        "canonical": "oklch(57.7% 0.245 27.325)",
-        "tonalRamp": ["oklch(39.6% 0.141 25.723)", "oklch(50.5% 0.213 27.518)", "oklch(57.7% 0.245 27.325)", "oklch(63.7% 0.237 25.331)", "oklch(70.4% 0.191 22.216)", "oklch(80.8% 0.114 19.571)", "oklch(88.5% 0.062 18.334)", "oklch(97.1% 0.013 17.38)"]
-      },
-      "danger-hover": {
-        "role": "danger",
-        "displayName": "Danger Hover",
-        "canonical": "oklch(50.5% 0.213 27.518)",
-        "tonalRamp": ["oklch(39.6% 0.141 25.723)", "oklch(50.5% 0.213 27.518)", "oklch(57.7% 0.245 27.325)", "oklch(63.7% 0.237 25.331)", "oklch(70.4% 0.191 22.216)", "oklch(80.8% 0.114 19.571)", "oklch(88.5% 0.062 18.334)", "oklch(97.1% 0.013 17.38)"]
-      },
-      "danger-tint": {
-        "role": "tint",
-        "displayName": "Danger Tint",
-        "canonical": "oklch(97.1% 0.013 17.38)",
-        "tonalRamp": ["oklch(39.6% 0.141 25.723)", "oklch(50.5% 0.213 27.518)", "oklch(57.7% 0.245 27.325)", "oklch(63.7% 0.237 25.331)", "oklch(70.4% 0.191 22.216)", "oklch(80.8% 0.114 19.571)", "oklch(88.5% 0.062 18.334)", "oklch(97.1% 0.013 17.38)"]
-      }
+      "accent": { "role": "primary", "displayName": "Indigo Accent", "canonical": "#5856d6", "dark": "#8e8cff" },
+      "accent-strong": { "role": "primary", "displayName": "Indigo Strong", "canonical": "#4644c4", "dark": "#a9a7ff" },
+      "accent-tint": { "role": "tint", "displayName": "Indigo Tint", "canonical": "#eeeefc", "dark": "#25244a" },
+      "on-accent": { "role": "neutral", "displayName": "On Accent", "canonical": "#ffffff", "dark": "#0e0e10" },
+      "focus": { "role": "focus", "displayName": "Focus", "canonical": "#5856d6", "dark": "#8e8cff" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1c1c1e", "dark": "#f5f5f7" },
+      "ink-2": { "role": "neutral", "displayName": "Ink 2", "canonical": "#3a3a3c", "dark": "#d1d1d6" },
+      "muted": { "role": "neutral", "displayName": "Muted", "canonical": "#5c5c61", "dark": "#98989f" },
+      "faint": { "role": "neutral", "displayName": "Faint", "canonical": "#636368", "dark": "#85858b" },
+      "rule": { "role": "neutral", "displayName": "Rule", "canonical": "#e5e5ea", "dark": "#2c2c2e" },
+      "rule-strong": { "role": "neutral", "displayName": "Rule Strong", "canonical": "#d1d1d6", "dark": "#3a3a3c" },
+      "page": { "role": "surface", "displayName": "Page", "canonical": "#f2f2f7", "dark": "#0e0e10" },
+      "surface": { "role": "surface", "displayName": "Surface", "canonical": "#ffffff", "dark": "#1c1c1e" },
+      "sunken": { "role": "surface", "displayName": "Sunken", "canonical": "#e9e9ee", "dark": "#161618" },
+      "scrim": { "role": "neutral", "displayName": "Scrim", "canonical": "rgb(0 0 0 / 0.35)", "dark": "rgb(0 0 0 / 0.6)" },
+      "danger": { "role": "danger", "displayName": "Danger", "canonical": "#d70015", "dark": "#ff6961" },
+      "danger-strong": { "role": "danger", "displayName": "Danger Strong", "canonical": "#b80012", "dark": "#ff8a84" },
+      "danger-tint": { "role": "tint", "displayName": "Danger Tint", "canonical": "#fdecee", "dark": "#3a1c1c" },
+      "ok": { "role": "status", "displayName": "Ok", "canonical": "#1e7b34", "dark": "#30d158" },
+      "ok-tint": { "role": "tint", "displayName": "Ok Tint", "canonical": "#e7f5eb", "dark": "#11301b" },
+      "warn": { "role": "status", "displayName": "Warn", "canonical": "#a05a00", "dark": "#ffb340" },
+      "warn-tint": { "role": "tint", "displayName": "Warn Tint", "canonical": "#fff4e0", "dark": "#33270f" },
+      "tone-blue-soft": { "role": "status", "displayName": "Blue Tone Soft", "canonical": "oklch(93.2% 0.032 255.585)", "dark": "oklch(30% 0.07 258)" },
+      "tone-blue": { "role": "status", "displayName": "Blue Tone", "canonical": "oklch(48.8% 0.243 264.376)", "dark": "oklch(85% 0.12 258)" },
+      "tone-amber-soft": { "role": "status", "displayName": "Amber Tone Soft", "canonical": "oklch(96.2% 0.059 95.617)", "dark": "oklch(30% 0.07 75)" },
+      "tone-amber": { "role": "status", "displayName": "Amber Tone", "canonical": "oklch(48% 0.14 48.998)", "dark": "oklch(85% 0.12 75)" },
+      "tone-violet-soft": { "role": "status", "displayName": "Violet Tone Soft", "canonical": "oklch(94.3% 0.029 294.588)", "dark": "oklch(30% 0.07 293)" },
+      "tone-violet": { "role": "status", "displayName": "Violet Tone", "canonical": "oklch(49.1% 0.27 292.581)", "dark": "oklch(85% 0.12 293)" },
+      "tone-green-soft": { "role": "status", "displayName": "Green Tone Soft", "canonical": "oklch(96.2% 0.044 156.743)", "dark": "oklch(30% 0.07 152)" },
+      "tone-green": { "role": "status", "displayName": "Green Tone", "canonical": "oklch(48% 0.14 150.069)", "dark": "oklch(85% 0.12 152)" },
+      "tone-red-soft": { "role": "status", "displayName": "Red Tone Soft", "canonical": "oklch(93.6% 0.032 17.717)", "dark": "oklch(30% 0.07 25)" },
+      "tone-red": { "role": "status", "displayName": "Red Tone", "canonical": "oklch(50.5% 0.213 27.518)", "dark": "oklch(85% 0.12 25)" },
+      "tone-gray-soft": { "role": "status", "displayName": "Gray Tone Soft", "canonical": "oklch(96.7% 0.003 264.542)", "dark": "oklch(30% 0.01 260)" },
+      "tone-gray": { "role": "status", "displayName": "Gray Tone", "canonical": "oklch(44.6% 0.03 256.802)", "dark": "oklch(85% 0.01 260)" },
+      "tone-slate-soft": { "role": "status", "displayName": "Slate Tone Soft", "canonical": "oklch(96.8% 0.007 247.896)", "dark": "oklch(30% 0.025 255)" },
+      "tone-slate": { "role": "status", "displayName": "Slate Tone", "canonical": "oklch(48% 0.046 257.417)", "dark": "oklch(85% 0.025 255)" },
+      "tone-teal-soft": { "role": "status", "displayName": "Teal Tone Soft", "canonical": "oklch(95.3% 0.051 180.801)", "dark": "oklch(30% 0.07 185)" },
+      "tone-teal": { "role": "status", "displayName": "Teal Tone", "canonical": "oklch(51.1% 0.096 186.391)", "dark": "oklch(85% 0.12 185)" },
+      "tone-orange-soft": { "role": "status", "displayName": "Orange Tone Soft", "canonical": "oklch(95.4% 0.038 75.164)", "dark": "oklch(30% 0.07 45)" },
+      "tone-orange": { "role": "status", "displayName": "Orange Tone", "canonical": "oklch(48% 0.17 38.402)", "dark": "oklch(85% 0.12 45)" }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Page titles. One per screen." },
-      "title": { "displayName": "Title", "purpose": "Dialog titles and section headings inside a panel." },
-      "body": { "displayName": "Body", "purpose": "Forms, rows, and card text. Most of the interface." },
-      "label": { "displayName": "Label", "purpose": "Status pills, date stamps, and column hints." }
+      "display": { "displayName": "Display", "purpose": "Page titles. One per screen. 32px on phone, 24px from lg." },
+      "title": { "displayName": "Title", "purpose": "Sheet and dialog headings." },
+      "body": { "displayName": "Body", "purpose": "Task-row titles and form input text. 16px on phone." },
+      "body-sm": { "displayName": "Body Small", "purpose": "Rows on lg, subtitles, Coming up titles." },
+      "label": { "displayName": "Label", "purpose": "Metadata lines, status and kind pills, counts. 12px." },
+      "button": { "displayName": "Button", "purpose": "Button labels. 15px on phone, 14px from sm." },
+      "stat": { "displayName": "Stat", "purpose": "Figures in This week tiles. Tabular numerals." }
     },
     "shadows": [
-      { "name": "resting", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Cards, inputs, and dashboard tiles at rest (shadow-xs)." },
-      { "name": "hover", "value": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)", "purpose": "Plan item card on hover (shadow-sm)." },
-      { "name": "popover", "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)", "purpose": "Floating drag overlay on the Plan page (shadow-xl)." },
-      { "name": "modal", "value": "0 25px 50px -12px rgb(0 0 0 / 0.25)", "purpose": "Dialogs and the review panel (shadow-2xl, with a gray-900 5% ring)." }
+      { "name": "floating-action", "value": "0 10px 15px -3px rgb(88 86 214 / 0.25), 0 4px 6px -4px rgb(88 86 214 / 0.25)", "purpose": "Log session floating button on phone (shadow-lg with accent/25)." },
+      { "name": "sheet", "value": "0 25px 50px -12px rgb(0 0 0 / 0.25), 0 0 0 1px rgb(28 28 30 / 0.05)", "purpose": "Bottom sheet on phone and centred dialog from sm (shadow-2xl with ink/5 ring)." },
+      { "name": "drag-overlay", "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)", "purpose": "Card following the pointer on the Plan board (shadow-lg)." },
+      { "name": "segment-active", "value": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)", "purpose": "Active option in a segmented control inside a dialog (shadow-sm)." }
     ],
-    "motion": [],
+    "motion": [
+      { "name": "check-pop", "value": "check-pop 260ms ease-out", "purpose": "Round check scales to 118% and back on a tap that completes an item. motion-safe only." },
+      { "name": "check-draw", "value": "check-draw 240ms ease-out 60ms both", "purpose": "Check mark draws in from stroke-dashoffset 20 to 0 after a tap. motion-safe only." },
+      { "name": "state-colour", "value": "color 150-200ms", "purpose": "Colour transitions on buttons, checks, and titles. Not yet motion-gated." },
+      { "name": "fab-press", "value": "transform 150ms, active scale 0.95", "purpose": "Floating action button press feedback." }
+    ],
     "breakpoints": [
       { "name": "sm", "value": "40rem" },
       { "name": "md", "value": "48rem" },
@@ -116,9 +77,9 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one live action in a dialog or panel.",
+      "description": "The one live action in a dialog or panel. 44px tall on phone.",
       "html": "<button class=\"ds-btn-primary\">Save changes</button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;border:0;border-radius:0.375rem;background:oklch(54.6% 0.245 262.881);color:#ffffff;font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.875rem;font-weight:500;line-height:1.25rem;padding:0.5rem 0.875rem;cursor:pointer;transition:background-color 150ms} .ds-btn-primary:hover{background:oklch(48.8% 0.243 264.376)} .ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px oklch(62.3% 0.214 259.815 / 0.4)} .ds-btn-primary:disabled{opacity:0.5;cursor:not-allowed}"
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;min-height:2.75rem;padding:0 1rem;border:0;border-radius:10px;background:#5856d6;color:#ffffff;font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.9375rem;font-weight:600;cursor:pointer;transition:background-color 150ms} .ds-btn-primary:hover{background:#4644c4} .ds-btn-primary:active{opacity:0.8} .ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px rgb(88 86 214 / 0.4)} .ds-btn-primary:disabled{opacity:0.5;cursor:not-allowed}"
     },
     {
       "name": "Secondary Button",
@@ -126,71 +87,85 @@
       "refersTo": "button-secondary",
       "description": "Cancel and other non-primary actions.",
       "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
-      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;border:1px solid oklch(87.2% 0.01 258.338);border-radius:0.375rem;background:#ffffff;color:oklch(37.3% 0.034 259.733);font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.875rem;font-weight:500;line-height:1.25rem;padding:0.5rem 0.875rem;cursor:pointer;transition:background-color 150ms} .ds-btn-secondary:hover{background:oklch(98.5% 0.002 247.839)} .ds-btn-secondary:focus-visible{outline:none;box-shadow:0 0 0 2px oklch(70.7% 0.022 261.325 / 0.4)}"
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;min-height:2.75rem;padding:0 1rem;border:1px solid #d1d1d6;border-radius:10px;background:#ffffff;color:#1c1c1e;font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.9375rem;font-weight:600;cursor:pointer;transition:background-color 150ms} .ds-btn-secondary:hover{background:#e9e9ee} .ds-btn-secondary:focus-visible{outline:none;box-shadow:0 0 0 2px rgb(209 209 214 / 0.4)}"
     },
     {
       "name": "Text Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Every text, number, and date field in a form.",
+      "description": "Every text, number, and date field in a form. 16px on phone so iOS does not zoom.",
       "html": "<input class=\"ds-input\" placeholder=\"Search\" />",
-      "css": ".ds-input{width:100%;box-sizing:border-box;border:1px solid oklch(87.2% 0.01 258.338);border-radius:0.375rem;background:#ffffff;color:oklch(21% 0.034 264.665);font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.875rem;line-height:1.25rem;padding:0.5rem 0.75rem;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05)} .ds-input::placeholder{color:oklch(70.7% 0.022 261.325)} .ds-input:focus{outline:none;border-color:oklch(62.3% 0.214 259.815);box-shadow:0 0 0 2px oklch(62.3% 0.214 259.815 / 0.2)}"
+      "css": ".ds-input{width:100%;box-sizing:border-box;padding:0.625rem 0.75rem;border:1px solid #d1d1d6;border-radius:10px;background:#ffffff;color:#1c1c1e;font-family:ui-sans-serif,system-ui,sans-serif;font-size:1rem;line-height:1.5rem} .ds-input::placeholder{color:#636368} .ds-input:focus{outline:none;border-color:#5856d6;box-shadow:0 0 0 2px rgb(88 86 214 / 0.2)} @media (min-width:40rem){.ds-input{padding:0.5rem 0.75rem;font-size:0.875rem;line-height:1.25rem}}"
     },
     {
       "name": "Status Pill",
       "kind": "chip",
       "refersTo": "pill",
-      "description": "A status or intent label. Its tone is fixed per value across the app.",
+      "description": "A status or kind label. Its tone is fixed per value across the app. Shown with the blue tone.",
       "html": "<span class=\"ds-pill\">In progress</span>",
-      "css": ".ds-pill{display:inline-block;white-space:nowrap;border-radius:9999px;background:oklch(93.2% 0.032 255.585);color:oklch(48.8% 0.243 264.376);font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.75rem;font-weight:500;line-height:1rem;padding:0.125rem 0.625rem}"
+      "css": ".ds-pill{display:inline-block;white-space:nowrap;border-radius:9999px;padding:0.125rem 0.625rem;background:oklch(93.2% 0.032 255.585);color:oklch(48.8% 0.243 264.376);font-family:ui-sans-serif,system-ui,sans-serif;font-size:0.75rem;font-weight:500;line-height:1rem}"
     },
     {
-      "name": "Card",
+      "name": "Task Row",
       "kind": "card",
       "refersTo": "card",
-      "description": "The standard container for a list, tile or section.",
-      "html": "<div class=\"ds-card\"><p class=\"ds-card-title\">Up next</p><p class=\"ds-card-body\">No dated intentions ahead.</p></div>",
-      "css": ".ds-card{background:#ffffff;border:1px solid oklch(92.8% 0.006 264.531);border-radius:0.75rem;padding:1rem;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);font-family:ui-sans-serif,system-ui,sans-serif} .ds-card-title{margin:0;font-size:0.875rem;font-weight:600;line-height:1.25rem;color:oklch(21% 0.034 264.665)} .ds-card-body{margin:0.25rem 0 0;font-size:0.875rem;line-height:1.25rem;color:oklch(55.1% 0.027 264.364)}"
+      "description": "A row in a grouped list: round check, title with one metadata line, kind pill. At least 56px tall. Shown open with an overdue metadata line in danger.",
+      "html": "<ul class=\"ds-group\"><li class=\"ds-row\"><span class=\"ds-check\" aria-pressed=\"false\"></span><span class=\"ds-row-main\"><span class=\"ds-row-title\">Draft the cover letter</span><span class=\"ds-row-meta\" data-late>Due yesterday · Apply</span></span><span class=\"ds-pill\">Apply</span></li></ul>",
+      "css": ".ds-group{margin:0;padding:0;list-style:none;background:#ffffff;border-radius:12px;overflow:hidden;font-family:ui-sans-serif,system-ui,sans-serif} .ds-row{display:flex;align-items:center;gap:0.75rem;min-height:3.5rem;padding:0.5rem 1rem 0.5rem 0.25rem;border-top:1px solid #e5e5ea} .ds-row:first-child{border-top:0} .ds-check{display:grid;place-items:center;flex-shrink:0;width:1.5rem;height:1.5rem;margin:0 0.75rem;border:2px solid oklch(48.8% 0.243 264.376);border-radius:9999px;color:transparent;transition:background-color 200ms,border-color 200ms} .ds-check[aria-pressed=true]{background:oklch(48.8% 0.243 264.376);color:#ffffff} .ds-row-main{flex:1;min-width:0} .ds-row-title{display:block;font-size:1rem;line-height:1.375;color:#1c1c1e} .ds-row[data-done] .ds-row-title{color:#5c5c61;text-decoration:line-through} .ds-row-meta{display:block;margin-top:0.125rem;font-size:0.75rem;line-height:1rem;color:#5c5c61} .ds-row-meta[data-late]{color:#d70015;font-weight:500} @media (min-width:64rem){.ds-row-title{font-size:0.875rem}}"
     },
     {
-      "name": "Plan Item Card",
-      "kind": "card",
-      "refersTo": "card",
-      "description": "A plan item on the status board or in a calendar day. Drag handles are not shown.",
-      "html": "<div class=\"ds-item\"><p class=\"ds-item-title\">Draft the cover letter</p><p class=\"ds-item-meta\">Tomorrow · Apply</p></div>",
-      "css": ".ds-item{background:#ffffff;border:1px solid oklch(92.8% 0.006 264.531);border-radius:0.5rem;padding:0.75rem;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);font-family:ui-sans-serif,system-ui,sans-serif;transition:box-shadow 150ms,border-color 150ms} .ds-item:hover{border-color:oklch(87.2% 0.01 258.338);box-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1),0 1px 2px -1px rgb(0 0 0 / 0.1)} .ds-item-title{margin:0;font-size:0.875rem;font-weight:500;line-height:1.375;color:oklch(21% 0.034 264.665)} .ds-item-meta{margin:0.5rem 0 0;font-size:0.75rem;line-height:1rem;color:oklch(55.1% 0.027 264.364)}"
+      "name": "Floating Action Button",
+      "kind": "button",
+      "refersTo": "fab",
+      "description": "The phone's Log session pill, floating above the tab bar. Hidden from lg up, where the same action sits in the page header.",
+      "html": "<button class=\"ds-fab\">Log session</button>",
+      "css": ".ds-fab{position:fixed;right:1rem;bottom:calc(4.5rem + env(safe-area-inset-bottom));z-index:30;display:inline-flex;align-items:center;gap:0.5rem;height:3.25rem;padding:0 1.25rem 0 1rem;border:0;border-radius:9999px;background:#5856d6;color:#ffffff;font-family:ui-sans-serif,system-ui,sans-serif;font-size:1rem;font-weight:600;box-shadow:0 10px 15px -3px rgb(88 86 214 / 0.25),0 4px 6px -4px rgb(88 86 214 / 0.25);cursor:pointer;transition:transform 150ms} .ds-fab:active{transform:scale(0.95)} @media (min-width:64rem){.ds-fab{display:none}}"
+    },
+    {
+      "name": "Bottom Tab Bar",
+      "kind": "nav",
+      "refersTo": "nav-bottom",
+      "description": "Five equal tabs below lg: Today, Plan, Sessions, Jobs, More. Translucent surface with a backdrop blur and the safe-area inset.",
+      "html": "<nav class=\"ds-tabbar\"><a class=\"ds-tab\" aria-current=\"page\">Today</a><a class=\"ds-tab\">Plan</a><a class=\"ds-tab\">Sessions</a><a class=\"ds-tab\">Jobs</a><a class=\"ds-tab\">More</a></nav>",
+      "css": ".ds-tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);background:rgb(255 255 255 / 0.95);border-top:1px solid #e5e5ea;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:ui-sans-serif,system-ui,sans-serif} .ds-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.125rem;min-height:3.5rem;font-size:0.6875rem;font-weight:500;color:#5c5c61;cursor:pointer} .ds-tab[aria-current=page]{color:#5856d6} @media (min-width:64rem){.ds-tabbar{display:none}}"
     }
   ],
   "narrative": {
-    "northStar": "The Quiet Ledger",
-    "overview": "intermediary is a record. It keeps what you meant to do next to what actually happened, and the screens should read like a careful ledger: neutral paper, one clear mark for what is live, and no decoration that competes with the entries. The product is a single person's working tool, so the system favors legibility over atmosphere. Density is moderate. Lists, boards, and forms stay scannable at a glance, and the week is the largest object on the page.\n\nThe surfaces are flat. Cards and columns are separated by hairline rules and a very light shadow, not by gradients or glow. Color is rationed: the signal blue marks what is active or actionable, and the status palette is the only other color on a screen. Everything is light-mode only; the page declares color-scheme: light.\n\nType is the system UI stack, sized small and set in Tailwind's default scale. Hierarchy comes from weight, size, and gray value, not from a display face.",
+    "northStar": "The Standard Task App",
+    "overview": "intermediary is a personal planner built in the category standard: a grouped list on a grey page, round checkboxes, one accent, and a bottom tab bar. It is played straight, at the polish of Todoist and iOS. The product is a single person's working tool, used mostly on a phone, one-handed, through the day. The system favours fast reading and thumb reach over decoration.\n\nThe app follows the phone's light or dark setting. Every colour is a semantic token with a light and a dark value; components never name a raw colour. In light mode the page is #f2f2f7 and cards are white; in dark mode the page is near-black and cards are #1c1c1e. Depth comes from the grouped-list contrast between page and card, not from shadow. Shadows appear only on floating elements: the floating action button, the bottom sheet and dialog, and the drag overlay.\n\nType is the system UI stack at the platform's own scale. The page title is large and bold; everything else steps down in size and grey value. Lists carry the content. The Today screen leads with late items, then today's items, then the week.",
     "keyCharacteristics": [
-      "Flat surfaces with hairline borders; shadow only on overlays and drag state.",
-      "Neutral gray scale with one accent (signal blue) and a status palette.",
-      "Dense but legible; the week and the status board are the primary objects.",
-      "System UI typography; no custom font loading.",
-      "Light mode only."
+      "Phone first. Below lg the bottom tab bar and floating action button are the navigation; from lg a 240px left sidebar replaces them.",
+      "Grouped lists: white 12px-rounded groups on a grey page, with hairline separators between rows.",
+      "One accent, indigo, used for the primary action, the active tab, the floating button, and links.",
+      "Round 24px task checks ringed in each item's kind colour; filled when done.",
+      "Light and dark modes, both first-class, selected by the system setting.",
+      "System UI typography; the page title is the largest object on any screen."
     ],
     "rules": [
-      { "name": "The One Signal Rule", "body": "Signal blue marks the one thing the user can act on right now. A screen with several blue calls to action has lost its order.", "section": "colors" },
-      { "name": "The Honest Status Rule", "body": "A status carries the same tone on every screen. Never assign a status a second color because a layout looks better that way.", "section": "colors" },
-      { "name": "The Tabular Numbers Rule", "body": "Any figure that a user compares across tiles or rows uses tabular numerals.", "section": "typography" },
-      { "name": "The Hairline Rule", "body": "Surfaces are separated by a one-pixel gray-200 border before they are separated by a shadow. A shadow is added only to show that something is floating above the page.", "section": "elevation" }
+      { "name": "The One Accent Rule", "body": "Indigo marks the one thing the user can act on right now. A screen with several accent calls to action has lost its order. Status tones are a separate palette and do not count as accent.", "section": "colors" },
+      { "name": "The Honest Status Rule", "body": "A status or kind carries the same tone on every screen. Never assign a status a second colour because a layout looks better that way.", "section": "colors" },
+      { "name": "The Kind Ring Rule", "body": "A task's round check takes the tone of its kind. It is a ring when open and a solid fill when done.", "section": "colors" },
+      { "name": "The Tabular Numbers Rule", "body": "Any figure a user compares across tiles or rows uses tabular numerals (tabular-nums).", "section": "typography" },
+      { "name": "The Flat-Groups Rule", "body": "Lists, groups, rows, and cards at rest carry no shadow. A shadow means the element is floating above the page.", "section": "elevation" },
+      { "name": "The Tinted Float Rule", "body": "The floating action button's shadow takes the accent colour. Other floating shadows are neutral black.", "section": "elevation" }
     ],
     "dos": [
-      "Do use one Signal Blue primary action per dialog or panel.",
-      "Do keep status tones consistent with Pill.tsx. Adding a status means adding its tone there.",
-      "Do separate surfaces with a one-pixel border first and a shadow second.",
+      "Do use one accent call to action per dialog or screen.",
+      "Do write colour as a semantic token (bg-accent, text-muted, bg-surface). Every token has a light and a dark value in index.css.",
+      "Do keep status and kind tones consistent with tones.ts. Adding a value means adding its tone there.",
+      "Do keep touch targets at least 44px tall on phone (min-h-11), and 56px for list rows and tabs (min-h-14).",
+      "Do keep form inputs at 16px on phone.",
+      "Do pad fixed bottom elements with env(safe-area-inset-bottom), and use min-h-dvh on the shell.",
+      "Do use bottom sheets on phone and centred dialogs from sm.",
       "Do use tabular numerals for counts, durations, and dates that are compared.",
-      "Do show overdue state in red-600 text, not with a red fill on the whole card.",
-      "Do leave focus to the base Focus Blue outline unless the element has its own ring, and inset it where a container would clip it."
+      "Do show overdue state in danger text, not with a red fill on the whole row."
     ],
     "donts": [
-      "Don't add a second accent color for branding. The accent is the signal blue.",
-      "Don't use gradients, glow, or frosted panels. The sticky header's 90% white blur is the only translucency in the system.",
-      "Don't add dark mode styles without a decision to support it. The page declares light only.",
-      "Don't give a resting card anything heavier than shadow-xs, or stack more than one shadow on an element.",
-      "Don't remove focus rings from interactive elements.",
+      "Don't add a second accent colour for branding. The accent is indigo.",
+      "Don't hard-code a colour value in a component. The only raw colour values are in src/index.css, apart from the danger button's literal white text.",
+      "Don't give a resting group, row, or card a shadow, or stack more than one shadow on an element.",
+      "Don't remove the focus ring from interactive elements.",
+      "Don't add a top tab row or underlined tabs back into the phone layout. Navigation is the bottom bar.",
       "Don't introduce a custom display typeface. The system stack is the product's voice."
     ]
   }

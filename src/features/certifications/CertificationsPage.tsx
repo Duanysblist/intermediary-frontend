@@ -8,6 +8,7 @@ import CertificationForm from './CertificationForm'
 import { Card, EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, formatMinutes, relativeDay } from '../../lib/format'
 import { CERTIFICATION_STATUSES, type Certification, type CertificationInput } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 export default function CertificationsPage() {
     const { data, isPending, isError, error } = certifications.useList()
@@ -52,7 +53,7 @@ export default function CertificationsPage() {
             <PageHeader
                 title="Certifications"
                 subtitle="What you're studying for, and the exams on the calendar."
-                actions={<Button onClick={() => setAdding(true)}>+ Add</Button>}
+                actions={<Button onClick={() => setAdding(true)}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Add</Button>}
             />
 
             {sorted.length === 0 ? (
@@ -62,34 +63,34 @@ export default function CertificationsPage() {
                     action={<Button onClick={() => setAdding(true)}>Add a certification</Button>}
                 />
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {sorted.map((c) => {
                         const logged = loggedMinutes.get(c.id)
                         return (
                             <Card key={c.id} className="flex flex-col">
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
-                                        <h3 className="truncate font-medium text-gray-900" title={c.name}>{c.name}</h3>
-                                        <p className="text-sm text-gray-500">{c.vendor}</p>
+                                        <h3 className="truncate font-medium text-ink" title={c.name}>{c.name}</h3>
+                                        <p className="text-sm text-muted">{c.vendor}</p>
                                     </div>
                                     <Pill value={c.status} />
                                 </div>
                                 <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-                                    <dt className="text-gray-500">Exam</dt>
-                                    <dd className="text-gray-900">
+                                    <dt className="text-muted">Exam</dt>
+                                    <dd className="text-ink">
                                         {c.examDate ? (
                                             <>
                                                 {formatDate(c.examDate)}
-                                                <span className="ml-1 text-xs text-gray-500">({relativeDay(c.examDate)})</span>
+                                                <span className="ml-1 text-xs text-muted">({relativeDay(c.examDate)})</span>
                                             </>
                                         ) : '—'}
                                     </dd>
-                                    <dt className="text-gray-500">Hours studied</dt>
-                                    <dd className="text-gray-900">{c.hoursStudied ?? '—'}</dd>
-                                    <dt className="text-gray-500">Logged sessions</dt>
-                                    <dd className="text-gray-900">{logged ? formatMinutes(logged) : '—'}</dd>
+                                    <dt className="text-muted">Hours studied</dt>
+                                    <dd className="text-ink">{c.hoursStudied ?? '—'}</dd>
+                                    <dt className="text-muted">Logged sessions</dt>
+                                    <dd className="text-ink">{logged ? formatMinutes(logged) : '—'}</dd>
                                 </dl>
-                                {c.notes && <p className="mt-3 line-clamp-3 text-sm text-gray-600">{c.notes}</p>}
+                                {c.notes && <p className="mt-3 line-clamp-3 text-sm text-ink-2">{c.notes}</p>}
                                 <div className="mt-auto pt-4 text-right">
                                     <RowActions onEdit={() => setEditing(c)} onDelete={() => setDeleting(c)} />
                                 </div>

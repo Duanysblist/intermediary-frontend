@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button'
 import { Card, ErrorState, LoadingState, PageHeader, SectionTitle } from '../../components/ui/Page'
 import { addDays, formatDate, formatMinutes, isInWeek, startOfWeek, toLocalISO, todayISO } from '../../lib/format'
 import { PLAN_INTENTS, isOpenPlanItem, type PlanIntent, type PlanItem } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 /**
  * Weekly review: the "did reality match intention?" questions the data model exists to answer.
@@ -78,25 +79,25 @@ export default function ReviewPage() {
                 subtitle={`${formatDate(monday)} – ${formatDate(addDays(monday, 6))} · what you meant to do versus what happened`}
                 actions={
                     <div className="flex gap-1">
-                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, -7))}>‹ Prev</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, -7))}><Icon name="chevronLeft" className="h-4 w-4" />Prev</Button>
                         <Button variant="secondary" size="sm" onClick={() => setWeek(thisMonday)} disabled={monday === thisMonday}>This week</Button>
-                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, 7))} disabled={monday >= thisMonday}>Next ›</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setWeek(addDays(monday, 7))} disabled={monday >= thisMonday}>Next<Icon name="chevronRight" className="h-4 w-4" /></Button>
                     </div>
                 }
             />
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <Card><p className="text-xs uppercase tracking-wide text-gray-500">Completion</p><p className={`mt-1 text-2xl font-semibold tabular-nums ${stats.completion == null ? 'text-gray-400' : stats.completion >= 70 ? 'text-green-600' : stats.completion >= 40 ? 'text-amber-600' : 'text-red-600'}`}>{stats.completion == null ? '—' : `${stats.completion}%`}</p><p className="mt-0.5 text-xs text-gray-500">{stats.done.length} of {stats.intended.length} intended</p></Card>
-                <Card><p className="text-xs uppercase tracking-wide text-gray-500">Deferred</p><p className="mt-1 text-2xl font-semibold tabular-nums">{stats.deferred.length}</p><p className="mt-0.5 text-xs text-gray-500">{stats.canceled.length} canceled</p></Card>
-                <Card><p className="text-xs uppercase tracking-wide text-gray-500">Study</p><p className="mt-1 text-2xl font-semibold tabular-nums text-blue-600">{formatMinutes(stats.studyMinutes)}</p><p className="mt-0.5 text-xs text-gray-500">{stats.studyWeek.length} sessions · {intentPlanned('STUDY')?.planned ?? 0} planned</p></Card>
-                <Card><p className="text-xs uppercase tracking-wide text-gray-500">Fitness</p><p className="mt-1 text-2xl font-semibold tabular-nums text-blue-600">{formatMinutes(stats.fitnessMinutes)}</p><p className="mt-0.5 text-xs text-gray-500">{stats.fitnessWeek.length} workouts · {intentPlanned('EXERCISE')?.planned ?? 0} planned</p></Card>
+                <Card><p className="text-xs text-muted">Completion</p><p className={`mt-1 text-2xl font-semibold tabular-nums ${stats.completion == null ? 'text-faint' : stats.completion >= 70 ? 'text-ok' : stats.completion >= 40 ? 'text-warn' : 'text-danger'}`}>{stats.completion == null ? '—' : `${stats.completion}%`}</p><p className="mt-0.5 text-xs text-muted">{stats.done.length} of {stats.intended.length} intended</p></Card>
+                <Card><p className="text-xs text-muted">Deferred</p><p className="mt-1 text-2xl font-semibold tabular-nums">{stats.deferred.length}</p><p className="mt-0.5 text-xs text-muted">{stats.canceled.length} canceled</p></Card>
+                <Card><p className="text-xs text-muted">Study</p><p className="mt-1 text-2xl font-semibold tabular-nums text-accent">{formatMinutes(stats.studyMinutes)}</p><p className="mt-0.5 text-xs text-muted">{stats.studyWeek.length} sessions · {intentPlanned('STUDY')?.planned ?? 0} planned</p></Card>
+                <Card><p className="text-xs text-muted">Fitness</p><p className="mt-1 text-2xl font-semibold tabular-nums text-accent">{formatMinutes(stats.fitnessMinutes)}</p><p className="mt-0.5 text-xs text-muted">{stats.fitnessWeek.length} workouts · {intentPlanned('EXERCISE')?.planned ?? 0} planned</p></Card>
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
                 <section className="min-w-0">
                     <SectionTitle>Planned vs done, by intent</SectionTitle>
                     {stats.byIntent.length === 0 ? (
-                        <Card><p className="text-sm text-gray-500">Nothing was scheduled for this week.</p></Card>
+                        <Card><p className="text-sm text-muted">Nothing was scheduled for this week.</p></Card>
                     ) : (
                         <Card>
                             <ul className="space-y-3">
@@ -104,10 +105,10 @@ export default function ReviewPage() {
                                     <li key={r.intent}>
                                         <div className="mb-1 flex items-center justify-between text-sm">
                                             <Pill value={r.intent} />
-                                            <span className="tabular-nums text-gray-600">{r.done} / {r.planned}</span>
+                                            <span className="tabular-nums text-ink-2">{r.done} / {r.planned}</span>
                                         </div>
-                                        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                                            <div className="h-full rounded-full bg-blue-500" style={{ width: `${r.planned ? Math.min(100, (r.done / r.planned) * 100) : 0}%` }} />
+                                        <div className="h-2 overflow-hidden rounded-full bg-sunken">
+                                            <div className="h-full rounded-full bg-accent" style={{ width: `${r.planned ? Math.min(100, (r.done / r.planned) * 100) : 0}%` }} />
                                         </div>
                                     </li>
                                 ))}
@@ -117,13 +118,13 @@ export default function ReviewPage() {
 
                     <SectionTitle>Study by certification</SectionTitle>
                     {stats.perCert.length === 0 ? (
-                        <Card><p className="text-sm text-gray-500">No study sessions logged this week.</p></Card>
+                        <Card><p className="text-sm text-muted">No study sessions logged this week.</p></Card>
                     ) : (
-                        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-xs">
+                        <ul className="divide-y divide-rule rounded-xl bg-surface">
                             {stats.perCert.map(({ cert, minutes }) => (
                                 <li key={cert.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                                    <span className="min-w-0 truncate text-gray-900">{cert.name}</span>
-                                    <span className="ml-3 shrink-0 tabular-nums text-gray-600">{formatMinutes(minutes)}</span>
+                                    <span className="min-w-0 truncate text-ink">{cert.name}</span>
+                                    <span className="ml-3 shrink-0 tabular-nums text-ink-2">{formatMinutes(minutes)}</span>
                                 </li>
                             ))}
                         </ul>
@@ -133,13 +134,13 @@ export default function ReviewPage() {
                 <section className="min-w-0">
                     <SectionTitle>Still open from this week</SectionTitle>
                     {stats.carried.length === 0 ? (
-                        <Card><p className="text-sm text-gray-500">Nothing slipped. Everything dated this week is done or still ahead.</p></Card>
+                        <Card><p className="text-sm text-muted">Nothing slipped. Everything dated this week is done or still ahead.</p></Card>
                     ) : (
-                        <ul className="divide-y divide-gray-100 rounded-xl border border-amber-200 bg-white shadow-xs">
+                        <ul className="divide-y divide-rule rounded-xl bg-surface">
                             {stats.carried.map((p) => (
                                 <li key={p.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                                    <span className="min-w-0 flex-1 truncate text-gray-900">{p.title}</span>
-                                    <span className="text-xs text-gray-500">{formatDate(p.targetDate)}</span>
+                                    <span className="min-w-0 flex-1 truncate text-ink">{p.title}</span>
+                                    <span className="text-xs text-muted">{formatDate(p.targetDate)}</span>
                                     <Pill value={p.status} />
                                 </li>
                             ))}
@@ -148,13 +149,13 @@ export default function ReviewPage() {
 
                     <SectionTitle>Deferred most often (all time)</SectionTitle>
                     {stats.mostDeferred.length === 0 ? (
-                        <Card><p className="text-sm text-gray-500">Nothing has been deferred yet.</p></Card>
+                        <Card><p className="text-sm text-muted">Nothing has been deferred yet.</p></Card>
                     ) : (
-                        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-xs">
+                        <ul className="divide-y divide-rule rounded-xl bg-surface">
                             {stats.mostDeferred.map(({ item, n }) => (
                                 <li key={item.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                                    <span className="min-w-0 flex-1 truncate text-gray-900">{item.title}</span>
-                                    <span className="text-xs text-gray-500">{n}×</span>
+                                    <span className="min-w-0 flex-1 truncate text-ink">{item.title}</span>
+                                    <span className="text-xs text-muted">{n}×</span>
                                     <Pill value={item.status} />
                                 </li>
                             ))}
@@ -164,7 +165,7 @@ export default function ReviewPage() {
                     {(stats.deferred.length > 0 || stats.canceled.length > 0) && (
                         <>
                             <SectionTitle>Dropped this week</SectionTitle>
-                            <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {stats.deferred.map((p) => (
                                     <li key={`d${p.id}`} className="flex items-center gap-3 px-4 py-2.5 text-sm"><span className="min-w-0 flex-1 truncate">{p.title}</span><Pill value="DEFERRED" /></li>
                                 ))}
@@ -177,8 +178,8 @@ export default function ReviewPage() {
                 </section>
             </div>
 
-            <p className="mt-8 text-center text-xs text-gray-500">
-                Want a second opinion? The <Link to="/prompt" className="text-blue-600 hover:underline">Prompt</Link> page can send this week to Claude.
+            <p className="mt-8 text-center text-xs text-muted">
+                Want a second opinion? The <Link to="/prompt" className="text-accent hover:underline">Prompt</Link> page can send this week to Claude.
             </p>
         </div>
     )

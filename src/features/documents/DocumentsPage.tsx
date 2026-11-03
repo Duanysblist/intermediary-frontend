@@ -8,6 +8,7 @@ import DocumentForm from './DocumentForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, isLink } from '../../lib/format'
 import { DOCUMENT_TYPES, type Document, type DocumentInput } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type SortKey = 'title' | 'type' | 'updated'
 
@@ -41,9 +42,9 @@ export default function DocumentsPage() {
         const descending = sort.reversed !== (key === 'updated')
         return (
             <th className="px-4 py-2.5 font-medium" aria-sort={active ? (descending ? 'descending' : 'ascending') : 'none'}>
-                <button type="button" onClick={() => sortBy(key)} className={`inline-flex items-center gap-1 uppercase tracking-wide hover:text-gray-800 ${active ? 'text-gray-800' : ''}`}>
+                <button type="button" onClick={() => sortBy(key)} className={`inline-flex items-center gap-1 hover:text-ink ${active ? 'text-ink' : ''}`}>
                     {text}
-                    <span aria-hidden="true" className={active ? '' : 'invisible'}>{descending ? '▼' : '▲'}</span>
+                    <Icon name={descending ? 'chevronDown' : 'chevronUp'} className={`h-3.5 w-3.5 ${active ? '' : 'invisible'}`} strokeWidth={2.4} />
                 </button>
             </th>
         )
@@ -63,7 +64,7 @@ export default function DocumentsPage() {
             <PageHeader
                 title="Documents"
                 subtitle="Resumes, plans, and guides you're drafting or maintaining."
-                actions={<Button onClick={() => setAdding(true)}>+ Add</Button>}
+                actions={<Button onClick={() => setAdding(true)}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Add</Button>}
             />
 
             {rows.length === 0 ? (
@@ -73,10 +74,41 @@ export default function DocumentsPage() {
                     action={<Button onClick={() => setAdding(true)}>Add a document</Button>}
                 />
             ) : (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-xs">
+                <>
+                <div className="mb-2 flex items-center justify-end gap-2 md:hidden">
+                    <label htmlFor="doc-sort" className="text-sm text-muted">Sort</label>
+                    <select id="doc-sort" className="min-h-11 rounded-[10px] border border-rule-strong bg-surface px-2.5 text-base"
+                            value={`${sort.key}:${sort.reversed}`}
+                            onChange={(e) => { const [key, reversed] = e.target.value.split(':'); setSort({ key: key as SortKey, reversed: reversed === 'true' }) }}>
+                        <option value="type:false">Type</option>
+                        <option value="title:false">Title, A to Z</option>
+                        <option value="title:true">Title, Z to A</option>
+                        <option value="updated:false">Newest first</option>
+                        <option value="updated:true">Oldest first</option>
+                    </select>
+                </div>
+                <ul className="divide-y divide-rule rounded-xl bg-surface md:hidden">
+                    {rows.map((d) => (
+                        <li key={d.id} className="flex items-center gap-1">
+                            {isLink(d.path) ? (
+                                <a href={d.path} target="_blank" rel="noreferrer" className="min-w-0 flex-1 px-4 py-3 focus-visible:-outline-offset-2">
+                                    <span className="block font-medium text-ink">{d.title}</span>
+                                    <span className="mt-0.5 flex items-center gap-2 text-xs text-muted"><Pill value={d.type} />{d.version && <span>{d.version}</span>}</span>
+                                </a>
+                            ) : (
+                                <div className="min-w-0 flex-1 px-4 py-3">
+                                    <span className="block font-medium text-ink">{d.title}</span>
+                                    <span className="mt-0.5 block truncate font-mono text-xs text-muted">{d.path}</span>
+                                </div>
+                            )}
+                            <button type="button" onClick={() => setEditing(d)} className="shrink-0 px-4 py-3 text-sm text-accent">Edit</button>
+                        </li>
+                    ))}
+                </ul>
+                <div className="hidden overflow-x-auto rounded-xl bg-surface md:block">
                     <table className="w-full text-sm">
                         <thead>
-                        <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                        <tr className="border-b border-rule bg-page text-left text-xs text-muted">
                             {header('title', 'Title')}
                             {header('type', 'Type')}
                             <th className="px-4 py-2.5 font-medium">Version</th>
@@ -87,17 +119,17 @@ export default function DocumentsPage() {
                         </thead>
                         <tbody>
                         {rows.map((d) => (
-                            <tr key={d.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/60">
-                                <td className="px-4 py-2.5 font-medium text-gray-900">
+                            <tr key={d.id} className="border-b border-rule last:border-0 hover:bg-page/60">
+                                <td className="px-4 py-2.5 font-medium text-ink">
                                     {d.title}
-                                    {d.notes && <div className="max-w-xs truncate text-xs font-normal text-gray-500" title={d.notes}>{d.notes}</div>}
+                                    {d.notes && <div className="max-w-xs truncate text-xs font-normal text-muted" title={d.notes}>{d.notes}</div>}
                                 </td>
                                 <td className="px-4 py-2.5"><Pill value={d.type} /></td>
-                                <td className="px-4 py-2.5 text-gray-600">{d.version ?? '—'}</td>
-                                <td className="max-w-xs truncate px-4 py-2.5 font-mono text-xs text-gray-600" title={d.path}>
-                                    {isLink(d.path) ? <a href={d.path} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{d.path}</a> : d.path}
+                                <td className="px-4 py-2.5 text-ink-2">{d.version ?? '—'}</td>
+                                <td className="max-w-xs truncate px-4 py-2.5 font-mono text-xs text-ink-2" title={d.path}>
+                                    {isLink(d.path) ? <a href={d.path} target="_blank" rel="noreferrer" className="text-accent hover:underline">{d.path}</a> : d.path}
                                 </td>
-                                <td className="px-4 py-2.5 text-gray-600">{formatDate(d.updatedAt)}</td>
+                                <td className="px-4 py-2.5 text-ink-2">{formatDate(d.updatedAt)}</td>
                                 <td className="px-4 py-2.5 text-right">
                                     <RowActions onEdit={() => setEditing(d)} onDelete={() => setDeleting(d)} />
                                 </td>
@@ -106,6 +138,7 @@ export default function DocumentsPage() {
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
 
             <Modal open={adding || editing !== null} onClose={close}>
@@ -117,6 +150,10 @@ export default function DocumentsPage() {
                     isSaving={createMut.isPending || updateMut.isPending}
                     error={createMut.error || updateMut.error}
                 />
+                {editing && (
+                    <button type="button" onClick={() => { const target = editing; close(); setDeleting(target) }}
+                            className="mt-4 min-h-11 text-sm text-danger hover:underline md:hidden">Delete this document</button>
+                )}
             </Modal>
             <ConfirmDialog
                 open={deleting !== null}

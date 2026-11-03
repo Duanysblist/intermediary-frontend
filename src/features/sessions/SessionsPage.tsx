@@ -9,6 +9,7 @@ import { FitnessSessionForm, StudySessionForm } from './SessionForms'
 import { Card, EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { addDays, formatDate, formatDateTime, formatMinutes, isInWeek, startOfWeek, todayISO } from '../../lib/format'
 import type { FitnessSession, FitnessSessionInput, StudySession, StudySessionInput } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 type Kind = 'study' | 'fitness'
 
@@ -36,10 +37,10 @@ function WeekSummary({ items, kindLabel }: { items: { sessionDate: string; durat
     const lastMinutes = lastWeek.reduce((sum, s) => sum + s.durationMinutes, 0)
     return (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">This week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(minutes)}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">Sessions</p><p className="mt-1 text-2xl font-semibold tabular-nums">{thisWeek.length}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">Last week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(lastMinutes)}</p></Card>
-            <Card><p className="text-xs uppercase tracking-wide text-gray-500">All time</p><p className="mt-1 text-2xl font-semibold tabular-nums">{items.length} <span className="text-sm font-normal text-gray-500">{kindLabel}</span></p></Card>
+            <Card><p className="text-xs text-muted">This week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(minutes)}</p></Card>
+            <Card><p className="text-xs text-muted">Sessions</p><p className="mt-1 text-2xl font-semibold tabular-nums">{thisWeek.length}</p></Card>
+            <Card><p className="text-xs text-muted">Last week</p><p className="mt-1 text-2xl font-semibold tabular-nums">{formatMinutes(lastMinutes)}</p></Card>
+            <Card><p className="text-xs text-muted">All time</p><p className="mt-1 text-2xl font-semibold tabular-nums">{items.length} <span className="text-sm font-normal text-muted">{kindLabel}</span></p></Card>
         </div>
     )
 }
@@ -52,14 +53,14 @@ export default function SessionsPage() {
                 title="Sessions"
                 subtitle="What actually happened. Log it as it happens; the plan is compared against this."
             />
-            <div className="mb-6 inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm shadow-xs" role="tablist">
+            <div className="mb-6 inline-flex rounded-[10px] bg-sunken p-0.5 text-sm" role="tablist">
                 {(['study', 'fitness'] as Kind[]).map((k) => (
                     <button
                         key={k}
                         role="tab"
                         aria-selected={kind === k}
                         onClick={() => setKind(k)}
-                        className={`rounded-md px-4 py-1.5 font-medium transition-colors ${kind === k ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                        className={`min-h-11 rounded-lg px-4 font-medium transition-colors sm:min-h-9 ${kind === k ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'}`}
                     >
                         {k === 'study' ? 'Study' : 'Fitness'}
                     </button>
@@ -95,26 +96,29 @@ function StudyLog() {
     return (
         <div>
             <WeekSummary items={data} kindLabel="sessions" />
-            <div className="mb-3 flex justify-end"><Button onClick={() => setAdding(true)}>+ Log study session</Button></div>
+            <div className="mb-3 flex justify-end"><Button className="w-full sm:w-auto" onClick={() => setAdding(true)}>
+                <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log study session</Button></div>
             {groups.length === 0 ? (
                 <EmptyState title="No study sessions logged." hint="Log the first one; it takes ten seconds." />
             ) : (
                 <div className="space-y-5">
                     {groups.map(([day, items]) => (
                         <section key={day}>
-                            <h3 className="mb-2 text-sm font-medium text-gray-500">
+                            <h3 className="mb-2 text-sm font-medium text-muted">
                                 {formatDate(day)} · {formatMinutes(items.reduce((s, i) => s + i.durationMinutes, 0))}
                             </h3>
-                            <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {items.map((s) => (
-                                    <li key={s.id} className="flex items-center gap-4 px-4 py-3 text-sm">
-                                        <span className="w-20 shrink-0 tabular-nums text-gray-500">{formatDateTime(s.sessionDate).split(', ').pop()}</span>
-                                        <span className="w-16 shrink-0 font-medium">{formatMinutes(s.durationMinutes)}</span>
-                                        <span className="min-w-0 flex-1 truncate text-gray-700">
-                                            {s.certificationId != null && (
-                                                <span className="mr-2 rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700">{certName.get(s.certificationId) ?? `Certification #${s.certificationId}`}</span>
-                                            )}
-                                            {s.notes ?? <span className="text-gray-400">No notes</span>}
+                                    <li key={s.id} className="flex items-center gap-3 py-2 pl-4 pr-2 text-sm sm:gap-4 sm:py-3 sm:pr-4">
+                                        <span className="w-16 shrink-0 tabular-nums text-muted sm:w-20">{formatDateTime(s.sessionDate).split(', ').pop()}</span>
+                                        <span className="min-w-0 flex-1 sm:flex sm:items-center sm:gap-4">
+                                            <span className="block font-medium sm:w-16 sm:shrink-0">{formatMinutes(s.durationMinutes)}</span>
+                                            <span className="block min-w-0 truncate text-ink-2 sm:flex-1">
+                                                {s.certificationId != null && (
+                                                    <span className="mr-2 rounded bg-accent-tint px-1.5 py-0.5 text-xs text-accent-strong">{certName.get(s.certificationId) ?? `Certification #${s.certificationId}`}</span>
+                                                )}
+                                                {s.notes ?? <span className="text-faint">No notes</span>}
+                                            </span>
                                         </span>
                                         <RowActions onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />
                                     </li>
@@ -158,23 +162,28 @@ function FitnessLog() {
     return (
         <div>
             <WeekSummary items={data} kindLabel="workouts" />
-            <div className="mb-3 flex justify-end"><Button onClick={() => setAdding(true)}>+ Log workout</Button></div>
+            <div className="mb-3 flex justify-end"><Button className="w-full sm:w-auto" onClick={() => setAdding(true)}>
+                <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Log workout</Button></div>
             {groups.length === 0 ? (
                 <EmptyState title="No workouts logged." hint="Log the first one; it takes ten seconds." />
             ) : (
                 <div className="space-y-5">
                     {groups.map(([day, items]) => (
                         <section key={day}>
-                            <h3 className="mb-2 text-sm font-medium text-gray-500">
+                            <h3 className="mb-2 text-sm font-medium text-muted">
                                 {formatDate(day)} · {formatMinutes(items.reduce((s, i) => s + i.durationMinutes, 0))}
                             </h3>
-                            <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-xs">
+                            <ul className="divide-y divide-rule rounded-xl bg-surface">
                                 {items.map((s) => (
-                                    <li key={s.id} className="flex items-center gap-4 px-4 py-3 text-sm">
-                                        <span className="w-20 shrink-0 tabular-nums text-gray-500">{formatDateTime(s.sessionDate).split(', ').pop()}</span>
-                                        <span className="w-16 shrink-0 font-medium">{formatMinutes(s.durationMinutes)}</span>
-                                        <Pill value={s.workoutType} />
-                                        <span className="min-w-0 flex-1 truncate text-gray-700">{s.notes ?? <span className="text-gray-400">No notes</span>}</span>
+                                    <li key={s.id} className="flex items-center gap-3 py-2 pl-4 pr-2 text-sm sm:gap-4 sm:py-3 sm:pr-4">
+                                        <span className="w-16 shrink-0 tabular-nums text-muted sm:w-20">{formatDateTime(s.sessionDate).split(', ').pop()}</span>
+                                        <span className="min-w-0 flex-1 sm:flex sm:items-center sm:gap-4">
+                                            <span className="flex items-center gap-2 sm:contents">
+                                                <span className="font-medium sm:w-16 sm:shrink-0">{formatMinutes(s.durationMinutes)}</span>
+                                                <Pill value={s.workoutType} />
+                                            </span>
+                                            <span className="mt-0.5 block min-w-0 truncate text-ink-2 sm:mt-0 sm:flex-1">{s.notes ?? <span className="text-faint">No notes</span>}</span>
+                                        </span>
                                         <RowActions onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />
                                     </li>
                                 ))}

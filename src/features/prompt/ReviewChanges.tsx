@@ -9,6 +9,7 @@ import { label, type PlanItem } from '../../types'
 import type { Change, ChangeSet, PlanItemFields } from './changeSet'
 import { recordBatch } from './appliedBatches'
 import { applyChanges, failedChanges, type Outcome } from './applyChanges'
+import Icon from '../../components/ui/Icon'
 
 type Props = {
     source: string
@@ -64,16 +65,16 @@ export default function ReviewChanges({ source, changeSet, onClose, onApplied }:
         <div>
             <div className="flex items-start justify-between gap-3">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Review suggested changes</h2>
-                    <p className="mt-0.5 text-xs text-gray-500">From {source}. Nothing is applied until you click Apply; applied batches can be reverted from the Prompt page.</p>
+                    <h2 className="text-lg font-semibold text-ink">Review suggested changes</h2>
+                    <p className="mt-0.5 text-xs text-muted">From {source}. Nothing is applied until you click Apply; applied batches can be reverted from the Prompt page.</p>
                 </div>
-                <button type="button" onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" aria-label="Close">✕</button>
+                <button type="button" onClick={onClose} className="-mr-2 -mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted hover:bg-sunken hover:text-ink" aria-label="Close"><Icon name="close" className="h-5 w-5" /></button>
             </div>
 
-            {changeSet.summary && <p className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-gray-800">{changeSet.summary}</p>}
+            {changeSet.summary && <p className="mt-4 rounded-lg bg-accent-tint px-3 py-2 text-sm text-ink">{changeSet.summary}</p>}
 
             {changeSet.changes.length === 0 ? (
-                <p className="mt-4 text-sm text-gray-500">No changes were proposed.</p>
+                <p className="mt-4 text-sm text-muted">No changes were proposed.</p>
             ) : (
                 <ul className="mt-4 space-y-3">
                     {changeSet.changes.map((ch, i) => (
@@ -91,7 +92,7 @@ export default function ReviewChanges({ source, changeSet, onClose, onApplied }:
             )}
 
             <div className="mt-6 flex items-center justify-between gap-3">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted">
                     {appliedCount > 0 ? `${appliedCount} applied · ` : ''}{acceptedCount} selected
                 </span>
                 <div className="flex gap-2">
@@ -111,25 +112,25 @@ function ChangeRow({ change, current, checked, outcome, disabled, onToggle }: {
     const fields = (Object.keys(change.fields) as (keyof PlanItemFields)[]).filter((k) => change.fields[k] !== undefined)
     const missing = change.op === 'update' && !current
     return (
-        <li className={`rounded-lg border p-3 ${outcome?.ok ? 'border-green-200 bg-green-50/40' : outcome && !outcome.ok ? 'border-red-200 bg-red-50/40' : 'border-gray-200 bg-white'}`}>
+        <li className={`rounded-lg border p-3 ${outcome?.ok ? 'border-ok/30 bg-ok-tint/40' : outcome && !outcome.ok ? 'border-danger/30 bg-danger-tint/40' : 'border-rule bg-surface'}`}>
             <label className="flex items-start gap-3">
-                <input type="checkbox" className="mt-1 h-4 w-4 rounded border-gray-300" checked={checked && !missing} disabled={disabled || missing} onChange={(e) => onToggle(e.target.checked)} />
+                <input type="checkbox" className="mt-1 h-4 w-4 rounded border-rule-strong" checked={checked && !missing} disabled={disabled || missing} onChange={(e) => onToggle(e.target.checked)} />
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 text-sm">
                         <Pill value={change.op === 'create' ? 'NEW_ITEM' : 'CHANGE'} tone={change.op === 'create' ? 'green' : 'blue'} />
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-ink">
                             {change.op === 'create' ? change.fields.title : current ? current.title : `Plan item #${change.id}`}
                         </span>
-                        {missing && <span className="text-xs text-red-600">not found</span>}
+                        {missing && <span className="text-xs text-danger">not found</span>}
                     </div>
                     <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                         {fields.map((k) => (
                             <FieldChange key={k} label={FIELD_LABEL[k]} before={change.op === 'update' && current ? describeField(k, current[k] as string | null) : null} after={describeField(k, change.fields[k])} />
                         ))}
                     </dl>
-                    {change.reason && <p className="mt-2 text-xs text-gray-600">{change.reason}</p>}
-                    {outcome && !outcome.ok && <p className="mt-2 text-xs text-red-600">{outcome.error}</p>}
-                    {outcome?.ok && <p className="mt-2 text-xs text-green-700">Applied</p>}
+                    {change.reason && <p className="mt-2 text-xs text-ink-2">{change.reason}</p>}
+                    {outcome && !outcome.ok && <p className="mt-2 text-xs text-danger">{outcome.error}</p>}
+                    {outcome?.ok && <p className="mt-2 text-xs text-ok">Applied</p>}
                 </div>
             </label>
         </li>
@@ -139,10 +140,10 @@ function ChangeRow({ change, current, checked, outcome, disabled, onToggle }: {
 function FieldChange({ label: text, before, after }: { label: string; before: string | null; after: string }) {
     return (
         <>
-            <dt className="text-gray-500">{text}</dt>
-            <dd className="text-gray-900">
-                {before != null && before !== after && <span className="mr-1 text-gray-400 line-through">{before}</span>}
-                {before != null && before !== after && <span className="mr-1 text-gray-400" aria-hidden="true">→</span>}
+            <dt className="text-muted">{text}</dt>
+            <dd className="text-ink">
+                {before != null && before !== after && <span className="mr-1 text-faint line-through">{before}</span>}
+                {before != null && before !== after && <span className="mr-1 text-faint" aria-hidden="true">→</span>}
                 <span className={before != null && before !== after ? 'font-medium' : ''}>{after}</span>
             </dd>
         </>

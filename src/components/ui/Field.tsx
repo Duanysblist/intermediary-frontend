@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 
 export const inputClass =
-    'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs ' +
-    'placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ' +
-    'disabled:bg-gray-50 disabled:text-gray-500'
+    // 16px text on phones stops iOS zooming into a field on focus.
+    'w-full rounded-[10px] border border-rule-strong bg-surface px-3 py-2.5 text-base text-ink sm:py-2 sm:text-sm ' +
+    'placeholder:text-faint focus:border-focus focus:outline-none focus:ring-2 focus:ring-focus/20 ' +
+    'disabled:bg-page disabled:text-muted'
 
 type Props = {
     label: string
@@ -18,15 +19,15 @@ type Props = {
 export default function Field({ label, required, hint, error, className = '', children }: Props) {
     return (
         <label className={`block ${className}`}>
-            <span className="mb-1 block text-sm font-medium text-gray-700">
+            <span className="mb-1 block text-sm font-medium text-ink-2">
                 {label}
-                {required && <span className="ml-0.5 text-red-500" aria-hidden="true">*</span>}
+                {required && <span className="ml-0.5 text-danger" aria-hidden="true">*</span>}
             </span>
             {children}
             {error ? (
-                <span className="mt-1 block text-xs text-red-600">{error}</span>
+                <span className="mt-1 block text-xs text-danger">{error}</span>
             ) : hint ? (
-                <span className="mt-1 block text-xs text-gray-500">{hint}</span>
+                <span className="mt-1 block text-xs text-muted">{hint}</span>
             ) : null}
         </label>
     )

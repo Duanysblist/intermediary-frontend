@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router'
 import AppShell from './components/layout/AppShell'
 import RequireAuth from './auth/RequireAuth'
 import LoginPage from './auth/LoginPage'
-import DashboardPage from './features/dashboard/DashboardPage'
+import TodayPage from './features/today/TodayPage'
 import PlanPage from './features/plan/PlanPage'
 import SessionsPage from './features/sessions/SessionsPage'
 import ApplicationsPage from './features/applications/ApplicationsPage'
@@ -17,7 +17,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route element={<RequireAuth />}>
                 <Route element={<AppShell />}>
-                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/" element={<TodayPage />} />
                     <Route path="/plan" element={<PlanPage />} />
                     <Route path="/sessions" element={<SessionsPage />} />
                     <Route path="/applications" element={<ApplicationsPage />} />

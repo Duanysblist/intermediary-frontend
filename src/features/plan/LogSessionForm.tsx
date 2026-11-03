@@ -54,8 +54,8 @@ export default function LogSessionForm({ item, onDone, onCancel }: Props) {
     return (
         <form onSubmit={submit} className="space-y-4">
             <div>
-                <h2 className="text-lg font-semibold text-gray-900">Log what happened</h2>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <h2 className="text-lg font-semibold text-ink">Log what happened</h2>
+                <p className="mt-0.5 text-sm text-muted">
                     Records a {kind === 'fitness' ? 'workout' : 'study session'} for “{item.title}”
                     {item.referenceEntityType === 'CERTIFICATION' && kind === 'study' ? ', linked to its certification' : ''}.
                 </p>
@@ -78,11 +78,11 @@ export default function LogSessionForm({ item, onDone, onCancel }: Props) {
                     <textarea className={inputClass} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="What did you cover?" />
                 </Field>
             </div>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input type="checkbox" className="h-4 w-4 rounded border-gray-300" checked={markDone} onChange={(e) => setMarkDone(e.target.checked)} />
+            <label className="flex items-center gap-2 text-sm text-ink-2">
+                <input type="checkbox" className="h-4 w-4 rounded border-rule-strong" checked={markDone} onChange={(e) => setMarkDone(e.target.checked)} />
                 Mark the plan item as done
             </label>
-            {mut.isError && <p className="text-sm text-red-600">{mut.error.message}</p>}
+            {mut.isError && <p className="text-sm text-danger">{mut.error.message}</p>}
             <div className="flex justify-end gap-2">
                 <Button variant="secondary" onClick={onCancel}>Back</Button>
                 <Button type="submit" disabled={mut.isPending}>{mut.isPending ? 'Saving…' : 'Log it'}</Button>

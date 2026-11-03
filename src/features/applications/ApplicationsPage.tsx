@@ -8,6 +8,7 @@ import ApplicationForm from './ApplicationForm'
 import { EmptyState, ErrorState, LoadingState, PageHeader, RowActions } from '../../components/ui/Page'
 import { formatDate, formatDateTime, formatSalary, isLink, todayISO } from '../../lib/format'
 import { APPLICATION_STATUSES, label, type Application, type ApplicationInput, type ApplicationStatus } from '../../types'
+import Icon from '../../components/ui/Icon'
 
 const CLOSED: ApplicationStatus[] = ['REJECTED', 'WITHDRAWN', 'GHOSTED']
 
@@ -54,7 +55,7 @@ export default function ApplicationsPage() {
                     <>
                         <select
                             aria-label="Filter by status"
-                            className="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm"
+                            className="min-h-11 rounded-[10px] border border-rule-strong bg-surface px-2.5 text-base sm:min-h-0 sm:py-1.5 sm:text-sm"
                             value={filter}
                             onChange={(e) => setFilter(e.target.value as typeof filter)}
                         >
@@ -62,7 +63,7 @@ export default function ApplicationsPage() {
                             <option value="all">All</option>
                             {APPLICATION_STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                         </select>
-                        <Button onClick={() => setAdding(true)}>+ Add</Button>
+                        <Button onClick={() => setAdding(true)}><Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />Add</Button>
                     </>
                 }
             />
@@ -74,10 +75,34 @@ export default function ApplicationsPage() {
                     action={data.length === 0 ? <Button onClick={() => setAdding(true)}>Add your first application</Button> : undefined}
                 />
             ) : (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-xs">
+                <>
+                <ul className="divide-y divide-rule rounded-xl bg-surface md:hidden">
+                    {rows.map((app) => {
+                        const late = !CLOSED.includes(app.status) && app.nextActionDate != null && app.nextActionDate < today
+                        return (
+                            <li key={app.id}>
+                                <button type="button" onClick={() => setEditing(app)} className="block w-full px-4 py-3 text-left focus-visible:-outline-offset-2">
+                                    <span className="flex items-start justify-between gap-3">
+                                        <span className="min-w-0">
+                                            <span className="block font-medium text-ink">{app.company}</span>
+                                            <span className="block text-sm text-ink-2">{app.role}</span>
+                                        </span>
+                                        <Pill value={app.status} className="shrink-0" />
+                                    </span>
+                                    <span className="mt-1 block text-xs text-muted">
+                                        {app.interviewAt ? <span className="text-ink">Interview {formatDateTime(app.interviewAt)} · </span> : null}
+                                        {app.nextActionDate ? <span className={late ? 'font-medium text-danger' : ''}>Next {formatDate(app.nextActionDate)}{late ? ', overdue' : ''} · </span> : null}
+                                        Applied {formatDate(app.applicationDate)}
+                                    </span>
+                                </button>
+                            </li>
+                        )
+                    })}
+                </ul>
+                <div className="hidden overflow-x-auto rounded-xl bg-surface md:block">
                     <table className="w-full text-sm">
                         <thead>
-                        <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                        <tr className="border-b border-rule bg-page text-left text-xs text-muted">
                             <th className="px-4 py-2.5 font-medium">Company</th>
                             <th className="px-4 py-2.5 font-medium">Role</th>
                             <th className="px-4 py-2.5 font-medium">Status</th>
@@ -90,30 +115,30 @@ export default function ApplicationsPage() {
                         </thead>
                         <tbody>
                         {rows.map((app) => (
-                            <tr key={app.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/60">
-                                <td className="px-4 py-2.5 font-medium text-gray-900">
+                            <tr key={app.id} className="border-b border-rule last:border-0 hover:bg-page/60">
+                                <td className="px-4 py-2.5 font-medium text-ink">
                                     {app.jobUrl && isLink(app.jobUrl) ? (
                                         <a href={app.jobUrl} target="_blank" rel="noreferrer" className="hover:underline">{app.company}</a>
                                     ) : app.company}
-                                    {app.location && <div className="text-xs font-normal text-gray-500">{app.location}</div>}
+                                    {app.location && <div className="text-xs font-normal text-muted">{app.location}</div>}
                                 </td>
                                 <td className="px-4 py-2.5">
                                     {app.role}
-                                    {app.contactName && <div className="text-xs text-gray-500">Contact: {app.contactName}</div>}
+                                    {app.contactName && <div className="text-xs text-muted">Contact: {app.contactName}</div>}
                                 </td>
                                 <td className="px-4 py-2.5"><Pill value={app.status} /></td>
-                                <td className="px-4 py-2.5 text-gray-600">
-                                    {app.interviewAt && <div className="text-gray-900">Interview {formatDateTime(app.interviewAt)}</div>}
+                                <td className="px-4 py-2.5 text-ink-2">
+                                    {app.interviewAt && <div className="text-ink">Interview {formatDateTime(app.interviewAt)}</div>}
                                     {app.nextActionDate && (
-                                        <div className={!CLOSED.includes(app.status) && app.nextActionDate < today ? 'font-medium text-red-600' : ''}>
+                                        <div className={!CLOSED.includes(app.status) && app.nextActionDate < today ? 'font-medium text-danger' : ''}>
                                             {formatDate(app.nextActionDate)}{!CLOSED.includes(app.status) && app.nextActionDate < today ? ' · overdue' : ''}
                                         </div>
                                     )}
                                     {!app.interviewAt && !app.nextActionDate && '—'}
                                 </td>
-                                <td className="px-4 py-2.5 text-gray-600">{label(app.source)}</td>
-                                <td className="px-4 py-2.5 text-gray-600">{formatSalary(app.salaryRangeMin, app.salaryRangeMax)}</td>
-                                <td className="px-4 py-2.5 text-gray-600">{formatDate(app.applicationDate)}</td>
+                                <td className="px-4 py-2.5 text-ink-2">{label(app.source)}</td>
+                                <td className="px-4 py-2.5 text-ink-2">{formatSalary(app.salaryRangeMin, app.salaryRangeMax)}</td>
+                                <td className="px-4 py-2.5 text-ink-2">{formatDate(app.applicationDate)}</td>
                                 <td className="px-4 py-2.5 text-right">
                                     <RowActions onEdit={() => setEditing(app)} onDelete={() => setDeleting(app)} />
                                 </td>
@@ -122,6 +147,7 @@ export default function ApplicationsPage() {
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
 
             <Modal open={isOpen} onClose={close} wide>
@@ -133,6 +159,10 @@ export default function ApplicationsPage() {
                     isSaving={createMut.isPending || updateMut.isPending}
                     error={createMut.error || updateMut.error}
                 />
+                {editing && (
+                    <button type="button" onClick={() => { const target = editing; close(); setDeleting(target) }}
+                            className="mt-4 min-h-11 text-sm text-danger hover:underline md:hidden">Delete this application</button>
+                )}
             </Modal>
             <ConfirmDialog
                 open={deleting !== null}
