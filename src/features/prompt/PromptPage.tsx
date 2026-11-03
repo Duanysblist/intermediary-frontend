@@ -23,10 +23,10 @@ const PROPOSALS_KEY = ['proposals', 'PENDING'] as const
 function Toggle({ label, checked, onChange, hint }: { label: string; checked: boolean; onChange: (v: boolean) => void; hint?: string }) {
     return (
         <label className="flex cursor-pointer items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+            <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-rule-strong text-accent focus:ring-focus" checked={checked} onChange={(e) => onChange(e.target.checked)} />
             <span>
-                <span className="text-gray-800">{label}</span>
-                {hint && <span className="block text-xs text-gray-500">{hint}</span>}
+                <span className="text-ink">{label}</span>
+                {hint && <span className="block text-xs text-muted">{hint}</span>}
             </span>
         </label>
     )
@@ -240,27 +240,27 @@ export default function PromptPage() {
             />
 
             {suggest.isError && (
-                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{suggestErrorMessage(suggest.error)}</p>
+                <p className="mb-4 rounded-lg border border-danger/30 bg-danger-tint px-3 py-2 text-sm text-danger" role="alert">{suggestErrorMessage(suggest.error)}</p>
             )}
             {revertError && (
-                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{revertError}</p>
+                <p className="mb-4 rounded-lg border border-danger/30 bg-danger-tint px-3 py-2 text-sm text-danger" role="alert">{revertError}</p>
             )}
             {notice && (
-                <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800" role="status">{notice}</p>
+                <p className="mb-4 rounded-lg border border-warn/30 bg-warn-tint px-3 py-2 text-sm text-warn" role="status">{notice}</p>
             )}
 
             {pending.length > 0 && (
                 <section className="mb-6">
                     <SectionTitle>Inbox · {pending.length} proposal{pending.length === 1 ? '' : 's'} waiting for review</SectionTitle>
-                    <ul className="divide-y divide-gray-100 rounded-xl border border-blue-200 bg-white shadow-xs">
+                    <ul className="divide-y divide-rule rounded-xl border border-accent/30 bg-surface shadow-xs">
                         {pending.map((p) => (
                             <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
                                         <Pill value="PROPOSAL" tone="blue" />
-                                        <span className="text-xs text-gray-500">{friendlySource(p.source)} · {formatDateTime(p.createdAt)} · {p.changes.length} change{p.changes.length === 1 ? '' : 's'}</span>
+                                        <span className="text-xs text-muted">{friendlySource(p.source)} · {formatDateTime(p.createdAt)} · {p.changes.length} change{p.changes.length === 1 ? '' : 's'}</span>
                                     </div>
-                                    <p className="mt-1 truncate text-gray-800" title={p.summary}>{p.summary || 'No summary'}</p>
+                                    <p className="mt-1 truncate text-ink" title={p.summary}>{p.summary || 'No summary'}</p>
                                 </div>
                                 <Button size="sm" onClick={() => reviewProposal(p)}>Review</Button>
                                 <Button size="sm" variant="ghost" onClick={() => resolveProposal.mutate({ id: p.id, status: 'DISMISSED' })} disabled={resolveProposal.isPending}>Dismiss</Button>
@@ -281,7 +281,7 @@ export default function PromptPage() {
                             value={ask}
                             onChange={(e) => setAsk(e.target.value)}
                         />
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2 text-xs text-muted">
                             {aiEnabled
                                 ? 'Ask Claude sends the preview plus this note to the server, which calls Claude and returns changes for you to review.'
                                 : aiStatus.isSuccess
@@ -308,7 +308,7 @@ export default function PromptPage() {
                     <Card>
                         <SectionTitle>Shape</SectionTitle>
                         <label className="block text-sm">
-                            <span className="text-gray-800">Recent window</span>
+                            <span className="text-ink">Recent window</span>
                             <select className={`${inputClass} mt-1`} value={opts.sessionDays} onChange={(e) => set('sessionDays', Number(e.target.value))}>
                                 {[7, 14, 30, 90].map((d) => <option key={d} value={d}>Last {d} days</option>)}
                             </select>
@@ -320,7 +320,7 @@ export default function PromptPage() {
                     <Card>
                         <SectionTitle>Instructions</SectionTitle>
                         <textarea className={inputClass} rows={7} value={opts.instructions} onChange={(e) => set('instructions', e.target.value)} />
-                        <button type="button" className="mt-2 text-xs text-blue-600 hover:underline" onClick={() => set('instructions', DEFAULT_OPTIONS.instructions)}>
+                        <button type="button" className="mt-2 text-xs text-accent hover:underline" onClick={() => set('instructions', DEFAULT_OPTIONS.instructions)}>
                             Reset to default
                         </button>
                     </Card>
@@ -332,11 +332,11 @@ export default function PromptPage() {
                                     <li key={b.id} className="text-sm">
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0">
-                                                <p className="truncate text-gray-800" title={b.summary}>{b.summary || `${b.entries.length} change${b.entries.length === 1 ? '' : 's'}`}</p>
-                                                <p className="text-xs text-gray-500">{b.source} · {new Date(b.appliedAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {b.entries.length} applied</p>
+                                                <p className="truncate text-ink" title={b.summary}>{b.summary || `${b.entries.length} change${b.entries.length === 1 ? '' : 's'}`}</p>
+                                                <p className="text-xs text-muted">{b.source} · {new Date(b.appliedAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {b.entries.length} applied</p>
                                             </div>
                                             {b.reverted ? (
-                                                <span className="shrink-0 text-xs text-gray-400">reverted</span>
+                                                <span className="shrink-0 text-xs text-faint">reverted</span>
                                             ) : (
                                                 <Button size="sm" variant="secondary" onClick={() => revert(b)} disabled={reverting === b.id}>
                                                     {reverting === b.id ? 'Reverting…' : 'Revert'}
@@ -346,13 +346,13 @@ export default function PromptPage() {
                                     </li>
                                 ))}
                             </ul>
-                            <p className="mt-3 text-xs text-gray-500">Kept in this browser for a week. Reverting restores each item to how it was and deletes items the batch created.</p>
+                            <p className="mt-3 text-xs text-muted">Kept in this browser for a week. Reverting restores each item to how it was and deletes items the batch created.</p>
                         </Card>
                     )}
                 </aside>
 
                 <section className="min-w-0">
-                    <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
+                    <div className="mb-2 flex items-center justify-between text-xs text-muted">
                         <span>Preview</span>
                         <span>{text.length.toLocaleString()} characters · ~{approxTokens.toLocaleString()} tokens</span>
                     </div>
@@ -360,7 +360,7 @@ export default function PromptPage() {
                         readOnly
                         value={text}
                         aria-label="Generated context"
-                        className="h-[70vh] w-full resize-y rounded-xl border border-gray-200 bg-white p-4 font-mono text-xs leading-relaxed text-gray-800 shadow-xs focus:outline-none"
+                        className="h-[70vh] w-full resize-y rounded-xl border border-rule bg-surface p-4 font-mono text-xs leading-relaxed text-ink shadow-xs focus:outline-none"
                         // Select-all is a copy convenience for mouse users. On touch devices it would grab the whole
                         // text on a stray tap, and WebKit zooms into a focused field with text this small.
                         onFocus={(e) => { if (matchMedia('(hover: hover)').matches) e.currentTarget.select() }}
@@ -369,8 +369,8 @@ export default function PromptPage() {
             </div>
 
             <Modal open={importOpen} onClose={() => setImportOpen(false)}>
-                <h2 className="text-lg font-semibold text-gray-900">Import changes from an assistant</h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <h2 className="text-lg font-semibold text-ink">Import changes from an assistant</h2>
+                <p className="mt-1 text-sm text-muted">
                     Paste the JSON change set the assistant returned (a whole ```json block is fine). You'll review each change before anything is applied.
                 </p>
                 <textarea
@@ -381,7 +381,7 @@ export default function PromptPage() {
                     placeholder={'{\n  "summary": "...",\n  "changes": [ ... ]\n}'}
                     autoFocus
                 />
-                {importError && <p className="mt-2 text-sm text-red-600" role="alert">{importError}</p>}
+                {importError && <p className="mt-2 text-sm text-danger" role="alert">{importError}</p>}
                 <div className="mt-4 flex justify-end gap-2">
                     <Button variant="secondary" onClick={() => setImportOpen(false)}>Cancel</Button>
                     <Button onClick={importChanges} disabled={!importText.trim()}>Review changes</Button>

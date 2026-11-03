@@ -30,3 +30,10 @@ dist-ssr
 undefined/
 .vercel
 .env.local
+
+# Impeccable working files: decision pages, sketches, review captures
+.impeccable/questions/
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/build/
+.impeccable/config.local.json

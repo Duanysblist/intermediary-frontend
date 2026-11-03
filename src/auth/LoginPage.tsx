@@ -32,26 +32,26 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
+        <div className="flex min-h-screen items-center justify-center bg-page px-4 py-10">
             <div className="w-full max-w-sm">
-                <div className="mb-6 flex items-center justify-center gap-2 text-xl font-semibold tracking-tight text-gray-900">
-                    <span className="inline-block h-3 w-3 rounded-full bg-blue-600" aria-hidden="true" />
+                <div className="mb-6 flex items-center justify-center gap-2 text-xl font-semibold tracking-tight text-ink">
+                    <span className="inline-block h-3 w-3 rounded-full bg-accent" aria-hidden="true" />
                     intermediary
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <h1 className="text-lg font-semibold text-gray-900">Sign in</h1>
+                <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-rule bg-surface p-6 shadow-sm">
+                    <h1 className="text-lg font-semibold text-ink">Sign in</h1>
                     <Field label="Username" required>
                         <input className={inputClass} value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoFocus required />
                     </Field>
                     <Field label="Password" required>
                         <input type="password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
                     </Field>
-                    {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+                    {error && <p className="text-sm text-danger" role="alert">{error}</p>}
                     <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</Button>
                 </form>
-                <p className="mt-6 text-center text-sm text-gray-500">
+                <p className="mt-6 text-center text-sm text-muted">
                     Just looking?{' '}
-                    <a href={DEMO_PATH} className="font-medium text-blue-600 hover:underline">Try the demo with sample data</a>
+                    <a href={DEMO_PATH} className="font-medium text-accent hover:underline">Try the demo with sample data</a>
                 </p>
             </div>
         </div>

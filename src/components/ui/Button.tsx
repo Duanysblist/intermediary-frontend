@@ -4,14 +4,15 @@ type Variant = 'primary' | 'secondary' | 'danger' | 'ghost'
 type Size = 'sm' | 'md'
 
 const VARIANT: Record<Variant, string> = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500/40',
-    secondary: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-400/40',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500/40',
-    ghost: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-400/40',
+    primary: 'bg-accent text-on-accent hover:bg-accent-strong focus-visible:ring-focus/40',
+    secondary: 'border border-rule-strong bg-surface text-ink-2 hover:bg-page focus-visible:ring-rule-strong/40',
+    danger: 'bg-danger text-white hover:bg-danger-strong focus-visible:ring-danger/40',
+    ghost: 'text-ink-2 hover:bg-sunken hover:text-ink focus-visible:ring-rule-strong/40',
 }
 const SIZE: Record<Size, string> = {
-    sm: 'px-2.5 py-1 text-xs',
-    md: 'px-3.5 py-2 text-sm',
+    // Phone sizes meet a 44px touch target; pointer screens get the denser desktop sizes.
+    sm: 'min-h-9 px-3 text-sm sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-xs',
+    md: 'min-h-11 px-4 text-[15px] sm:min-h-0 sm:px-3.5 sm:py-2 sm:text-sm',
 }
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size }

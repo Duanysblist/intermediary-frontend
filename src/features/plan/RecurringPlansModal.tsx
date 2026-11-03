@@ -76,10 +76,10 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
         <div>
             <div className="flex items-start justify-between gap-3">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Routines</h2>
-                    <p className="mt-0.5 text-xs text-gray-500">Things you intend to do on the same days every week. Generate creates the plan items for the next two weeks.</p>
+                    <h2 className="text-lg font-semibold text-ink">Routines</h2>
+                    <p className="mt-0.5 text-xs text-muted">Things you intend to do on the same days every week. Generate creates the plan items for the next two weeks.</p>
                 </div>
-                <button type="button" onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" aria-label="Close">✕</button>
+                <button type="button" onClick={onClose} className="rounded p-1 text-faint hover:bg-sunken hover:text-ink-2" aria-label="Close">✕</button>
             </div>
 
             {editing ? (
@@ -103,7 +103,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                             <div className="flex flex-wrap gap-1.5">
                                 {DAYS_OF_WEEK.map((d) => (
                                     <button key={d} type="button" onClick={() => toggleDay(d)} aria-pressed={form.days.includes(d)}
-                                            className={`rounded-md border px-2.5 py-1 text-sm ${form.days.includes(d) ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}>
+                                            className={`rounded-md border px-2.5 py-1 text-sm ${form.days.includes(d) ? 'border-accent bg-accent text-on-accent' : 'border-rule-strong bg-surface text-ink-2 hover:bg-page'}`}>
                                         {DAY_SHORT[d]}
                                     </button>
                                 ))}
@@ -127,7 +127,7 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                             <textarea className={inputClass} rows={2} value={form.notes ?? ''} onChange={(e) => update('notes', e.target.value)} />
                         </Field>
                     </div>
-                    {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-red-600">{error.message}</p>}
+                    {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-danger">{error.message}</p>}
                     <div className="flex justify-end gap-2">
                         <Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>
                         <Button type="submit" disabled={createMut.isPending || updateMut.isPending || form.days.length === 0}>Save</Button>
@@ -138,31 +138,31 @@ export default function RecurringPlansModal({ onClose }: { onClose: () => void }
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                         <Button variant="secondary" onClick={() => startEdit()}>+ New routine</Button>
                         <div className="flex items-center gap-3">
-                            {generated != null && <span className="text-xs text-gray-500">{generated === 0 ? 'Nothing new to add.' : `${generated} item${generated === 1 ? '' : 's'} added to the plan.`}</span>}
+                            {generated != null && <span className="text-xs text-muted">{generated === 0 ? 'Nothing new to add.' : `${generated} item${generated === 1 ? '' : 's'} added to the plan.`}</span>}
                             <Button onClick={() => generateMut.mutate()} disabled={generateMut.isPending || !(plans.data ?? []).some((p) => p.active)}>
                                 {generateMut.isPending ? 'Generating…' : 'Generate next 2 weeks'}
                             </Button>
                         </div>
                     </div>
-                    {generateMut.isError && <p className="mt-2 text-sm text-red-600">{generateMut.error.message}</p>}
+                    {generateMut.isError && <p className="mt-2 text-sm text-danger">{generateMut.error.message}</p>}
                     {plans.isPending ? (
-                        <p className="mt-4 text-sm text-gray-500">Loading…</p>
+                        <p className="mt-4 text-sm text-muted">Loading…</p>
                     ) : (plans.data ?? []).length === 0 ? (
                         <div className="mt-4"><EmptyState title="No routines yet." hint="Add the things you do every week, then Generate fills the calendar." /></div>
                     ) : (
-                        <ul className="mt-4 divide-y divide-gray-100 rounded-xl border border-gray-200">
+                        <ul className="mt-4 divide-y divide-rule rounded-xl border border-rule">
                             {(plans.data ?? []).map((p) => (
                                 <li key={p.id} className={`flex items-center gap-3 px-3 py-2.5 text-sm ${p.active ? '' : 'opacity-60'}`}>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="truncate font-medium text-gray-900">{p.title}</span>
+                                            <span className="truncate font-medium text-ink">{p.title}</span>
                                             <Pill value={p.intent} />
-                                            {!p.active && <span className="text-xs text-gray-500">paused</span>}
+                                            {!p.active && <span className="text-xs text-muted">paused</span>}
                                         </div>
-                                        <div className="mt-0.5 text-xs text-gray-500">{DAYS_OF_WEEK.filter((d) => p.days.includes(d)).map((d) => DAY_SHORT[d]).join(' · ')}</div>
+                                        <div className="mt-0.5 text-xs text-muted">{DAYS_OF_WEEK.filter((d) => p.days.includes(d)).map((d) => DAY_SHORT[d]).join(' · ')}</div>
                                     </div>
-                                    <button type="button" onClick={() => startEdit(p)} className="text-blue-600 hover:underline">Edit</button>
-                                    <button type="button" onClick={() => removeMut.mutate(p.id)} className="text-red-600 hover:underline">Delete</button>
+                                    <button type="button" onClick={() => startEdit(p)} className="text-accent hover:underline">Edit</button>
+                                    <button type="button" onClick={() => removeMut.mutate(p.id)} className="text-danger hover:underline">Delete</button>
                                 </li>
                             ))}
                         </ul>

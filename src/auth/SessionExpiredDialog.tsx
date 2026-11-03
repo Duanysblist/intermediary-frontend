@@ -38,8 +38,8 @@ function ExpiredPrompt() {
         <Modal open onClose={keepOpen}>
             <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Your session expired</h2>
-                    <p className="mt-1 text-sm text-gray-500">Sign in again to keep working. What you have on this page is still here.</p>
+                    <h2 className="text-lg font-semibold text-ink">Your session expired</h2>
+                    <p className="mt-1 text-sm text-muted">Sign in again to keep working. What you have on this page is still here.</p>
                 </div>
                 <Field label="Username" required>
                     <input className={inputClass} value={user} onChange={(e) => setUser(e.target.value)} autoComplete="username" required />
@@ -47,7 +47,7 @@ function ExpiredPrompt() {
                 <Field label="Password" required>
                     <input type="password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus required />
                 </Field>
-                {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+                {error && <p className="text-sm text-danger" role="alert">{error}</p>}
                 <div className="flex justify-end gap-2">
                     <Button variant="secondary" onClick={logout}>Sign out</Button>
                     <Button type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</Button>

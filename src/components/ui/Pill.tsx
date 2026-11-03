@@ -3,15 +3,15 @@ import { label } from '../../types'
 export type Tone = 'blue' | 'amber' | 'violet' | 'green' | 'red' | 'gray' | 'slate' | 'teal' | 'orange'
 
 const TONE_CLASS: Record<Tone, string> = {
-    blue: 'bg-blue-100 text-blue-700',
-    amber: 'bg-amber-100 text-amber-700',
-    violet: 'bg-violet-100 text-violet-700',
-    green: 'bg-green-100 text-green-700',
-    red: 'bg-red-100 text-red-700',
-    gray: 'bg-gray-100 text-gray-600',
-    slate: 'bg-slate-100 text-slate-500',
-    teal: 'bg-teal-100 text-teal-700',
-    orange: 'bg-orange-100 text-orange-700',
+    blue: 'bg-tone-blue-soft text-tone-blue',
+    amber: 'bg-tone-amber-soft text-tone-amber',
+    violet: 'bg-tone-violet-soft text-tone-violet',
+    green: 'bg-tone-green-soft text-tone-green',
+    red: 'bg-tone-red-soft text-tone-red',
+    gray: 'bg-tone-gray-soft text-tone-gray',
+    slate: 'bg-tone-slate-soft text-tone-slate',
+    teal: 'bg-tone-teal-soft text-tone-teal',
+    orange: 'bg-tone-orange-soft text-tone-orange',
 }
 
 /** One tone per enum value across the whole app, so a status looks the same on every screen. */

@@ -130,7 +130,7 @@ export default function ApplicationForm({ initial, onSubmit, onCancel, isSaving,
                 </Field>
             </div>
 
-            {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-red-600">{error.message}</p>}
+            {error && Object.keys(fieldErrors).length === 0 && <p className="text-sm text-danger">{error.message}</p>}
 
             <div className="flex justify-end gap-2 pt-2">
                 <Button variant="secondary" onClick={onCancel}>Cancel</Button>

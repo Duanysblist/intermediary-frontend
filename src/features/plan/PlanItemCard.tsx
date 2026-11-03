@@ -23,11 +23,11 @@ export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: 
         {
             key: 'date',
             node: item.targetDate ? (
-                <span className={overdue ? 'font-medium text-red-600' : ''} title={formatDate(item.targetDate)}>
+                <span className={overdue ? 'font-medium text-danger' : ''} title={formatDate(item.targetDate)}>
                     {overdue ? 'Overdue · ' : ''}{relativeDay(item.targetDate)}
                 </span>
             ) : (
-                <span className="text-gray-400">No date</span>
+                <span className="text-faint">No date</span>
             ),
         },
     ]
@@ -36,10 +36,10 @@ export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: 
     return (
         <>
             <div className={compact ? '' : 'flex items-start justify-between gap-2'}>
-                <p className={`text-sm font-medium leading-snug ${item.status === 'DONE' ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{item.title}</p>
+                <p className={`text-sm font-medium leading-snug ${item.status === 'DONE' ? 'text-muted line-through' : 'text-ink'}`}>{item.title}</p>
                 <Pill value={item.intent} className={compact ? 'mt-1.5' : 'shrink-0'} />
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-gray-500">
+            <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
                 {meta.map((m, i) => (
                     <span key={m.key} className="flex min-w-0 items-center gap-1.5">
                         {i > 0 && <span aria-hidden="true">·</span>}
@@ -69,9 +69,9 @@ export default function PlanItemCard({ item, referenceLabel, showStatus, compact
             {...(overlay ? {} : attributes)}
             {...(overlay ? {} : listeners)}
             onClick={() => onOpen?.(item)}
-            className={`cursor-grab touch-none rounded-lg border bg-white p-3 shadow-xs transition-shadow active:cursor-grabbing ` +
-                `${overlay ? 'rotate-1 border-blue-300 shadow-lg' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'} ` +
-                `${isDragging ? 'opacity-30' : ''} ${drop.isOver && !isDragging ? 'ring-2 ring-blue-400' : ''}`}
+            className={`cursor-grab touch-manipulation select-none rounded-lg border bg-surface p-3 shadow-xs transition-shadow [-webkit-touch-callout:none] active:cursor-grabbing ` +
+                `${overlay ? 'rotate-1 border-accent/50 shadow-lg' : 'border-rule hover:border-rule-strong hover:shadow-sm'} ` +
+                `${isDragging ? 'opacity-30' : ''} ${drop.isOver && !isDragging ? 'ring-2 ring-focus' : ''}`}
             data-testid={`plan-item-${item.id}`}
         >
             <PlanItemCardBody item={item} referenceLabel={referenceLabel} showStatus={showStatus} compact={compact} />
