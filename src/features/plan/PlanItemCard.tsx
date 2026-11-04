@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Pill from '../../components/ui/Pill'
 import { formatDate, isBefore, relativeDay, todayISO } from '../../lib/format'
@@ -17,7 +17,11 @@ type Props = {
     dropStatus?: PlanItemStatus
 }
 
-export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: Pick<Props, 'item' | 'referenceLabel' | 'showStatus' | 'compact'>) {
+/**
+ * Memoized: every card on the board re-renders on each move of a drag (dnd-kit's hooks subscribe
+ * to the drag state), so the part that formats dates and builds the row must be cheap to skip.
+ */
+export const PlanItemCardBody = memo(function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: Pick<Props, 'item' | 'referenceLabel' | 'showStatus' | 'compact'>) {
     const overdue = isOpenPlanItem(item) && item.targetDate != null && isBefore(item.targetDate, todayISO())
     const meta: { key: string; node: ReactNode }[] = [
         {
@@ -50,7 +54,7 @@ export function PlanItemCardBody({ item, referenceLabel, showStatus, compact }: 
             </div>
         </>
     )
-}
+})
 
 export default function PlanItemCard({ item, referenceLabel, showStatus, compact, onOpen, overlay, dropStatus }: Props) {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({

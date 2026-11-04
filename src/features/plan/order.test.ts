@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { placeInColumn } from './order'
+import { placeInColumn, splitOlder } from './order'
 import { comparePlanItems, type PlanItem } from '../../types'
 
 describe('placeInColumn', () => {
@@ -32,5 +32,27 @@ describe('comparePlanItems', () => {
             item(5, { position: 0, targetDate: '2030-12-31' }),
         ]
         expect([...items].sort(comparePlanItems).map((i) => i.id)).toEqual([5, 4, 3, 2, 1])
+    })
+})
+
+describe('splitOlder', () => {
+    const item = (id: number, status: PlanItem['status'], updatedAt: string) => ({ id, status, updatedAt } as PlanItem)
+    const today = '2026-11-04'
+
+    it('folds away finished cards changed more than a week ago, newest first kept', () => {
+        const items = [
+            item(1, 'DONE', '2026-11-03T22:00:00Z'),
+            item(2, 'DONE', '2026-10-28T09:00:00'),
+            item(3, 'DONE', '2026-10-27T09:00:00'),
+            item(4, 'CANCELED', '2026-09-01T09:00:00Z'),
+        ]
+        expect(splitOlder(items, 'DONE', today).recent.map((i) => i.id)).toEqual([1, 2])
+        expect(splitOlder(items, 'DONE', today).older.map((i) => i.id)).toEqual([3, 4])
+    })
+
+    it('never splits a column that is still in play', () => {
+        const items = [item(1, 'PLANNED', '2026-01-01T09:00:00Z'), item(2, 'DEFERRED', '2026-01-01T09:00:00Z')]
+        expect(splitOlder(items, 'PLANNED', today)).toEqual({ recent: items, older: [] })
+        expect(splitOlder(items, 'DEFERRED', today)).toEqual({ recent: items, older: [] })
     })
 })
