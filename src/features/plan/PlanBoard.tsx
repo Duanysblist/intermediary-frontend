@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import PlanItemCard from './PlanItemCard'
+import { splitOlder } from './order'
 import { PLAN_STATUSES, label, type PlanItem, type PlanItemStatus } from '../../types'
+import { todayISO } from '../../lib/format'
 import Icon from '../../components/ui/Icon'
 
 type Props = {
@@ -8,6 +11,8 @@ type Props = {
     referenceLabel: (item: PlanItem) => string | null
     onOpen: (item: PlanItem) => void
     onAdd: (status: PlanItemStatus) => void
+    /** True while a card is being dragged. */
+    dragging?: boolean
 }
 
 const COLUMN_HINT: Record<PlanItemStatus, string> = {
@@ -18,8 +23,11 @@ const COLUMN_HINT: Record<PlanItemStatus, string> = {
     CANCELED: 'Dropped',
 }
 
-function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: PlanItemStatus; items: PlanItem[] } & Omit<Props, 'items'>) {
+function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: PlanItemStatus; items: PlanItem[] } & Omit<Props, 'items' | 'dragging'>) {
     const { setNodeRef, isOver } = useDroppable({ id: `status-${status}`, data: { status } })
+    const [showOlder, setShowOlder] = useState(false)
+    const { recent, older } = splitOlder(items, status, todayISO())
+    const shown = showOlder ? items : recent
     return (
         <section
             ref={setNodeRef}
@@ -36,11 +44,20 @@ function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: Plan
                 <span className="rounded-full bg-surface px-2 py-0.5 text-xs font-medium text-ink-2 ring-1 ring-rule">{items.length}</span>
             </header>
             <div className="flex flex-1 flex-col gap-2">
-                {items.map((item) => (
+                {shown.map((item) => (
                     <PlanItemCard key={item.id} item={item} referenceLabel={referenceLabel(item)} onOpen={onOpen} dropStatus={status} />
                 ))}
                 {items.length === 0 && (
                     <p className="rounded-lg border border-dashed border-rule-strong px-3 py-6 text-center text-xs text-faint">Drop here</p>
+                )}
+                {older.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => setShowOlder((v) => !v)}
+                        className="min-h-11 rounded-lg px-2 text-sm text-muted hover:bg-surface hover:text-ink sm:min-h-0 sm:py-1.5 sm:text-xs"
+                    >
+                        {showOlder ? 'Hide older' : `Show ${older.length} older`}
+                    </button>
                 )}
             </div>
             <button
@@ -57,12 +74,16 @@ function Column({ status, items, referenceLabel, onOpen, onAdd }: { status: Plan
 /**
  * Kanban by status, in the order PlanPage sorted the items. Dropping a card on another card puts it
  * in that card's place; dropping it on a column's empty space puts it at the end. Either can change its status.
+ *
+ * On a phone the columns snap one per screen, except while a card is in the air: dnd-kit scrolls
+ * the board in small steps to reach the next column, and mandatory snapping turns each step into a
+ * whole-column jump under the finger.
  */
-export default function PlanBoard({ items, referenceLabel, onOpen, onAdd }: Props) {
+export default function PlanBoard({ items, referenceLabel, onOpen, onAdd, dragging = false }: Props) {
     const byStatus = new Map<PlanItemStatus, PlanItem[]>(PLAN_STATUSES.map((s) => [s, []]))
     for (const it of items) byStatus.get(it.status)?.push(it)
     return (
-        <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:snap-none sm:px-0">
+        <div className={`-mx-4 flex scroll-px-4 gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:snap-none sm:px-0 ${dragging ? 'snap-none' : 'snap-x snap-mandatory'}`}>
             {PLAN_STATUSES.map((status) => (
                 <Column key={status} status={status} items={byStatus.get(status) ?? []} referenceLabel={referenceLabel} onOpen={onOpen} onAdd={onAdd} />
             ))}

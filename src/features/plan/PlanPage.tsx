@@ -146,6 +146,7 @@ export default function PlanPage() {
                         referenceLabel={referenceLabel}
                         onOpen={(item) => setSheet({ kind: 'item', item })}
                         onAdd={(status) => setSheet({ kind: 'create', defaults: { status } })}
+                        dragging={dragging !== null}
                     />
                 ) : (
                     <PlanWeek
